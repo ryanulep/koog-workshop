@@ -12,7 +12,7 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.selectAll
 
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-class ExposedShippingRepository {
+class ShippingRepository {
 
     context(_: Transaction)
     fun getAllShippingMethods(): List<ShippingMethod> =

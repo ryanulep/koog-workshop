@@ -7,9 +7,6 @@ import org.example.project.db.tables.Currencies
 import org.example.project.db.tables.Merchants
 import org.example.project.db.tables.Products
 import org.example.project.db.tables.Weapons
-import org.example.project.db.tables.Weapons.damage
-import org.example.project.db.tables.Weapons.damageType
-import org.example.project.db.tables.Weapons.weaponSlot
 import org.example.project.domain.enums.DamageType
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.example.project.domain.enums.ProductCategory
@@ -25,19 +22,19 @@ import kotlin.test.*
 class RepositoryIntegrationTest {
 
     private lateinit var database: Database
-    private lateinit var characterRepo: ExposedCharacterRepository
-    private lateinit var productRepo: ExposedProductRepository
-    private lateinit var merchantRepo: ExposedMerchantRepository
-    private lateinit var currencyRepo: ExposedCurrencyRepository
+    private lateinit var characterRepo: CharacterRepository
+    private lateinit var productRepo: ProductRepository
+    private lateinit var merchantRepo: MerchantRepository
+    private lateinit var currencyRepo: CurrencyRepository
 
     @BeforeTest
     fun setup() {
         val testDbFile = java.io.File.createTempFile("test_repos_", ".db").apply { deleteOnExit() }
         database = Database.connect("jdbc:sqlite:${testDbFile.absolutePath}").createTables()
-        characterRepo = ExposedCharacterRepository()
-        productRepo = ExposedProductRepository()
-        merchantRepo = ExposedMerchantRepository()
-        currencyRepo = ExposedCurrencyRepository()
+        characterRepo = CharacterRepository()
+        productRepo = ProductRepository()
+        merchantRepo = MerchantRepository()
+        currencyRepo = CurrencyRepository()
     }
 
     @Test

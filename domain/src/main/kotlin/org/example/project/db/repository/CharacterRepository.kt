@@ -17,7 +17,7 @@ import kotlin.uuid.Uuid
 import kotlin.uuid.ExperimentalUuidApi
 
 @OptIn(ExperimentalUuidApi::class)
-class ExposedCharacterRepository {
+class CharacterRepository {
 
     context(_: Transaction)
     fun getCharacterOrNull(id: CharacterId): Character? =

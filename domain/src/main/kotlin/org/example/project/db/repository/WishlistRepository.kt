@@ -14,7 +14,7 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-class ExposedWishlistRepository {
+class WishlistRepository {
 
     context(_: Transaction)
     fun addToWishlist(characterId: CharacterId, productId: ProductId): WishlistItemId {

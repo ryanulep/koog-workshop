@@ -10,10 +10,9 @@ import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.selectAll
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-class ExposedMerchantRepository {
+class MerchantRepository {
 
     context(_: Transaction)
     fun getMerchants(offset: Long, limit: Long): Page<Merchant> {

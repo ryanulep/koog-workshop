@@ -15,7 +15,7 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-class ExposedProductRepository {
+class ProductRepository {
 
     private val joinedTable = Products
         .join(Weapons, JoinType.LEFT, Products.id, Weapons.id)

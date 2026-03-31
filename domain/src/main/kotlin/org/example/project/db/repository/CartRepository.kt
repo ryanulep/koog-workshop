@@ -15,7 +15,7 @@ import org.jetbrains.exposed.v1.jdbc.update
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-class ExposedCartRepository {
+class CartRepository {
 
     context(_: Transaction)
     fun addToCart(characterId: CharacterId, productId: ProductId, quantity: Int = 1): CartItemId {

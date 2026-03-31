@@ -12,13 +12,13 @@ import kotlin.test.*
 class ExposedReviewRepositoryTest {
 
     private lateinit var database: Database
-    private lateinit var reviewRepo: ExposedReviewRepository
+    private lateinit var reviewRepo: ReviewRepository
 
     @BeforeTest
     fun setup() {
         val testDbFile = java.io.File.createTempFile("test_review_repo_", ".db").apply { deleteOnExit() }
         database = Database.connect("jdbc:sqlite:${testDbFile.absolutePath}").createTables()
-        reviewRepo = ExposedReviewRepository()
+        reviewRepo = ReviewRepository()
     }
 
     @Test

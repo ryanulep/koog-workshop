@@ -11,7 +11,7 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.selectAll
 
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-class ExposedCurrencyRepository {
+class CurrencyRepository {
 
     context(_: Transaction)
     fun getAllCurrencies(): List<Currency> =
