@@ -1,252 +1,93 @@
 Command finished with exit code 1.
 Command output:
 Reusing configuration cache.
-> Task :composeApp:copyNonXmlValueResourcesForJvmTest NO-SOURCE
 > Task :composeApp:copyNonXmlValueResourcesForCommonMain NO-SOURCE
-> Task :composeApp:convertXmlValueResourcesForJvmMain NO-SOURCE
-> Task :composeApp:copyNonXmlValueResourcesForCommonTest NO-SOURCE
-> Task :composeApp:kmpPartiallyResolvedDependenciesChecker
-> Task :composeApp:generateExpectResourceCollectorsForCommonMain UP-TO-DATE
 > Task :composeApp:convertXmlValueResourcesForCommonMain NO-SOURCE
 > Task :composeApp:generateComposeResClass UP-TO-DATE
-> Task :composeApp:convertXmlValueResourcesForJvmTest NO-SOURCE
+> Task :composeApp:generateExpectResourceCollectorsForCommonMain UP-TO-DATE
+> Task :composeApp:kmpPartiallyResolvedDependenciesChecker
 > Task :composeApp:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :composeApp:convertXmlValueResourcesForCommonTest NO-SOURCE
 > Task :composeApp:copyNonXmlValueResourcesForJvmMain UP-TO-DATE
 > Task :composeApp:prepareComposeResourcesTaskForCommonMain NO-SOURCE
-> Task :composeApp:prepareComposeResourcesTaskForCommonTest NO-SOURCE
-> Task :composeApp:prepareComposeResourcesTaskForJvmTest NO-SOURCE
+> Task :composeApp:convertXmlValueResourcesForJvmMain NO-SOURCE
 > Task :composeApp:generateResourceAccessorsForCommonMain NO-SOURCE
-> Task :composeApp:generateResourceAccessorsForJvmTest NO-SOURCE
-> Task :composeApp:generateResourceAccessorsForCommonTest NO-SOURCE
-> Task :composeApp:assembleJvmTestResources UP-TO-DATE
 > Task :composeApp:prepareComposeResourcesTaskForJvmMain UP-TO-DATE
-> Task :composeApp:jvmTestProcessResources UP-TO-DATE
-> Task :composeApp:assembleJvmMainResources UP-TO-DATE
 > Task :composeApp:generateResourceAccessorsForJvmMain UP-TO-DATE
-> Task :composeApp:processJvmTestResources SKIPPED
-> Task :composeApp:jvmProcessResources UP-TO-DATE
 > Task :composeApp:generateActualResourceCollectorsForJvmMain UP-TO-DATE
-> Task :composeApp:processJvmMainResources SKIPPED
-> Task :composeApp:compileKotlinJvm UP-TO-DATE
-> Task :composeApp:compileJvmMainJava NO-SOURCE
-> Task :composeApp:jvmMainClasses UP-TO-DATE
-> Task :composeApp:jvmJar UP-TO-DATE
 
-> Task :composeApp:compileTestKotlinJvm FAILED
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:26:37 Unresolved reference 'insertAndGetId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:27:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:27:20 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:29:28 Cannot infer type for type parameter 'V'. Specify it explicitly.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:29:39 Unresolved reference 'selectAll'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:38:24 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-fun StringBuilder.insert(index: Int, value: Short): StringBuilder
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:39:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:39:20 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-val Char.code: Int
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:40:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:40:20 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:41:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:41:20 Unresolved reference 'symbol'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:45:28 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-fun StringBuilder.insert(index: Int, value: Short): StringBuilder
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:46:21 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:46:24 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-val Char.code: Int
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:47:21 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:47:24 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:48:21 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:48:24 Unresolved reference 'symbol'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:57:37 Unresolved reference 'insertAndGetId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:58:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:58:20 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-val Char.code: Int
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:59:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:59:20 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:60:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:60:20 Unresolved reference 'symbol'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:62:38 Unresolved reference 'insertAndGetId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:63:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:63:20 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-val Char.code: Int
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:64:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:64:20 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:65:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:65:20 Unresolved reference 'symbol'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:68:33 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-fun StringBuilder.insert(index: Int, value: Short): StringBuilder
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:69:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:69:20 Unresolved reference 'fromCurrency'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:70:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:70:20 Unresolved reference 'toCurrency'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:71:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:71:20 Unresolved reference 'rate'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:75:37 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-fun StringBuilder.insert(index: Int, value: Short): StringBuilder
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:76:21 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:76:24 Unresolved reference 'fromCurrency'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:77:21 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:77:24 Unresolved reference 'toCurrency'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:78:21 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:78:24 Unresolved reference 'rate'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:87:37 Unresolved reference 'insertAndGetId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:87:54 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:87:57 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:88:37 Unresolved reference 'insertAndGetId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:89:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:89:20 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-val Char.code: Int
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:90:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:90:20 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:91:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:91:20 Unresolved reference 'symbol'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:94:26 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-fun StringBuilder.insert(index: Int, value: Short): StringBuilder
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:95:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:95:20 Unresolved reference 'character'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:96:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:96:20 Unresolved reference 'currency'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:97:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:97:20 Unresolved reference 'amount'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:98:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:98:20 Unresolved reference 'type'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:101:26 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-fun StringBuilder.insert(index: Int, value: Short): StringBuilder
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:102:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:102:20 Unresolved reference 'character'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:103:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:103:20 Unresolved reference 'currency'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:104:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:104:20 Unresolved reference 'amount'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:105:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:105:20 Unresolved reference 'type'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:109:18 Unresolved reference 'select'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:120:37 Unresolved reference 'insertAndGetId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:120:54 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:120:57 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:121:37 Unresolved reference 'insertAndGetId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:121:54 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:121:57 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-val Char.code: Int
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:121:73 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:121:76 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:121:92 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:121:95 Unresolved reference 'symbol'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:122:38 Unresolved reference 'insertAndGetId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:122:55 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:122:58 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-val Char.code: Int
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:122:75 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:122:78 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:122:95 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:122:98 Unresolved reference 'symbol'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:124:26 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-fun StringBuilder.insert(index: Int, value: Short): StringBuilder
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:124:35 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:124:38 Unresolved reference 'character'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:124:59 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:124:62 Unresolved reference 'currency'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:124:82 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:124:85 Unresolved reference 'amount'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:124:100 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:124:103 Unresolved reference 'type'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:125:26 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-fun StringBuilder.insert(index: Int, value: Short): StringBuilder
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:125:35 Unresolved reference 'it'.
-14 actionable tasks: 2 executed, 12 up-to-date
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:125:38 Unresolved reference 'character'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:125:59 Unresolved reference 'it'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/CharacterRepository.kt:20:55 Unresolved reference 'dbQuery'.
+> Task :composeApp:compileKotlinJvm FAILED
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/CharacterRepository.kt:26:72 Unresolved reference 'dbQuery'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/CharacterRepository.kt:27:29 Argument type mismatch: actual type is '() -> Op<Boolean>', but 'List<Expression<*>>' was expected.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/CharacterRepository.kt:40:15 Unresolved reference 'dbQuery'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/CurrencyRepository.kt:9:38 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/CurrencyRepository.kt:14:20 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/CurrencyRepository.kt:18:20 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/CurrencyRepository.kt:18:54 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/CurrencyRepository.kt:24:29 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/CurrencyRepository.kt:25:56 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/CurrencyRepository.kt:25:103 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/CurrencyRepository.kt:26:20 Unresolved reference 'it'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/CurrencyRepository.kt:26:20 Cannot infer type for type parameter 'V'. Specify it explicitly.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/MerchantRepository.kt:10:38 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/MerchantRepository.kt:15:19 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/MerchantRepository.kt:19:19 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/MerchantRepository.kt:19:52 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/MerchantRepository.kt:26:14 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/MerchantRepository.kt:27:55 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:10:38 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:11:38 Unresolved reference 'insertAndGetId'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:12:38 Unresolved reference 'update'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:17:16 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:17:46 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:23:16 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:23:53 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:29:19 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:29:55 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:34:20 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:34:60 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:39:19 Unresolved reference 'update'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:39:41 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:40:13 Unresolved reference 'it'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/OrderRepository.kt:41:13 Unresolved reference 'it'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:8:38 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:9:38 Unresolved reference 'update'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:14:18 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:18:18 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:18:50 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:24:18 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:24:56 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:29:37 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:29:69 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:30:20 Unresolved reference 'it'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:30:20 Cannot infer type for type parameter 'V'. Specify it explicitly.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:34:22 'operator' modifier is required on 'fun <T> Comparable<T>.compareTo(other: T): Int'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:36:18 Unresolved reference 'update'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:36:39 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:37:13 Unresolved reference 'it'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:37:16 Unresolved reference 'stock'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ProductRepository.kt:59:88 Unresolved reference 'PHYSICAL'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:7:38 Unresolved reference 'insertAndGetId'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:8:38 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:19:17 Unresolved reference 'insertAndGetId'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:20:13 Unresolved reference 'it'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:21:13 Unresolved reference 'it'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:22:13 Unresolved reference 'it'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:23:13 Unresolved reference 'it'.
+8 actionable tasks: 2 executed, 6 up-to-date
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:24:13 Unresolved reference 'it'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:29:17 Unresolved reference 'selectAll'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:29:53 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:34:31 Unresolved reference 'selectAll'.
 Configuration cache entry reused.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:125:62 Unresolved reference 'currency'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:125:83 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:125:86 Unresolved reference 'amount'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:125:101 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:125:104 Unresolved reference 'type'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:128:18 Unresolved reference 'select'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:131:30 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:131:30 Cannot infer type for type parameter 'V'. Specify it explicitly.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:131:56 Unresolved reference 'value'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:131:62 Cannot infer type for type parameter 'A'. Specify it explicitly.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:131:62 Cannot infer type for type parameter 'B'. Specify it explicitly.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:131:66 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:133:13 Type inference failed. The value of the type parameter 'T' must be mentioned in input types (argument types, receiver type, or expected type). Try to specify it explicitly.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:133:32 Cannot infer type for type parameter 'E'. Specify it explicitly.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:133:32 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:134:13 Type inference failed. The value of the type parameter 'T' must be mentioned in input types (argument types, receiver type, or expected type). Try to specify it explicitly.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:134:32 Cannot infer type for type parameter 'E'. Specify it explicitly.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:134:32 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:141:37 Unresolved reference 'insertAndGetId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:141:54 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:141:57 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:142:37 Unresolved reference 'insertAndGetId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:142:54 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:142:57 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-val Char.code: Int
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:142:73 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:142:76 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:142:92 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:142:95 Unresolved reference 'symbol'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:143:38 Unresolved reference 'insertAndGetId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:143:55 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:143:58 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-val Char.code: Int
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:143:75 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:143:78 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:143:95 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:143:98 Unresolved reference 'symbol'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:148:26 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-fun StringBuilder.insert(index: Int, value: Short): StringBuilder
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:149:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:149:20 Unresolved reference 'character'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:150:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:150:20 Unresolved reference 'currency'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:151:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:151:20 Unresolved reference 'amount'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:152:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:152:20 Unresolved reference 'type'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:153:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:153:20 Unresolved reference 'referenceId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:154:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:154:20 Unresolved reference 'referenceType'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:158:26 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-fun StringBuilder.insert(index: Int, value: Short): StringBuilder
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:159:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:159:20 Unresolved reference 'character'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:160:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:160:20 Unresolved reference 'currency'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:161:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:161:20 Unresolved reference 'amount'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:162:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:162:20 Unresolved reference 'type'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:163:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:163:20 Unresolved reference 'referenceId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:164:17 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:164:20 Unresolved reference 'referenceType'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:167:43 Unresolved reference 'selectAll'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:171:13 Type inference failed. The value of the type parameter 'T' must be mentioned in input types (argument types, receiver type, or expected type). Try to specify it explicitly.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:178:37 Unresolved reference 'insertAndGetId'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:178:54 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:178:57 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-val Char.code: Int
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:178:73 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:178:76 Unresolved reference 'name'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:178:92 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:178:95 Unresolved reference 'symbol'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:181:30 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-fun StringBuilder.insert(index: Int, value: Short): StringBuilder
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:182:21 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:182:24 Unresolved reference 'character'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:183:21 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:183:24 Unresolved reference 'currency'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:184:21 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:184:24 Unresolved reference 'amount'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:185:21 Unresolved reference 'it'.
-e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmTest/kotlin/org/example/project/db/CharacterAndCurrencyTest.kt:185:24 Unresolved reference 'type'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:34:67 Unresolved reference 'eq'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:35:20 Unresolved reference 'it'.
+e: file:///Users/simonvergauwen/Developer/agent-fantasy-store/composeApp/src/jvmMain/kotlin/org/example/project/db/repository/ReviewRepository.kt:35:20 Cannot infer type for type parameter 'V'. Specify it explicitly.
 
 FAILURE: Build failed with an exception.
 
 * What went wrong:
-Execution failed for task ':composeApp:compileTestKotlinJvm'.
+Execution failed for task ':composeApp:compileKotlinJvm'.
 > A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
    > Compilation error. See log for more details
 
@@ -254,3 +95,6 @@ Execution failed for task ':composeApp:compileTestKotlinJvm'.
 > Run with --stacktrace option to get the stack trace.
 > Run with --info or --debug option to get more log output.
 > Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 449ms

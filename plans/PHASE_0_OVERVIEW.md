@@ -38,6 +38,7 @@ Fully immersive in-world fantasy merchant shop (D&D/WoW/BG themed). Kotlin Compo
 | 5 | Orders | Done | Order/SubOrder/OrderItem hierarchy + tables + tests |
 | 6 | Reviews | Done | Review system, tables + tests |
 | 7 | Database Factory | Done | Unified init, full schema smoke test |
+| 8 | Repository Layer | Done | Character, Currency, Product, Merchant, Order, Review repos + mapping |
 
 ## Key Design Notes
 
