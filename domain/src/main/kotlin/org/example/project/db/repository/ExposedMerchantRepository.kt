@@ -1,6 +1,5 @@
 package org.example.project.db.repository
 
-import org.example.project.db.suspendTransaction
 import org.example.project.db.tables.MerchantShippingMethods
 import org.example.project.db.tables.Merchants
 import org.example.project.db.tables.ShippingMethods
@@ -9,33 +8,30 @@ import org.example.project.domain.id.MerchantId
 import org.example.project.domain.id.ShippingMethodId
 import org.example.project.domain.model.Merchant
 import org.example.project.domain.model.ShippingMethod
-import org.example.project.domain.repository.MerchantRepository
 import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.selectAll
 
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-class ExposedMerchantRepository(
-    private val database: Database
-) : MerchantRepository {
+class ExposedMerchantRepository {
 
-    override suspend fun getAllMerchants(): List<Merchant> = database.suspendTransaction {
+    context(_: Transaction)
+    fun getAllMerchants(): List<Merchant> =
         Merchants.selectAll().map(::mapToMerchant)
-    }
 
-    override suspend fun getMerchantOrNull(id: MerchantId): Merchant? = database.suspendTransaction {
+    context(_: Transaction)
+    fun getMerchantOrNull(id: MerchantId): Merchant? =
         Merchants.selectAll().where { Merchants.id eq id.value }
             .map(::mapToMerchant)
             .singleOrNull()
-    }
 
-    override suspend fun getShippingMethodsForMerchant(merchantId: MerchantId): List<ShippingMethod> = database.suspendTransaction {
+    context(_: Transaction)
+    fun getShippingMethodsForMerchant(merchantId: MerchantId): List<ShippingMethod> =
         (ShippingMethods innerJoin MerchantShippingMethods)
             .selectAll()
             .where { MerchantShippingMethods.merchant eq merchantId.value }
             .map(::mapToShippingMethod)
-    }
 
     private fun mapToMerchant(row: ResultRow) = Merchant(
         id = MerchantId(row[Merchants.id].value),

@@ -2,7 +2,11 @@ package org.example.project.db.repository
 
 import kotlinx.coroutines.runBlocking
 import org.example.project.db.createTables
+import org.example.project.db.suspendTransaction
 import org.example.project.db.tables.Currencies
+import org.example.project.db.tables.Merchants
+import org.example.project.db.tables.Products
+import org.example.project.db.tables.Weapons
 import org.example.project.db.tables.Weapons.damage
 import org.example.project.db.tables.Weapons.damageType
 import org.example.project.db.tables.Weapons.weaponSlot
@@ -13,10 +17,6 @@ import org.example.project.domain.enums.Rarity
 import org.example.project.domain.enums.TransactionType
 import org.example.project.domain.enums.WeaponSlot
 import org.example.project.domain.id.CurrencyId
-import org.example.project.domain.repository.CharacterRepository
-import org.example.project.domain.repository.CurrencyRepository
-import org.example.project.domain.repository.MerchantRepository
-import org.example.project.domain.repository.ProductRepository
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -25,19 +25,19 @@ import kotlin.test.*
 class RepositoryIntegrationTest {
 
     private lateinit var database: Database
-    private lateinit var characterRepo: CharacterRepository
-    private lateinit var productRepo: ProductRepository
-    private lateinit var merchantRepo: MerchantRepository
-    private lateinit var currencyRepo: CurrencyRepository
+    private lateinit var characterRepo: ExposedCharacterRepository
+    private lateinit var productRepo: ExposedProductRepository
+    private lateinit var merchantRepo: ExposedMerchantRepository
+    private lateinit var currencyRepo: ExposedCurrencyRepository
 
     @BeforeTest
     fun setup() {
         val testDbFile = java.io.File.createTempFile("test_repos_", ".db").apply { deleteOnExit() }
         database = Database.connect("jdbc:sqlite:${testDbFile.absolutePath}").createTables()
-        characterRepo = ExposedCharacterRepository(database)
-        productRepo = ExposedProductRepository(database)
-        merchantRepo = ExposedMerchantRepository(database)
-        currencyRepo = ExposedCurrencyRepository(database)
+        characterRepo = ExposedCharacterRepository()
+        productRepo = ExposedProductRepository()
+        merchantRepo = ExposedMerchantRepository()
+        currencyRepo = ExposedCurrencyRepository()
     }
 
     @Test
@@ -50,37 +50,37 @@ class RepositoryIntegrationTest {
             }.value
         })
 
-        val charId = characterRepo.createCharacter("Test Aldric")
-        val character = characterRepo.getCharacterOrNull(charId)
-        assertNotNull(character)
-        assertEquals("Test Aldric", character.name)
+        database.suspendTransaction {
+            val charId = characterRepo.createCharacter("Test Aldric")
+            val character = characterRepo.getCharacterOrNull(charId)
+            assertNotNull(character)
+            assertEquals("Test Aldric", character.name)
 
-        // Initial balance should be empty
-        val balance = characterRepo.getWalletBalance(charId)
-        assertTrue(balance.isEmpty())
+            val balance = characterRepo.getWalletBalance(charId)
+            assertTrue(balance.isEmpty())
 
-        // Add some transactions
-        characterRepo.addTransaction(charId, currencyId, 1000, TransactionType.DEPOSIT)
-        characterRepo.addTransaction(charId, currencyId, -200, TransactionType.PURCHASE)
+            characterRepo.addTransaction(charId, currencyId, 1000, TransactionType.DEPOSIT)
+            characterRepo.addTransaction(charId, currencyId, -200, TransactionType.PURCHASE)
 
-        val newBalance = characterRepo.getWalletBalance(charId)
-        assertEquals(800L, newBalance[currencyId])
+            val newBalance = characterRepo.getWalletBalance(charId)
+            assertEquals(800L, newBalance[currencyId])
+        }
     }
 
     @Test
     fun testProductMapping() = runBlocking {
         // We need to seed some data first since we are in memory
-        transaction(database) {
+        database.suspendTransaction {
             // Currencies and Merchants needed for Products
             val goldId = Currencies.insertAndGetId {
                 it[code] = "GOLD"
                 it[name] = "Gold"
                 it[symbol] = "G"
             }
-            val mId = org.example.project.db.tables.Merchants.insertAndGetId {
+            val mId = Merchants.insertAndGetId {
                 it[name] = "Repo Merchant"
             }
-            val productId = org.example.project.db.tables.Products.insertAndGetId {
+            val productId = Products.insertAndGetId {
                 it[name] = "Repo Sword"
                 it[category] = ProductCategory.WEAPONS.name
                 it[rarity] = Rarity.COMMON.name
@@ -89,7 +89,7 @@ class RepositoryIntegrationTest {
                 it[merchant] = mId
                 it[stock] = 10
             }
-            org.example.project.db.tables.Weapons.insert {
+            Weapons.insert {
                 it[id] = productId
                 it[damage] = 5
                 it[damageType] = DamageType.PHYSICAL.name
@@ -97,16 +97,17 @@ class RepositoryIntegrationTest {
             }
         }
 
-        val products = productRepo.getAllProducts()
-        assertEquals(1, products.size)
-        val sword = products.first() as org.example.project.domain.model.Product.Weapon
-        assertEquals("Repo Sword", sword.name)
-        assertEquals(5, sword.damage)
+        database.suspendTransaction {
+            val products = productRepo.getAllProducts()
+            assertEquals(1, products.size)
+            val sword = products.first() as org.example.project.domain.model.Product.Weapon
+            assertEquals("Repo Sword", sword.name)
+            assertEquals(5, sword.damage)
 
-        // Test stock update
-        val success = productRepo.updateStock(sword.id, -2)
-        assertTrue(success)
-        val updatedSword = productRepo.getProductOrNull(sword.id)
-        assertEquals(8, updatedSword?.stock)
+            val success = productRepo.updateStock(sword.id, -2)
+            assertTrue(success)
+            val updatedSword = productRepo.getProductOrNull(sword.id)
+            assertEquals(8, updatedSword?.stock)
+        }
     }
 }

@@ -7,6 +7,12 @@ plugins {
     alias(libs.plugins.composeHotReload)
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xcontext-parameters")
+    }
+}
+
 dependencies {
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)

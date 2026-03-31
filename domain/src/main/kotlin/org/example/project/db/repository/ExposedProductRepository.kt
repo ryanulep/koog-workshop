@@ -1,22 +1,18 @@
 package org.example.project.db.repository
 
-import org.example.project.db.suspendTransaction
 import org.example.project.db.tables.*
 import org.example.project.domain.enums.*
 import org.example.project.domain.id.*
 import org.example.project.domain.model.Product
-import org.example.project.domain.repository.ProductRepository
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.JoinType
+import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-class ExposedProductRepository(
-    private val database: Database
-) : ProductRepository {
+class ExposedProductRepository {
 
     private val joinedTable = Products
         .join(Weapons, JoinType.LEFT, Products.id, Weapons.id)
@@ -24,30 +20,31 @@ class ExposedProductRepository(
         .join(Potions, JoinType.LEFT, Products.id, Potions.id)
         .join(Scrolls, JoinType.LEFT, Products.id, Scrolls.id)
 
-    override suspend fun getAllProducts(): List<Product> = database.suspendTransaction {
+    context(_: Transaction)
+    fun getAllProducts(): List<Product> =
         joinedTable.selectAll().map(::mapToProduct)
-    }
 
-    override suspend fun getProductOrNull(id: ProductId): Product? = database.suspendTransaction {
+    context(_: Transaction)
+    fun getProductOrNull(id: ProductId): Product? =
         joinedTable.selectAll().where { Products.id eq id.value }
             .map(::mapToProduct)
             .singleOrNull()
-    }
 
-    override suspend fun getProductsByCategory(category: ProductCategory): List<Product> = database.suspendTransaction {
+    context(_: Transaction)
+    fun getProductsByCategory(category: ProductCategory): List<Product> =
         joinedTable.selectAll().where { Products.category eq category.name }
             .map(::mapToProduct)
-    }
 
-    override suspend fun updateStock(productId: ProductId, quantityChange: Int): Boolean = database.suspendTransaction {
+    context(_: Transaction)
+    fun updateStock(productId: ProductId, quantityChange: Int): Boolean {
         val currentStock = Products.selectAll().where { Products.id eq productId.value }
             .map { it[Products.stock] }
-            .singleOrNull() ?: return@suspendTransaction false
-        
+            .singleOrNull() ?: return false
+
         val newStock = currentStock + quantityChange
-        if (newStock < 0) return@suspendTransaction false
-        
-        Products.update({ Products.id eq productId.value }) {
+        if (newStock < 0) return false
+
+        return Products.update({ Products.id eq productId.value }) {
             it[stock] = newStock
         } > 0
     }
