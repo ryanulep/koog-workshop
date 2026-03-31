@@ -44,7 +44,9 @@ class ExposedMerchantRepository(
         location = row[Merchants.location],
         theme = row[Merchants.theme],
         iconPath = row[Merchants.iconPath],
-        isActive = row[Merchants.isActive]
+        isActive = row[Merchants.isActive],
+        createdAt = row[Merchants.createdAt],
+        updatedAt = row[Merchants.updatedAt]
     )
 
     private fun mapToShippingMethod(row: ResultRow) = ShippingMethod(
@@ -54,6 +56,8 @@ class ExposedMerchantRepository(
         baseCost = row[ShippingMethods.baseCost],
         currencyId = CurrencyId(row[ShippingMethods.currency].value),
         estimatedDays = row[ShippingMethods.estimatedDays],
-        isActive = row[ShippingMethods.isActive]
+        isActive = row[ShippingMethods.isActive],
+        createdAt = row[ShippingMethods.createdAt],
+        updatedAt = row[ShippingMethods.updatedAt]
     )
 }

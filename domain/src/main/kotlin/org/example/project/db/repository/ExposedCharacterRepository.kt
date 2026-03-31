@@ -71,6 +71,7 @@ class ExposedCharacterRepository(
     private fun mapToCharacter(row: ResultRow) = Character(
         id = CharacterId(row[Characters.id].value),
         name = row[Characters.name],
-        createdAt = row[Characters.createdAt]
+        createdAt = row[Characters.createdAt],
+        updatedAt = row[Characters.updatedAt]
     )
 }

@@ -69,9 +69,10 @@ class ExposedProductRepository(
                 imageUrl = row[Products.imageUrl],
                 isActive = row[Products.isActive],
                 createdAt = row[Products.createdAt],
+                updatedAt = row[Products.updatedAt],
                 damage = row[Weapons.damage],
                 damageType = DamageType.valueOf(row[Weapons.damageType]),
-                weaponSlot = WeaponSlot.valueOf(row[Weapons.weaponSlot])
+                weaponSlot = WeaponSlot.valueOf(row[Weapons.weaponSlot]),
             )
             ProductCategory.ARMOR -> Product.Armor(
                 id = ProductId(row[Products.id].value),
@@ -85,8 +86,9 @@ class ExposedProductRepository(
                 imageUrl = row[Products.imageUrl],
                 isActive = row[Products.isActive],
                 createdAt = row[Products.createdAt],
+                updatedAt = row[Products.updatedAt],
                 defense = row[Armors.defense],
-                armorSlot = ArmorSlot.valueOf(row[Armors.armorSlot])
+                armorSlot = ArmorSlot.valueOf(row[Armors.armorSlot]),
             )
             ProductCategory.POTIONS -> Product.Potion(
                 id = ProductId(row[Products.id].value),
@@ -100,8 +102,9 @@ class ExposedProductRepository(
                 imageUrl = row[Products.imageUrl],
                 isActive = row[Products.isActive],
                 createdAt = row[Products.createdAt],
+                updatedAt = row[Products.updatedAt],
                 effect = row[Potions.effect],
-                duration = row[Potions.duration]
+                duration = row[Potions.duration],
             )
             ProductCategory.SCROLLS -> Product.Scroll(
                 id = ProductId(row[Products.id].value),
@@ -115,8 +118,9 @@ class ExposedProductRepository(
                 imageUrl = row[Products.imageUrl],
                 isActive = row[Products.isActive],
                 createdAt = row[Products.createdAt],
+                updatedAt = row[Products.updatedAt],
                 spellName = row[Scrolls.spellName],
-                spellLevel = row[Scrolls.spellLevel]
+                spellLevel = row[Scrolls.spellLevel],
             )
             ProductCategory.MISCELLANEOUS -> Product.MiscItem(
                 id = ProductId(row[Products.id].value),
@@ -129,7 +133,8 @@ class ExposedProductRepository(
                 stock = row[Products.stock],
                 imageUrl = row[Products.imageUrl],
                 isActive = row[Products.isActive],
-                createdAt = row[Products.createdAt]
+                createdAt = row[Products.createdAt],
+                updatedAt = row[Products.updatedAt],
             )
         }
     }

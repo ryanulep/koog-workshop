@@ -76,6 +76,7 @@ class ExposedOrderRepository(
         quantity = row[OrderItems.quantity],
         snapshottedPrice = row[OrderItems.snapshottedPrice],
         snapshottedCurrencyId = CurrencyId(row[OrderItems.snapshottedCurrency].value),
-        createdAt = row[OrderItems.createdAt]
+        createdAt = row[OrderItems.createdAt],
+        updatedAt = row[OrderItems.updatedAt]
     )
 }

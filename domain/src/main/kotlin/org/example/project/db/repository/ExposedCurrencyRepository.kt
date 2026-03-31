@@ -39,6 +39,8 @@ class ExposedCurrencyRepository(
         code = row[Currencies.code],
         name = row[Currencies.name],
         symbol = row[Currencies.symbol],
-        iconPath = row[Currencies.iconPath]
+        iconPath = row[Currencies.iconPath],
+        createdAt = row[Currencies.createdAt],
+        updatedAt = row[Currencies.updatedAt],
     )
 }

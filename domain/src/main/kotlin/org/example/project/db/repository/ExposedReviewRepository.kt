@@ -39,9 +39,9 @@ class ExposedReviewRepository(
     }
 
     override suspend fun getAverageRatingForProduct(productId: ProductId): Double = database.suspendTransaction {
-        val ratings = Reviews.selectAll().where { Reviews.product eq productId.value }
+        Reviews.selectAll().where { Reviews.product eq productId.value }
             .map { it[Reviews.rating] }
-        if (ratings.isEmpty()) 0.0 else ratings.average()
+            .average()
     }
 
     private fun mapToReview(row: ResultRow) = Review(
