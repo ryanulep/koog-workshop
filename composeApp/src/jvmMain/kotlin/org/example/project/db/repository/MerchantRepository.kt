@@ -1,6 +1,6 @@
 package org.example.project.db.repository
 
-import org.example.project.db.DatabaseFactory.dbQuery
+import org.example.project.db.suspendTransaction
 import org.example.project.db.tables.MerchantShippingMethods
 import org.example.project.db.tables.Merchants
 import org.example.project.db.tables.ShippingMethods
@@ -8,21 +8,24 @@ import org.example.project.domain.model.Merchant
 import org.example.project.domain.model.ShippingMethod
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.selectAll
 
-class MerchantRepository {
+class MerchantRepository(
+    private val database: Database
+) {
 
-    suspend fun getAllMerchants(): List<Merchant> = dbQuery {
+    suspend fun getAllMerchants(): List<Merchant> = database.suspendTransaction {
         Merchants.selectAll().map(::mapToMerchant)
     }
 
-    suspend fun getMerchantById(id: Long): Merchant? = dbQuery {
+    suspend fun getMerchantById(id: Long): Merchant? = database.suspendTransaction {
         Merchants.selectAll().where { Merchants.id eq id }
             .map(::mapToMerchant)
             .singleOrNull()
     }
 
-    suspend fun getShippingMethodsForMerchant(merchantId: Long): List<ShippingMethod> = dbQuery {
+    suspend fun getShippingMethodsForMerchant(merchantId: Long): List<ShippingMethod> = database.suspendTransaction {
         (ShippingMethods innerJoin MerchantShippingMethods)
             .selectAll()
             .where { MerchantShippingMethods.merchant eq merchantId }

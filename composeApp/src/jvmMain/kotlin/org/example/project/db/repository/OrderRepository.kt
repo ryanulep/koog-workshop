@@ -1,6 +1,6 @@
 package org.example.project.db.repository
 
-import org.example.project.db.DatabaseFactory.dbQuery
+import org.example.project.db.suspendTransaction
 import org.example.project.db.tables.*
 import org.example.project.domain.enums.OrderStatus
 import org.example.project.domain.model.Order
@@ -8,34 +8,37 @@ import org.example.project.domain.model.SubOrder
 import org.example.project.domain.model.OrderItem
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 
-class OrderRepository {
+class OrderRepository(
+    private val database: Database
+) {
 
-    suspend fun getOrderById(id: Long): Order? = dbQuery {
+    suspend fun getOrderById(id: Long): Order? = database.suspendTransaction {
         Orders.selectAll().where { Orders.id eq id }
             .map(::mapToOrder)
             .singleOrNull()
     }
 
-    suspend fun getOrderHistory(characterId: Long): List<Order> = dbQuery {
+    suspend fun getOrderHistory(characterId: Long): List<Order> = database.suspendTransaction {
         Orders.selectAll().where { Orders.character eq characterId }
             .orderBy(Orders.createdAt to org.jetbrains.exposed.v1.core.SortOrder.DESC)
             .map(::mapToOrder)
     }
 
-    suspend fun getSubOrders(orderId: Long): List<SubOrder> = dbQuery {
+    suspend fun getSubOrders(orderId: Long): List<SubOrder> = database.suspendTransaction {
         SubOrders.selectAll().where { SubOrders.order eq orderId }
             .map(::mapToSubOrder)
     }
 
-    suspend fun getOrderItems(subOrderId: Long): List<OrderItem> = dbQuery {
+    suspend fun getOrderItems(subOrderId: Long): List<OrderItem> = database.suspendTransaction {
         OrderItems.selectAll().where { OrderItems.subOrder eq subOrderId }
             .map(::mapToOrderItem)
     }
 
-    suspend fun updateSubOrderStatus(subOrderId: Long, status: OrderStatus): Boolean = dbQuery {
+    suspend fun updateSubOrderStatus(subOrderId: Long, status: OrderStatus): Boolean = database.suspendTransaction {
         SubOrders.update({ SubOrders.id eq subOrderId }) {
             it[SubOrders.status] = status.name
             it[SubOrders.updatedAt] = System.currentTimeMillis()

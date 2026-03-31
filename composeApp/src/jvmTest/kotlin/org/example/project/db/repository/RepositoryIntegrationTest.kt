@@ -1,28 +1,37 @@
 package org.example.project.db.repository
 
 import kotlinx.coroutines.runBlocking
-import org.example.project.db.DatabaseFactory
+import org.example.project.db.createTables
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.example.project.domain.enums.ProductCategory
 import org.example.project.domain.enums.TransactionType
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import kotlin.test.*
 
 class RepositoryIntegrationTest {
 
-    private val characterRepo = CharacterRepository()
-    private val productRepo = ProductRepository()
-    private val merchantRepo = MerchantRepository()
-    private val currencyRepo = CurrencyRepository()
+    private lateinit var database: Database
+    private lateinit var characterRepo: CharacterRepository
+    private lateinit var productRepo: ProductRepository
+    private lateinit var merchantRepo: MerchantRepository
+    private lateinit var currencyRepo: CurrencyRepository
 
     @BeforeTest
     fun setup() {
-        DatabaseFactory.init("jdbc:sqlite:file:test_repos?mode=memory&cache=shared")
+        val testDbFile = java.io.File.createTempFile("test_repos_", ".db").apply { deleteOnExit() }
+        database = Database.connect("jdbc:sqlite:${testDbFile.absolutePath}").createTables()
+        characterRepo = CharacterRepository(database)
+        productRepo = ProductRepository(database)
+        merchantRepo = MerchantRepository(database)
+        currencyRepo = CurrencyRepository(database)
     }
 
     @Test
     fun testCharacterAndWallet() = runBlocking {
         // Seed currency first
-        val currencyId = transaction {
+        val currencyId = transaction(database) {
             org.example.project.db.tables.Currencies.insertAndGetId {
                 it[code] = "GOLD"
                 it[name] = "Gold"
@@ -50,7 +59,7 @@ class RepositoryIntegrationTest {
     @Test
     fun testProductMapping() = runBlocking {
         // We need to seed some data first since we are in memory
-        transaction {
+        transaction(database) {
             // Currencies and Merchants needed for Products
             val goldId = org.example.project.db.tables.Currencies.insertAndGetId {
                 it[code] = "GOLD"

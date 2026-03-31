@@ -1,1 +1,5 @@
- - Exposed v1 uses v1 in their packages i.e. `org.jetbrains.exposed.v1.core.*`
+- Use Gradle MCP
+- To use Exposed correctly with the specific project requirements Exposed v1:
+  -  Package structure: Exposed v1 uses org.jetbrains.exposed.v1.* e.g., org.jetbrains.exposed.v1.core.*, org.jetbrains.exposed.v1.jdbc.*.
+  - Extension functions: Many common DSL functions like selectAll(), update(), insert(), and deleteWhere are in org.jetbrains.exposed.v1.jdbc or
+  similar specific packages.

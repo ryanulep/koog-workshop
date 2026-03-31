@@ -1,38 +1,41 @@
 package org.example.project.db.repository
 
-import org.example.project.db.DatabaseFactory.dbQuery
+import org.example.project.db.suspendTransaction
 import org.example.project.db.tables.Products
 import org.example.project.domain.enums.*
 import org.example.project.domain.model.Product
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 
-class ProductRepository {
+class ProductRepository(
+    private val database: Database
+) {
 
-    suspend fun getAllProducts(): List<Product> = dbQuery {
+    suspend fun getAllProducts(): List<Product> = database.suspendTransaction {
         Products.selectAll().map(::mapToProduct)
     }
 
-    suspend fun getProductById(id: Long): Product? = dbQuery {
+    suspend fun getProductById(id: Long): Product? = database.suspendTransaction {
         Products.selectAll().where { Products.id eq id }
             .map(::mapToProduct)
             .singleOrNull()
     }
 
-    suspend fun getProductsByCategory(category: ProductCategory): List<Product> = dbQuery {
+    suspend fun getProductsByCategory(category: ProductCategory): List<Product> = database.suspendTransaction {
         Products.selectAll().where { Products.category eq category.name }
             .map(::mapToProduct)
     }
 
-    suspend fun updateStock(productId: Long, quantityChange: Int): Boolean = dbQuery {
+    suspend fun updateStock(productId: Long, quantityChange: Int): Boolean = database.suspendTransaction {
         val currentStock = Products.selectAll().where { Products.id eq productId }
             .map { it[Products.stock] }
-            .singleOrNull() ?: return@dbQuery false
+            .singleOrNull() ?: return@suspendTransaction false
         
         val newStock = currentStock + quantityChange
-        if (newStock < 0) return@dbQuery false
+        if (newStock < 0) return@suspendTransaction false
         
         Products.update({ Products.id eq productId }) {
             it[stock] = newStock

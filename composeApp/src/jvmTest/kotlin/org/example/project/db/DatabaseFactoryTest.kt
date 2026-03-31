@@ -2,8 +2,8 @@ package org.example.project.db
 
 import org.example.project.db.tables.Characters
 import org.jetbrains.exposed.v1.core.*
-import org.jetbrains.exposed.v1.core.dao.id.*
 import org.jetbrains.exposed.v1.jdbc.*
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import kotlin.test.*
 
@@ -16,14 +16,15 @@ class DatabaseFactoryTest {
         java.io.File(testDbFile).delete()
         
         try {
-            DatabaseFactory.init(testDbFile)
-            
-            transaction {
+            val database = Database.connect("jdbc:sqlite:$testDbFile")
+            database.createTables()
+
+            transaction(database) {
                 // Verify that at least one table is created and usable
                 Characters.insert {
                     it[name] = "SmokeTestCharacter"
                 }
-                
+
                 val exists = Characters.selectAll().where { Characters.name eq "SmokeTestCharacter" }.any()
                 assertTrue(exists, "Character should exist in the database")
             }

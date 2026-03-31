@@ -3,8 +3,8 @@ package org.example.project.db
 import org.example.project.db.tables.*
 import org.example.project.domain.enums.*
 import org.jetbrains.exposed.v1.core.*
-import org.jetbrains.exposed.v1.core.dao.id.*
 import org.jetbrains.exposed.v1.jdbc.*
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import kotlin.test.*
 
@@ -12,10 +12,10 @@ class FullSchemaTest {
 
     @Test
     fun testFullSchemaLifecycle() {
-        val dbPath = "jdbc:sqlite:file:test_full_schema?mode=memory&cache=shared"
-        DatabaseFactory.init(dbPath)
+        val testDbFile = java.io.File.createTempFile("test_full_schema_", ".db").apply { deleteOnExit() }
+        val database = Database.connect("jdbc:sqlite:${testDbFile.absolutePath}").createTables()
 
-        transaction {
+        transaction(database) {
             // 2. Seed currencies
             val goldId = Currencies.insertAndGetId {
                 it[code] = "GOLD"

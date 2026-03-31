@@ -1,14 +1,17 @@
 package org.example.project.db.repository
 
-import org.example.project.db.DatabaseFactory.dbQuery
+import org.example.project.db.suspendTransaction
 import org.example.project.db.tables.Reviews
 import org.example.project.domain.model.Review
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.selectAll
 
-class ReviewRepository {
+class ReviewRepository(
+    private val database: Database
+) {
 
     suspend fun createReview(
         characterId: Long,
@@ -16,7 +19,7 @@ class ReviewRepository {
         orderItemId: Long,
         rating: Int,
         text: String?
-    ): Long = dbQuery {
+    ): Long = database.suspendTransaction {
         Reviews.insertAndGetId {
             it[Reviews.character] = characterId
             it[Reviews.product] = productId
@@ -26,12 +29,12 @@ class ReviewRepository {
         }.value
     }
 
-    suspend fun getReviewsForProduct(productId: Long): List<Review> = dbQuery {
+    suspend fun getReviewsForProduct(productId: Long): List<Review> = database.suspendTransaction {
         Reviews.selectAll().where { Reviews.product eq productId }
             .map(::mapToReview)
     }
 
-    suspend fun getAverageRatingForProduct(productId: Long): Double = dbQuery {
+    suspend fun getAverageRatingForProduct(productId: Long): Double = database.suspendTransaction {
         val ratings = Reviews.selectAll().where { Reviews.product eq productId }
             .map { it[Reviews.rating] }
         if (ratings.isEmpty()) 0.0 else ratings.average()
