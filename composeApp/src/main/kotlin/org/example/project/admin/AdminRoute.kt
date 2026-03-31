@@ -4,7 +4,6 @@ package org.example.project.admin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,9 +23,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -45,42 +41,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Window
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import org.example.project.domain.model.LowStockProductSummary
 import org.example.project.domain.model.RecentOrderSummary
 import org.example.project.service.AdminDashboardService
-import java.awt.FileDialog
-import java.awt.Frame
 import java.nio.file.Path
-import java.nio.file.Paths
 
 @Composable
-fun AdminRoute() {
-    val databaseSessionService = remember { DatabaseSessionService() }
-    val dashboardService = remember(databaseSessionService) {
-        AdminDashboardService(databaseSessionService::databaseOrNull)
-    }
-    val appViewModel: AdminAppViewModel = viewModel(
-        factory = remember(databaseSessionService) {
-            AdminAppViewModel.factory(databaseSessionService)
-        }
-    )
+fun AdminRoute(
+    dashboardService: AdminDashboardService,
+    databasePath: Path
+) {
     val dashboardViewModel: DashboardViewModel = viewModel(
         factory = remember(dashboardService) {
             DashboardViewModel.factory(dashboardService)
         }
     )
 
-    val appState by appViewModel.uiState.collectAsState()
     val dashboardState by dashboardViewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(appState.currentDestination, appState.selectedDatabasePath) {
-        when (appState.currentDestination) {
-            AdminDestination.Dashboard -> dashboardViewModel.loadDashboard()
-            AdminDestination.Startup -> dashboardViewModel.reset()
-        }
+    LaunchedEffect(Unit) {
+        dashboardViewModel.loadDashboard()
     }
 
     val backgroundBrush = Brush.verticalGradient(
@@ -105,17 +89,10 @@ fun AdminRoute() {
                 containerColor = Color.Transparent,
                 topBar = {
                     AdminTopBar(
-                        appState = appState,
-                        onOpenDatabase = {
-                            chooseDatabaseFile()?.let { selectedPath ->
-                                coroutineScope.launch {
-                                    appViewModel.openDatabase(selectedPath)
-                                }
-                            }
-                        },
-                        onCloseDatabase = {
+                        databasePath = databasePath,
+                        onRefresh = {
                             coroutineScope.launch {
-                                appViewModel.closeDatabase()
+                                dashboardViewModel.loadDashboard()
                             }
                         }
                     )
@@ -128,29 +105,14 @@ fun AdminRoute() {
                         .padding(horizontal = 24.dp, vertical = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    SessionBanner(appState = appState)
-
-                    when (appState.currentDestination) {
-                        AdminDestination.Startup -> StartupScreen(
-                            appState = appState,
-                            onOpenDatabase = {
-                                chooseDatabaseFile()?.let { selectedPath ->
-                                    coroutineScope.launch {
-                                        appViewModel.openDatabase(selectedPath)
-                                    }
-                                }
+                    DashboardScreen(
+                        uiState = dashboardState,
+                        onRefresh = {
+                            coroutineScope.launch {
+                                dashboardViewModel.loadDashboard()
                             }
-                        )
-
-                        AdminDestination.Dashboard -> DashboardScreen(
-                            uiState = dashboardState,
-                            onRefresh = {
-                                coroutineScope.launch {
-                                    dashboardViewModel.loadDashboard()
-                                }
-                            }
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }
@@ -159,9 +121,8 @@ fun AdminRoute() {
 
 @Composable
 private fun AdminTopBar(
-    appState: AdminAppUiState,
-    onOpenDatabase: () -> Unit,
-    onCloseDatabase: () -> Unit
+    databasePath: Path,
+    onRefresh: () -> Unit
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
@@ -181,7 +142,7 @@ private fun AdminTopBar(
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
                 )
                 Text(
-                    text = appState.selectedDatabasePath ?: "No database selected",
+                    text = databasePath.toAbsolutePath().normalize().toString(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -189,171 +150,9 @@ private fun AdminTopBar(
                 )
             }
 
-            appState.availableDestinations.forEach { destination ->
-                FilterChip(
-                    selected = appState.currentDestination == destination &&
-                        appState.databaseConnectionState is DatabaseConnectionState.Connected,
-                    onClick = {},
-                    label = { Text(destination.name) },
-                    enabled = appState.databaseConnectionState is DatabaseConnectionState.Connected
-                )
+            TextButton(onClick = onRefresh) {
+                Text("Refresh")
             }
-
-            if (appState.databaseConnectionState is DatabaseConnectionState.Connected) {
-                TextButton(onClick = onCloseDatabase) {
-                    Text("Close Database")
-                }
-            }
-
-            OutlinedButton(
-                onClick = onOpenDatabase,
-                enabled = appState.databaseConnectionState !is DatabaseConnectionState.Connecting
-            ) {
-                Text("Open Database")
-            }
-        }
-    }
-}
-
-@Composable
-private fun SessionBanner(appState: AdminAppUiState) {
-    when {
-        appState.databaseConnectionState is DatabaseConnectionState.Connecting ||
-            appState.schemaValidationState is SchemaValidationState.Validating -> {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.5.dp
-                    )
-                    Column {
-                        Text(
-                            text = "Validating selected database",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Text(
-                            text = "Checking file accessibility and expected tables.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.84f)
-                        )
-                    }
-                }
-            }
-        }
-
-        appState.schemaValidationState is SchemaValidationState.Invalid -> {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Text(
-                        text = "Database validation failed",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text(
-                        text = appState.schemaValidationState.message,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun StartupScreen(
-    appState: AdminAppUiState,
-    onOpenDatabase: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxSize(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f))
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "Open an existing SQLite database",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "Choose a file to validate the schema and enter the admin dashboard.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Current selected path",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Text(
-                        text = appState.selectedDatabasePath ?: "No database selected yet.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (appState.databaseConnectionState is DatabaseConnectionState.Connecting) {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    }
-                }
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = onOpenDatabase,
-                    enabled = appState.databaseConnectionState !is DatabaseConnectionState.Connecting
-                ) {
-                    Text("Open Database")
-                }
-
-                if (appState.schemaValidationState is SchemaValidationState.Invalid) {
-                    AssistChip(
-                        onClick = {},
-                        label = { Text("Recoverable error") }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Dashboard highlights will appear after a valid database has been opened.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
@@ -365,50 +164,47 @@ private fun DashboardScreen(
 ) {
     when (uiState) {
         DashboardUiState.Uninitialized,
-        DashboardUiState.Loading -> {
-            Card(
-                modifier = Modifier.fillMaxSize(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f))
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(32.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Loading dashboard",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text(
-                        text = "Reading summary counts and operational highlights.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
+        DashboardUiState.Loading -> LoadingCard()
 
-        DashboardUiState.Empty -> {
-            DashboardEmptyState(onRefresh = onRefresh)
-        }
+        DashboardUiState.Empty -> EmptyCard(onRefresh = onRefresh)
 
-        is DashboardUiState.Error -> {
-            DashboardErrorState(message = uiState.message, onRefresh = onRefresh)
-        }
+        is DashboardUiState.Error -> ErrorCard(message = uiState.message, onRefresh = onRefresh)
 
-        is DashboardUiState.Ready -> {
-            DashboardContent(uiState = uiState, onRefresh = onRefresh)
+        is DashboardUiState.Ready -> DashboardContent(uiState = uiState, onRefresh = onRefresh)
+    }
+}
+
+@Composable
+private fun LoadingCard() {
+    Card(
+        modifier = Modifier.fillMaxSize(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Loading dashboard",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = "Reading summary counts and operational highlights.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
 
 @Composable
-private fun DashboardEmptyState(onRefresh: () -> Unit) {
+private fun EmptyCard(onRefresh: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxSize(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f))
@@ -426,7 +222,7 @@ private fun DashboardEmptyState(onRefresh: () -> Unit) {
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = "The schema is valid, but the connected database does not contain catalog or order data yet.",
+                text = "The database is open, but there is no catalog or order data yet.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -438,7 +234,7 @@ private fun DashboardEmptyState(onRefresh: () -> Unit) {
 }
 
 @Composable
-private fun DashboardErrorState(
+private fun ErrorCard(
     message: String,
     onRefresh: () -> Unit
 ) {
@@ -500,7 +296,7 @@ private fun DashboardContent(
                     )
                 }
 
-                OutlinedButton(onClick = onRefresh) {
+                Button(onClick = onRefresh) {
                     Text("Refresh")
                 }
             }
@@ -519,7 +315,6 @@ private fun DashboardContent(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SummaryCards(summary: org.example.project.domain.model.DashboardSummary) {
     androidx.compose.foundation.layout.FlowRow(
@@ -756,15 +551,4 @@ private fun RecentOrderRow(order: RecentOrderSummary) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
-}
-
-private fun chooseDatabaseFile(): Path? {
-    val dialog = FileDialog(null as Frame?, "Open SQLite Database", FileDialog.LOAD).apply {
-        isMultipleMode = false
-        isVisible = true
-    }
-
-    val file = dialog.file ?: return null
-    val directory = dialog.directory ?: return null
-    return Paths.get(directory, file)
 }

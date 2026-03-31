@@ -13,8 +13,6 @@ import org.example.project.service.AdminDashboardService
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import org.sqlite.SQLiteConfig
-import org.sqlite.SQLiteDataSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -26,10 +24,8 @@ class DashboardViewModelTest {
 
     @Test
     fun `loadDashboard maps an empty database to Empty`() = runBlocking {
-        val databaseFile = createDatabaseFile()
-        Database.connect("jdbc:sqlite:${databaseFile.absolutePath}").createTables()
-        val database = openReadOnlyDatabase(databaseFile)
-        val viewModel = DashboardViewModel(AdminDashboardService(databaseProvider = { database }))
+        val database = createDatabase()
+        val viewModel = DashboardViewModel(AdminDashboardService(database))
 
         viewModel.loadDashboard()
 
@@ -38,11 +34,9 @@ class DashboardViewModelTest {
 
     @Test
     fun `loadDashboard maps dashboard data to Ready`() = runBlocking {
-        val databaseFile = createDatabaseFile()
-        val writableDatabase = Database.connect("jdbc:sqlite:${databaseFile.absolutePath}").createTables()
-        seedDashboardData(writableDatabase)
-        val database = openReadOnlyDatabase(databaseFile)
-        val viewModel = DashboardViewModel(AdminDashboardService(databaseProvider = { database }))
+        val database = createDatabase()
+        seedDashboardData(database)
+        val viewModel = DashboardViewModel(AdminDashboardService(database))
 
         viewModel.loadDashboard()
 
@@ -69,20 +63,11 @@ class DashboardViewModelTest {
         assertTrue(state.recentOrders.all { it.totalCurrencyCode == "GOLD" })
     }
 
-    private fun createDatabaseFile(): java.io.File {
+    private fun createDatabase(): Database {
         val databaseFile = java.io.File.createTempFile("dashboard_viewmodel_", ".db").apply {
             deleteOnExit()
         }
-        return databaseFile
-    }
-
-    private fun openReadOnlyDatabase(databaseFile: java.io.File): Database {
-        val dataSource = SQLiteDataSource(SQLiteConfig().apply {
-            setReadOnly(true)
-        }).apply {
-            url = "jdbc:sqlite:${databaseFile.toURI().toASCIIString()}"
-        }
-        return Database.connect(dataSource)
+        return Database.connect("jdbc:sqlite:${databaseFile.absolutePath}").createTables()
     }
 
     private fun seedDashboardData(database: Database) {

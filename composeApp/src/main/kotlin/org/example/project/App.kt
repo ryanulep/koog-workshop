@@ -2,12 +2,15 @@ package org.example.project
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import org.example.project.admin.AdminRoute
+import org.example.project.admin.createAdminDatabase
+import org.example.project.admin.adminDatabasePath
+import org.example.project.service.AdminDashboardService
 
 private val AdminColorScheme: ColorScheme = lightColorScheme(
     primary = Color(0xFF0F766E),
@@ -37,7 +40,13 @@ private val AdminColorScheme: ColorScheme = lightColorScheme(
 @Composable
 @Preview
 fun App() {
+    val database = remember { createAdminDatabase() }
+    val dashboardService = remember(database) { AdminDashboardService(database) }
+
     MaterialTheme(colorScheme = AdminColorScheme) {
-        AdminRoute()
+        AdminRoute(
+            dashboardService = dashboardService,
+            databasePath = adminDatabasePath()
+        )
     }
 }
