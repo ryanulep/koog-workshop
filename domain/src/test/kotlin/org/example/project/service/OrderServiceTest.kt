@@ -156,7 +156,7 @@ class OrderServiceTest {
         val orderId = orderService.checkout(characterId, mapOf(merchantId to shippingMethodId))
 
         // Verify: order exists with PENDING status
-        val order = orderService.getOrder(orderId)
+        val order = orderService.getOrderOrNull(orderId)
         assertNotNull(order)
         assertEquals(OrderStatus.PENDING, order.status)
 
@@ -175,7 +175,7 @@ class OrderServiceTest {
         assertEquals(5000L - 250L, balance[goldId])
 
         // Verify: product stock decreased from 10 to 8
-        val product = catalogService.getProduct(swordId)
+        val product = catalogService.getProductOrNull(swordId)
         assertNotNull(product)
         assertEquals(8, product.stock)
 
@@ -260,7 +260,7 @@ class OrderServiceTest {
 
         val orderId = orderService.checkout(characterId, mapOf(merchantId to silverShippingMethodId))
 
-        val order = orderService.getOrder(orderId)
+        val order = orderService.getOrderOrNull(orderId)
         assertNotNull(order)
         assertEquals(goldId, order.totalCurrencyId)
         assertEquals(120L, order.totalPrice)
@@ -279,11 +279,11 @@ class OrderServiceTest {
         val balance = characterService.getWalletBalance(characterId)
         assertEquals(4880L, balance[goldId])
 
-        val goldProduct = catalogService.getProduct(swordId)
+        val goldProduct = catalogService.getProductOrNull(swordId)
         assertNotNull(goldProduct)
         assertEquals(9, goldProduct.stock)
 
-        val silverProduct = catalogService.getProduct(silverTrinketId)
+        val silverProduct = catalogService.getProductOrNull(silverTrinketId)
         assertNotNull(silverProduct)
         assertEquals(9, silverProduct.stock)
 
@@ -353,7 +353,7 @@ class OrderServiceTest {
         assertTrue(cancelled)
 
         // Verify: order status is CANCELLED
-        val order = orderService.getOrder(orderId)
+        val order = orderService.getOrderOrNull(orderId)
         assertNotNull(order)
         assertEquals(OrderStatus.CANCELLED, order.status)
 
@@ -362,7 +362,7 @@ class OrderServiceTest {
         assertEquals(5000L, balance[goldId])
 
         // Verify: product stock is restored to 10
-        val product = catalogService.getProduct(swordId)
+        val product = catalogService.getProductOrNull(swordId)
         assertNotNull(product)
         assertEquals(10, product.stock)
     }

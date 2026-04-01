@@ -1,8 +1,10 @@
 package org.example.project.domain.catalog
 
+import androidx.compose.runtime.Immutable
 import kotlin.time.Instant
 import org.example.project.domain.shared.MerchantId
 
+@Immutable
 data class Merchant(
     val id: MerchantId,
     val name: String,

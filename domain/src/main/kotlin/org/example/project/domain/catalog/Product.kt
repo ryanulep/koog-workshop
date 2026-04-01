@@ -1,10 +1,12 @@
 package org.example.project.domain.catalog
 
+import androidx.compose.runtime.Immutable
 import kotlin.time.Instant
 import org.example.project.domain.shared.CurrencyId
 import org.example.project.domain.shared.MerchantId
 import org.example.project.domain.shared.ProductId
 
+@Immutable
 sealed class Product {
     abstract val id: ProductId
     abstract val name: String
@@ -20,6 +22,7 @@ sealed class Product {
     abstract val createdAt: Instant
     abstract val updatedAt: Instant
 
+    @Immutable
     data class Weapon(
         override val id: ProductId,
         override val name: String,
@@ -40,6 +43,7 @@ sealed class Product {
         override val category = ProductCategory.WEAPONS
     }
 
+    @Immutable
     data class Armor(
         override val id: ProductId,
         override val name: String,
@@ -59,6 +63,7 @@ sealed class Product {
         override val category = ProductCategory.ARMOR
     }
 
+    @Immutable
     data class Potion(
         override val id: ProductId,
         override val name: String,
@@ -78,6 +83,7 @@ sealed class Product {
         override val category = ProductCategory.POTIONS
     }
 
+    @Immutable
     data class Scroll(
         override val id: ProductId,
         override val name: String,
@@ -97,6 +103,7 @@ sealed class Product {
         override val category = ProductCategory.SCROLLS
     }
 
+    @Immutable
     data class MiscItem(
         override val id: ProductId,
         override val name: String,

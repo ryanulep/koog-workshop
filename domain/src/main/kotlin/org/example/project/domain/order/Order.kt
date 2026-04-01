@@ -1,9 +1,11 @@
 package org.example.project.domain.order
 
+import androidx.compose.runtime.Immutable
 import kotlin.time.Instant
 import org.example.project.domain.order.OrderStatus
 import org.example.project.domain.shared.*
 
+@Immutable
 data class Order(
     val id: OrderId,
     val characterId: CharacterId,
@@ -14,6 +16,7 @@ data class Order(
     val updatedAt: Instant
 )
 
+@Immutable
 data class SubOrder(
     val id: SubOrderId,
     val orderId: OrderId,
@@ -26,6 +29,7 @@ data class SubOrder(
     val updatedAt: Instant
 )
 
+@Immutable
 data class OrderItem(
     val id: OrderItemId,
     val subOrderId: SubOrderId,

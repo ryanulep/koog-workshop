@@ -150,7 +150,7 @@ class OrderService(
         orderId
     }
 
-    suspend fun getOrder(id: OrderId): Order? =
+    suspend fun getOrderOrNull(id: OrderId): Order? =
         database.suspendTransaction { orderRepository.getOrderOrNull(id) }
 
     suspend fun getOrderHistory(

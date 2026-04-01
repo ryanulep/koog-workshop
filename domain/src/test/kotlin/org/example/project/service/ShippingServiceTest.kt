@@ -41,7 +41,7 @@ class ShippingServiceTest {
             currencyId = goldId,
             estimatedDays = 1
         )
-        val method = shippingService.getShippingMethod(id)
+        val method = shippingService.getShippingMethodOrNull(id)
         assertNotNull(method)
         assertEquals("Dragon Express", method.name)
         assertEquals("Fast delivery by dragon", method.description)
@@ -78,7 +78,7 @@ class ShippingServiceTest {
             estimatedDays = 1
         )
         shippingService.updateShippingMethod(id, name = "Phoenix Express", baseCost = 750)
-        val updated = shippingService.getShippingMethod(id)
+        val updated = shippingService.getShippingMethodOrNull(id)
         assertNotNull(updated)
         assertEquals("Phoenix Express", updated.name)
         assertEquals(750L, updated.baseCost)
@@ -121,7 +121,7 @@ class ShippingServiceTest {
             estimatedDays = 1
         )
         shippingService.deleteShippingMethod(id)
-        val method = shippingService.getShippingMethod(id)
+        val method = shippingService.getShippingMethodOrNull(id)
         assertNull(method)
     }
 

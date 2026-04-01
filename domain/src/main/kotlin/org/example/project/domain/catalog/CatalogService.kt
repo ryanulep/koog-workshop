@@ -21,7 +21,7 @@ class CatalogService(
     suspend fun getProducts(offset: Long = 0, limit: Long = 50): Page<Product> =
         database.suspendTransaction { productRepository.getProducts(offset, limit) }
 
-    suspend fun getProduct(id: ProductId): Product? =
+    suspend fun getProductOrNull(id: ProductId): Product? =
         database.suspendTransaction { productRepository.getProductOrNull(id) }
 
     suspend fun getProductsByCategory(category: ProductCategory): List<Product> =
@@ -41,7 +41,7 @@ class CatalogService(
     suspend fun getMerchants(offset: Long = 0, limit: Long = 50): Page<Merchant> =
         database.suspendTransaction { merchantRepository.getMerchants(offset, limit) }
 
-    suspend fun getMerchant(id: MerchantId): Merchant? =
+    suspend fun getMerchantOrNull(id: MerchantId): Merchant? =
         database.suspendTransaction { merchantRepository.getMerchantOrNull(id) }
 
     suspend fun createMerchant(

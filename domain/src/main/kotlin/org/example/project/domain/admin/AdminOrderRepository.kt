@@ -22,10 +22,12 @@ import org.example.project.domain.shared.OrderItemId
 import org.example.project.domain.shared.ProductId
 import org.example.project.domain.shared.ShippingMethodId
 import org.example.project.domain.shared.SubOrderId
+import org.example.project.domain.shared.TransactionId
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import kotlin.time.Instant
 
@@ -90,29 +92,60 @@ class AdminOrderRepository {
 
     context(_: Transaction)
     fun getOrderDetailOrNull(orderId: OrderId): AdminOrderDetail? {
-        val orderRow = Orders.selectAll()
+        val order = Orders.selectAll()
             .where { Orders.id eq orderId.value }
             .singleOrNull()
+            ?.toOrder
             ?: return null
-
-        val charactersById = Characters.selectAll().associateBy { row -> CharacterId(row[Characters.id].value) }
-        val currenciesById = Currencies.selectAll().associateBy { row -> CurrencyId(row[Currencies.id].value) }
-        val merchantsById = Merchants.selectAll().associateBy { row -> MerchantId(row[Merchants.id].value) }
-        val shippingById = ShippingMethods.selectAll().associateBy { row -> ShippingMethodId(row[ShippingMethods.id].value) }
-        val productsById = Products.selectAll().associateBy { row -> ProductId(row[Products.id].value) }
-
-        val order = orderRow.toOrder()
-        val currencyCode = currenciesById[order.totalCurrencyId]?.get(Currencies.code) ?: "UNK"
-        val characterName = charactersById[order.characterId]?.get(Characters.name) ?: "Unknown character"
 
         val subOrderRows = SubOrders.selectAll()
             .where { SubOrders.order eq orderId.value }
             .orderBy(SubOrders.createdAt to SortOrder.ASC, SubOrders.id to SortOrder.ASC)
             .toList()
 
-        val itemRowsBySubOrderId = OrderItems.selectAll()
+        val subOrderIds = subOrderRows.map { SubOrderId(it[SubOrders.id].value) }
+        val itemRows = if (subOrderIds.isEmpty()) emptyList()
+        else OrderItems.selectAll()
+            .where { OrderItems.subOrder inList subOrderIds.map { it.value } }
+            .toList()
+        val itemRowsBySubOrderId = itemRows
             .map { row -> row.toOrderItem() to row }
             .groupBy { (item, _) -> item.subOrderId }
+
+        // Collect all referenced IDs
+        val merchantIds = subOrderRows.map { MerchantId(it[SubOrders.merchant].value) }.toSet()
+        val shippingMethodIds = subOrderRows.map { ShippingMethodId(it[SubOrders.shippingMethod].value) }.toSet()
+        val productIds = itemRows.map { ProductId(it[OrderItems.product].value) }.toSet()
+        val currencyIds = buildSet {
+            add(order.totalCurrencyId)
+            itemRows.forEach { add(CurrencyId(it[OrderItems.snapshottedCurrency].value)) }
+        }
+
+        // Batch-fetch only the referenced rows
+        val characterName = Characters.selectAll()
+            .where { Characters.id eq order.characterId.value }
+            .singleOrNull()?.get(Characters.name) ?: "Unknown character"
+
+        val currenciesById = if (currencyIds.isEmpty()) emptyMap()
+        else Currencies.selectAll()
+            .where { Currencies.id inList currencyIds.map { it.value } }
+            .associateBy { row -> CurrencyId(row[Currencies.id].value) }
+        val currencyCode = currenciesById[order.totalCurrencyId]?.get(Currencies.code) ?: "UNK"
+
+        val merchantsById = if (merchantIds.isEmpty()) emptyMap()
+        else Merchants.selectAll()
+            .where { Merchants.id inList merchantIds.map { it.value } }
+            .associateBy { row -> MerchantId(row[Merchants.id].value) }
+
+        val shippingById = if (shippingMethodIds.isEmpty()) emptyMap()
+        else ShippingMethods.selectAll()
+            .where { ShippingMethods.id inList shippingMethodIds.map { it.value } }
+            .associateBy { row -> ShippingMethodId(row[ShippingMethods.id].value) }
+
+        val productsById = if (productIds.isEmpty()) emptyMap()
+        else Products.selectAll()
+            .where { Products.id inList productIds.map { it.value } }
+            .associateBy { row -> ProductId(row[Products.id].value) }
 
         val subOrders = subOrderRows.map { subOrderRow ->
             val subOrder = subOrderRow.toSubOrder()
@@ -150,100 +183,39 @@ class AdminOrderRepository {
             characterName = characterName,
             currencyCode = currencyCode,
             subOrders = subOrders,
-            history = buildHistoryEvents(order = order, currencyCode = currencyCode, subOrders = subOrders)
+            history = buildOrderHistoryEvents(
+                orderId = order.id,
+                orderStatus = order.status.name,
+                orderCreatedAt = order.createdAt,
+                orderUpdatedAt = order.updatedAt,
+                currencyCode = currencyCode,
+                subOrders = subOrders,
+                transactions = getOrderTransactions(orderId)
+            )
         )
     }
 
     context(_: Transaction)
-    private fun buildHistoryEvents(
-        order: Order,
-        currencyCode: String,
-        subOrders: List<AdminSubOrderDetail>
-    ): List<AdminOrderHistoryEvent> {
-        data class TimelineEntry(
-            val timestamp: Instant,
-            val priority: Int,
-            val title: String,
-            val description: String
-        )
-
-        val transactionEntries = Transactions.selectAll()
+    private fun getOrderTransactions(orderId: OrderId): List<org.example.project.domain.character.Transaction> =
+        Transactions.selectAll()
             .where {
-                (Transactions.referenceType eq "ORDER") and (Transactions.referenceId eq order.id.value)
+                (Transactions.referenceType eq "ORDER") and (Transactions.referenceId eq orderId.value)
             }
             .orderBy(Transactions.createdAt to SortOrder.ASC, Transactions.id to SortOrder.ASC)
             .map { row ->
-                val title = when (TransactionType.valueOf(row[Transactions.type])) {
-                    TransactionType.PURCHASE -> "Purchase recorded"
-                    TransactionType.REFUND -> "Refund recorded"
-                    TransactionType.DEPOSIT -> "Deposit recorded"
-                    TransactionType.EXCHANGE_DEBIT -> "Exchange debit recorded"
-                    TransactionType.EXCHANGE_CREDIT -> "Exchange credit recorded"
-                }
-                TimelineEntry(
-                    timestamp = row[Transactions.createdAt],
-                    priority = 2,
-                    title = title,
-                    description = row[Transactions.description]
-                        ?: "${row[Transactions.type]} ${row[Transactions.amount]} $currencyCode"
+                org.example.project.domain.character.Transaction(
+                    id = TransactionId(row[Transactions.id].value),
+                    characterId = CharacterId(row[Transactions.character].value),
+                    currencyId = CurrencyId(row[Transactions.currency].value),
+                    amount = row[Transactions.amount],
+                    type = TransactionType.valueOf(row[Transactions.type]),
+                    referenceId = row[Transactions.referenceId],
+                    referenceType = row[Transactions.referenceType],
+                    description = row[Transactions.description],
+                    createdAt = row[Transactions.createdAt],
+                    updatedAt = row[Transactions.updatedAt]
                 )
             }
-
-        return buildList {
-            add(
-                TimelineEntry(
-                    timestamp = order.createdAt,
-                    priority = 0,
-                    title = "Order created",
-                    description = "Order ${order.id.value} was created."
-                )
-            )
-
-            if (order.updatedAt != order.createdAt) {
-                add(
-                    TimelineEntry(
-                        timestamp = order.updatedAt,
-                        priority = 4,
-                        title = "Order updated",
-                        description = "Order ${order.id.value} is now ${order.status.name}."
-                    )
-                )
-            }
-
-            subOrders.forEach { detail ->
-                val subOrder = detail.subOrder
-                add(
-                    TimelineEntry(
-                        timestamp = subOrder.createdAt,
-                        priority = 1,
-                        title = "Sub-order created",
-                        description = "${detail.merchantName} received sub-order ${subOrder.id.value}."
-                    )
-                )
-
-                if (subOrder.updatedAt != subOrder.createdAt) {
-                    add(
-                        TimelineEntry(
-                            timestamp = subOrder.updatedAt,
-                            priority = 3,
-                            title = "Sub-order updated",
-                            description = "${detail.merchantName} updated sub-order ${subOrder.id.value} to ${subOrder.status.name}."
-                        )
-                    )
-                }
-            }
-
-            addAll(transactionEntries)
-        }
-            .sortedWith(compareBy<TimelineEntry> { it.timestamp }.thenBy { it.priority }.thenBy { it.title })
-            .map { entry ->
-                AdminOrderHistoryEvent(
-                    timestamp = entry.timestamp,
-                    title = entry.title,
-                    description = entry.description
-                )
-            }
-    }
 
     private fun org.jetbrains.exposed.v1.core.ResultRow.toOrder(): Order =
         Order(

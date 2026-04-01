@@ -61,7 +61,7 @@ class ReviewService(
     suspend fun deleteReview(id: ReviewId): Boolean =
         database.suspendTransaction { reviewRepository.deleteReview(id) }
 
-    suspend fun getReview(id: ReviewId): Review? =
+    suspend fun getReviewOrNull(id: ReviewId): Review? =
         database.suspendTransaction { reviewRepository.getReviewOrNull(id) }
 
     suspend fun getProductReviews(
@@ -73,6 +73,6 @@ class ReviewService(
             reviewRepository.getReviewsForProduct(productId, offset, limit)
         }
 
-    suspend fun getAverageRating(productId: ProductId): Double? =
+    suspend fun getAverageRatingOrNull(productId: ProductId): Double? =
         database.suspendTransaction { reviewRepository.averageRatingForProductOrNull(productId) }
 }

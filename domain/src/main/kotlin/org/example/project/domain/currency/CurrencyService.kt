@@ -15,7 +15,7 @@ class CurrencyService(
     suspend fun getAllCurrencies(): List<Currency> =
         database.suspendTransaction { currencyRepository.getAllCurrencies() }
 
-    suspend fun getCurrency(id: CurrencyId): Currency? =
+    suspend fun getCurrencyOrNull(id: CurrencyId): Currency? =
         database.suspendTransaction { currencyRepository.getCurrencyOrNull(id) }
 
     suspend fun createCurrency(
@@ -42,7 +42,7 @@ class CurrencyService(
     suspend fun deleteCurrency(id: CurrencyId): Boolean =
         database.suspendTransaction { currencyRepository.deleteCurrency(id) }
 
-    suspend fun getConversionRate(fromId: CurrencyId, toId: CurrencyId): Double? =
+    suspend fun getConversionRateOrNull(fromId: CurrencyId, toId: CurrencyId): Double? =
         database.suspendTransaction { currencyRepository.getConversionRateOrNull(fromId, toId) }
 
     suspend fun getAllConversionRates(): List<CurrencyConversion> =

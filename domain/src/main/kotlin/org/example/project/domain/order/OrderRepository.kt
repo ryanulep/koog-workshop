@@ -11,8 +11,6 @@ import org.example.project.domain.shipping.ShippingMethods
 import org.example.project.domain.order.OrderStatus
 import org.example.project.domain.shared.*
 import org.example.project.domain.shared.Page
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.Transaction
@@ -52,17 +50,6 @@ class OrderRepository {
             .map(::mapToOrder)
         val total = query.count()
         return Page(items, total, offset, limit)
-    }
-
-    context(_: Transaction)
-    fun getOrderHistory(characterId: CharacterId, chunkSize: Long = 50L): Flow<List<Order>> = flow {
-        var offset = 0L
-        while (true) {
-            val page = getOrderHistory(characterId, offset, chunkSize)
-            if (page.items.isEmpty()) break
-            emit(page.items)
-            offset += chunkSize
-        }
     }
 
     context(_: Transaction)

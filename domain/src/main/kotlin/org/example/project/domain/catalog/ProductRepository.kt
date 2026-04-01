@@ -3,8 +3,6 @@ package org.example.project.domain.catalog
 import org.example.project.domain.shared.*
 import org.example.project.domain.catalog.Product
 import org.example.project.domain.shared.Page
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.Transaction
@@ -28,21 +26,11 @@ class ProductRepository {
     context(_: Transaction)
     fun getProducts(offset: Long, limit: Long): Page<Product> {
         val items = joinedTable.selectAll()
+            .orderBy(Products.name)
             .limit(limit.toInt()).offset(offset)
             .map(::mapToProduct)
-        val total = joinedTable.selectAll().count()
+        val total = Products.selectAll().count()
         return Page(items, total, offset, limit)
-    }
-
-    context(_: Transaction)
-    fun getAllProducts(chunkSize: Long = 50L): Flow<List<Product>> = flow {
-        var offset = 0L
-        while (true) {
-            val page = getProducts(offset, chunkSize)
-            if (page.items.isEmpty()) break
-            emit(page.items)
-            offset += chunkSize
-        }
     }
 
     context(_: Transaction)

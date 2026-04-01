@@ -23,7 +23,7 @@ class CharacterServiceTest {
     @Test
     fun testCreateAndGetCharacter() = runBlocking {
         val id = characterService.createCharacter("Gandalf")
-        val character = characterService.getCharacter(id)
+        val character = characterService.getCharacterOrNull(id)
         assertNotNull(character)
         assertEquals("Gandalf", character.name)
     }
@@ -33,7 +33,7 @@ class CharacterServiceTest {
         val id = characterService.createCharacter("Gandalf")
         val updated = characterService.updateCharacter(id, "Gandalf the White")
         assertTrue(updated)
-        val character = characterService.getCharacter(id)
+        val character = characterService.getCharacterOrNull(id)
         assertNotNull(character)
         assertEquals("Gandalf the White", character.name)
     }
@@ -43,7 +43,7 @@ class CharacterServiceTest {
         val id = characterService.createCharacter("Gandalf")
         val deleted = characterService.deleteCharacter(id)
         assertTrue(deleted)
-        val character = characterService.getCharacter(id)
+        val character = characterService.getCharacterOrNull(id)
         assertNull(character)
     }
 

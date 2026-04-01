@@ -1,11 +1,13 @@
 package org.example.project.domain.review
 
+import androidx.compose.runtime.Immutable
 import kotlin.time.Instant
 import org.example.project.domain.shared.CharacterId
 import org.example.project.domain.shared.OrderItemId
 import org.example.project.domain.shared.ProductId
 import org.example.project.domain.shared.ReviewId
 
+@Immutable
 data class Review(
     val id: ReviewId,
     val characterId: CharacterId,

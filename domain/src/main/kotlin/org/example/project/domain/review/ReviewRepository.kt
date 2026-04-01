@@ -4,8 +4,6 @@ import org.example.project.domain.review.Reviews
 import org.example.project.domain.shared.*
 import org.example.project.domain.review.Review
 import org.example.project.domain.shared.Page
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.and
@@ -43,17 +41,6 @@ class ReviewRepository {
             .map(::mapToReview)
         val total = query.count()
         return Page(items, total, offset, limit)
-    }
-
-    context(_: Transaction)
-    fun getReviewsForProduct(productId: ProductId, chunkSize: Long = 50L): Flow<List<Review>> = flow {
-        var offset = 0L
-        while (true) {
-            val page =  getReviewsForProduct(productId, offset, chunkSize)
-            if (page.items.isEmpty()) break
-            emit(page.items)
-            offset += chunkSize
-        }
     }
 
     context(_: Transaction)

@@ -4,8 +4,6 @@ import org.example.project.domain.catalog.Merchants
 import org.example.project.domain.shared.MerchantId
 import org.example.project.domain.catalog.Merchant
 import org.example.project.domain.shared.Page
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.eq
@@ -20,21 +18,11 @@ class MerchantRepository {
     context(_: Transaction)
     fun getMerchants(offset: Long, limit: Long): Page<Merchant> {
         val items = Merchants.selectAll()
+            .orderBy(Merchants.name)
             .limit(limit.toInt()).offset(offset)
             .map(::mapToMerchant)
         val total = Merchants.selectAll().count()
         return Page(items, total, offset, limit)
-    }
-
-    context(_: Transaction)
-    fun getAllMerchants(chunkSize: Long = 50L): Flow<List<Merchant>> = flow {
-        var offset = 0L
-        while (true) {
-            val page = getMerchants(offset, chunkSize)
-            if (page.items.isEmpty()) break
-            emit(page.items)
-            offset += chunkSize
-        }
     }
 
     context(_: Transaction)

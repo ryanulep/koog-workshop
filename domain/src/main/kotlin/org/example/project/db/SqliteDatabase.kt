@@ -70,10 +70,6 @@ fun adminSchemaTables(): List<Table> = listOf(
 
 fun Database.createTables(): Database = apply {
     transaction(this) {
-        val actualTables = SchemaUtils.listTables().map { it.lowercase() }.toSet()
-        adminSchemaTables()
-            .map { it.tableName }
-            .filterNot { tableName -> tableName.lowercase() in actualTables }
         SchemaUtils.create(*adminSchemaTables().toTypedArray())
     }
 }

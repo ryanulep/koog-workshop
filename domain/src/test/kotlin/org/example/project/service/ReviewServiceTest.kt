@@ -85,7 +85,7 @@ class ReviewServiceTest {
     fun testCreateAndGetReview() = runBlocking {
         val reviewId = reviewService.createReview(characterId, productId, orderItemId, 5, "Great sword!")
 
-        val review = reviewService.getReview(reviewId)
+        val review = reviewService.getReviewOrNull(reviewId)
         assertNotNull(review)
         assertEquals(characterId, review.characterId)
         assertEquals(productId, review.productId)
@@ -101,7 +101,7 @@ class ReviewServiceTest {
         val updated = reviewService.updateReview(reviewId, rating = 3)
         assertTrue(updated)
 
-        val review = reviewService.getReview(reviewId)
+        val review = reviewService.getReviewOrNull(reviewId)
         assertNotNull(review)
         assertEquals(3, review.rating)
     }
@@ -113,7 +113,7 @@ class ReviewServiceTest {
         val deleted = reviewService.deleteReview(reviewId)
         assertTrue(deleted)
 
-        val review = reviewService.getReview(reviewId)
+        val review = reviewService.getReviewOrNull(reviewId)
         assertNull(review)
     }
 
@@ -129,7 +129,7 @@ class ReviewServiceTest {
     fun testGetAverageRating() = runBlocking {
         reviewService.createReview(characterId, productId, orderItemId, 4, "Good sword!")
 
-        val avgRating = reviewService.getAverageRating(productId)
+        val avgRating = reviewService.getAverageRatingOrNull(productId)
         assertNotNull(avgRating)
         assertEquals(4.0, avgRating)
     }

@@ -15,7 +15,7 @@ class ShippingService(
     suspend fun getAllShippingMethods(): List<ShippingMethod> =
         database.suspendTransaction { shippingRepository.getAllShippingMethods() }
 
-    suspend fun getShippingMethod(id: ShippingMethodId): ShippingMethod? =
+    suspend fun getShippingMethodOrNull(id: ShippingMethodId): ShippingMethod? =
         database.suspendTransaction { shippingRepository.getShippingMethodByIdOrNull(id) }
 
     suspend fun createShippingMethod(

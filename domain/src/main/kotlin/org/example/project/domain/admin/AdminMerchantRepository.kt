@@ -8,6 +8,7 @@ import org.example.project.domain.order.SubOrders
 import org.example.project.domain.shipping.ShippingRepository
 import org.example.project.domain.shared.MerchantId
 import org.jetbrains.exposed.v1.core.Transaction
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.selectAll
 
 class AdminMerchantRepository(
@@ -59,9 +60,9 @@ class AdminMerchantRepository(
                     updatedAt = shippingMethod.updatedAt
                 )
             }
-        val productCount = Products.selectAll().count { row ->
-            MerchantId(row[Products.merchant].value) == merchantId
-        }
+        val productCount = Products.selectAll()
+            .where { Products.merchant eq merchantId.value }
+            .count().toInt()
         val recentOrderCount = getRecentOrderCountByMerchantId()[merchantId] ?: 0
 
         return MerchantDetail(

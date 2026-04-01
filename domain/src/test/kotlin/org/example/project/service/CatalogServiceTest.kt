@@ -71,7 +71,7 @@ class CatalogServiceTest {
     fun testCreateAndGetProduct() = runBlocking {
         val weapon = createWeapon()
         val id = catalogService.createProduct(weapon)
-        val product = catalogService.getProduct(id)
+        val product = catalogService.getProductOrNull(id)
         assertNotNull(product)
         assertIs<Product.Weapon>(product)
         assertEquals("Test Sword", product.name)
@@ -92,12 +92,12 @@ class CatalogServiceTest {
     fun testUpdateProduct() = runBlocking {
         val weapon = createWeapon()
         val id = catalogService.createProduct(weapon)
-        val created = catalogService.getProduct(id)
+        val created = catalogService.getProductOrNull(id)
         assertNotNull(created)
         val createdWeapon = created as Product.Weapon
         val updated = catalogService.updateProduct(createdWeapon.copy(name = "Epic Sword"))
         assertTrue(updated)
-        val fetched = catalogService.getProduct(id)
+        val fetched = catalogService.getProductOrNull(id)
         assertNotNull(fetched)
         assertEquals("Epic Sword", fetched.name)
     }
@@ -118,7 +118,7 @@ class CatalogServiceTest {
     @Test
     fun testUpdateProductRejectsNegativeValues() = runBlocking {
         val id = catalogService.createProduct(createWeapon())
-        val created = catalogService.getProduct(id)
+        val created = catalogService.getProductOrNull(id)
         assertNotNull(created)
         val createdWeapon = created as Product.Weapon
 
@@ -138,14 +138,14 @@ class CatalogServiceTest {
         val id = catalogService.createProduct(createWeapon())
         val deleted = catalogService.deleteProduct(id)
         assertTrue(deleted)
-        val product = catalogService.getProduct(id)
+        val product = catalogService.getProductOrNull(id)
         assertNull(product)
     }
 
     @Test
     fun testCreateAndGetMerchant() = runBlocking {
         val id = catalogService.createMerchant("Magic Shop", description = "Sells magical items")
-        val merchant = catalogService.getMerchant(id)
+        val merchant = catalogService.getMerchantOrNull(id)
         assertNotNull(merchant)
         assertEquals("Magic Shop", merchant.name)
         assertEquals("Sells magical items", merchant.description)
@@ -156,7 +156,7 @@ class CatalogServiceTest {
         val id = catalogService.createMerchant("Magic Shop")
         val updated = catalogService.updateMerchant(id, name = "Grand Magic Shop")
         assertTrue(updated)
-        val merchant = catalogService.getMerchant(id)
+        val merchant = catalogService.getMerchantOrNull(id)
         assertNotNull(merchant)
         assertEquals("Grand Magic Shop", merchant.name)
     }
@@ -166,7 +166,7 @@ class CatalogServiceTest {
         val id = catalogService.createMerchant("Magic Shop")
         val deleted = catalogService.deleteMerchant(id)
         assertTrue(deleted)
-        val merchant = catalogService.getMerchant(id)
+        val merchant = catalogService.getMerchantOrNull(id)
         assertNull(merchant)
     }
 

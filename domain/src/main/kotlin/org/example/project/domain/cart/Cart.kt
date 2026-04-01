@@ -1,10 +1,12 @@
 package org.example.project.domain.cart
 
+import androidx.compose.runtime.Immutable
 import kotlin.time.Instant
 import org.example.project.domain.shared.CartItemId
 import org.example.project.domain.shared.CharacterId
 import org.example.project.domain.shared.ProductId
 
+@Immutable
 data class CartItem(
     val id: CartItemId,
     val characterId: CharacterId,

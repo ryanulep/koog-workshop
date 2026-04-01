@@ -20,7 +20,7 @@ class CurrencyServiceTest {
     @Test
     fun testCreateAndGetCurrency() = runBlocking {
         val id = currencyService.createCurrency("GOLD", "Gold", "G")
-        val currency = currencyService.getCurrency(id)
+        val currency = currencyService.getCurrencyOrNull(id)
         assertNotNull(currency)
         assertEquals("GOLD", currency.code)
         assertEquals("Gold", currency.name)
@@ -40,7 +40,7 @@ class CurrencyServiceTest {
         val id = currencyService.createCurrency("GOLD", "Gold", "G")
         val updated = currencyService.updateCurrency(id, name = "Pure Gold")
         assertTrue(updated)
-        val currency = currencyService.getCurrency(id)
+        val currency = currencyService.getCurrencyOrNull(id)
         assertNotNull(currency)
         assertEquals("Pure Gold", currency.name)
     }
@@ -50,7 +50,7 @@ class CurrencyServiceTest {
         val id = currencyService.createCurrency("GOLD", "Gold", "G")
         val deleted = currencyService.deleteCurrency(id)
         assertTrue(deleted)
-        val currency = currencyService.getCurrency(id)
+        val currency = currencyService.getCurrencyOrNull(id)
         assertNull(currency)
     }
 
@@ -59,7 +59,7 @@ class CurrencyServiceTest {
         val goldId = currencyService.createCurrency("GOLD", "Gold", "G")
         val silverId = currencyService.createCurrency("SILVER", "Silver", "S")
         currencyService.setConversionRate(goldId, silverId, 10.0)
-        val rate = currencyService.getConversionRate(goldId, silverId)
+        val rate = currencyService.getConversionRateOrNull(goldId, silverId)
         assertNotNull(rate)
         assertEquals(10.0, rate)
     }
@@ -70,7 +70,7 @@ class CurrencyServiceTest {
         val silverId = currencyService.createCurrency("SILVER", "Silver", "S")
         currencyService.setConversionRate(goldId, silverId, 10.0)
         currencyService.setConversionRate(goldId, silverId, 15.0)
-        val rate = currencyService.getConversionRate(goldId, silverId)
+        val rate = currencyService.getConversionRateOrNull(goldId, silverId)
         assertNotNull(rate)
         assertEquals(15.0, rate)
     }
