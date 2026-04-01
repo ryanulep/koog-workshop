@@ -64,7 +64,7 @@ class ReviewServiceTest {
             // Create an order so we have a valid orderItemId
             cartService.addToCart(characterId, productId, 1)
             val orderId = orderService.checkout(characterId, mapOf(merchantId to shippingMethodId))
-            val details = orderService.getOrderDetails(orderId)!!
+            val details = orderService.getOrderDetailsOrNull(orderId)!!
             orderItemId = details.subOrders.first().items.first().id
         }
     }

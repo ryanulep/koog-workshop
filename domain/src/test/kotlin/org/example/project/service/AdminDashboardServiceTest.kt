@@ -43,12 +43,12 @@ class AdminDashboardServiceTest {
     }
 
     @Test
-    fun `loadOrderDetails returns the order graph and history timeline`() = runBlocking {
+    fun `loadOrderDetailsOrNull returns the order graph and history timeline`() = runBlocking {
         val database = createDatabase()
         val orderId = seedOrderDetails(database)
         val service = AdminDashboardService(database)
 
-        val detail = service.loadOrderDetails(orderId)
+        val detail = service.loadOrderDetailsOrNull(orderId)
 
         assertNotNull(detail)
         assertEquals(orderId, detail.order.id)

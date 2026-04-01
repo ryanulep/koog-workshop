@@ -88,7 +88,7 @@ class OrderServiceTest {
         assertEquals(OrderStatus.PENDING, order.status)
 
         // Verify: order details has 1 suborder with 1 item (quantity 2, snapshotted price 100)
-        val details = orderService.getOrderDetails(orderId)
+        val details = orderService.getOrderDetailsOrNull(orderId)
         assertNotNull(details)
         assertEquals(1, details.subOrders.size)
         val subOrderDetails = details.subOrders.first()

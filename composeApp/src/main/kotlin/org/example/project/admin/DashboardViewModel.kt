@@ -10,8 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.collections.immutable.toPersistentList
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.reflect.KClass
-import org.example.project.domain.id.OrderId
-import org.example.project.domain.model.AdminOrderDetail
 import org.example.project.domain.model.RecentOrderSummary
 import org.example.project.service.AdminDashboardService
 
@@ -37,9 +35,6 @@ class DashboardViewModel(
             errorMessage = "Unable to load order history."
         )
     }
-
-    suspend fun loadOrderDetails(orderId: OrderId): AdminOrderDetail? =
-        dashboardService.loadOrderDetails(orderId)
 
     private suspend fun loadOrders(
         loader: suspend () -> List<RecentOrderSummary>,

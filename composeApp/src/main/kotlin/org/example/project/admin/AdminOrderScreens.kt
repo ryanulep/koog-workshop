@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.example.project.domain.id.OrderItemId
 import org.example.project.domain.model.AdminOrderDetail
 import org.example.project.domain.model.AdminOrderHistoryEvent
 import org.example.project.domain.model.AdminOrderItemDetail
@@ -114,46 +115,27 @@ fun OrderHistoryScreen(
 
 @Composable
 fun OrderDetailScreen(
-    detail: AdminOrderDetail,
-    onBack: () -> Unit,
+    uiState: AdminOrderDetailUiState,
     onRefresh: () -> Unit,
     onItemClick: (AdminOrderItemDetail) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        OrderDetailSummaryCard(detail = detail)
-        OrderSubOrdersSection(
-            detail = detail,
+    when (uiState) {
+        AdminOrderDetailUiState.Loading -> LoadingCard(
+            title = "Loading order details",
+            body = "Reading the full history for this order."
+        )
+
+        is AdminOrderDetailUiState.Error -> ErrorCard(
+            title = "Order details failed to load",
+            message = uiState.message,
+            onRefresh = onRefresh
+        )
+
+        is AdminOrderDetailUiState.Ready -> OrderDetailContent(
+            detail = uiState.detail,
+            selectedItemId = uiState.selectedItemId,
             onItemClick = onItemClick
         )
-    }
-}
-
-@Composable
-fun OrderItemDetailScreen(
-    detail: AdminOrderDetail,
-    item: AdminOrderItemDetail
-) {
-    val parentSubOrder = detail.subOrders.firstOrNull { it.subOrder.id == item.item.subOrderId }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        ItemSnapshotCard(
-            detail = detail,
-            item = item,
-            parentSubOrder = parentSubOrder
-        )
-        OrderHistorySection(detail = detail)
     }
 }
 
@@ -616,6 +598,69 @@ private fun ItemSnapshotCard(
 }
 
 @Composable
+private fun OrderDetailContent(
+    detail: AdminOrderDetail,
+    selectedItemId: OrderItemId?,
+    onItemClick: (AdminOrderItemDetail) -> Unit
+) {
+    val selectedItem = detail.findItemOrNull(selectedItemId)
+    val parentSubOrder = detail.findSubOrderForItemOrNull(selectedItemId)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(32.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        OrderDetailSummaryCard(detail = detail)
+        OrderSubOrdersSection(
+            detail = detail,
+            onItemClick = onItemClick
+        )
+
+        Text(
+            text = "Item details",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        if (selectedItem != null) {
+            ItemSnapshotCard(
+                detail = detail,
+                item = selectedItem,
+                parentSubOrder = parentSubOrder
+            )
+        } else {
+            ItemDetailHintCard()
+        }
+
+        OrderHistorySection(detail = detail)
+    }
+}
+
+@Composable
+private fun ItemDetailHintCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.34f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Select an item to inspect its snapshot.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
 private fun OrderHistorySection(detail: AdminOrderDetail) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
@@ -703,3 +748,17 @@ private fun String.labelize(): String =
 
 private fun Instant.formatAdminInstant(): String =
     adminDateFormatter.format(JavaInstant.ofEpochMilli(toEpochMilliseconds()))
+
+private fun AdminOrderDetail.findItemOrNull(itemId: OrderItemId?): AdminOrderItemDetail? =
+    itemId?.let { selectedItemId ->
+        subOrders.asSequence()
+            .flatMap { subOrder -> subOrder.items.asSequence() }
+            .firstOrNull { item -> item.item.id == selectedItemId }
+    }
+
+private fun AdminOrderDetail.findSubOrderForItemOrNull(itemId: OrderItemId?): AdminSubOrderDetail? =
+    itemId?.let { selectedItemId ->
+        subOrders.firstOrNull { subOrder ->
+            subOrder.items.any { item -> item.item.id == selectedItemId }
+        }
+    }

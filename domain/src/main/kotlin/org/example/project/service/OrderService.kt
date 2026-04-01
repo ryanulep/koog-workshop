@@ -122,7 +122,7 @@ class OrderService(
     ): Page<Order> =
         database.suspendTransaction { orderRepository.getOrderHistory(characterId, offset, limit) }
 
-    suspend fun getOrderDetails(orderId: OrderId): OrderDetails? =
+    suspend fun getOrderDetailsOrNull(orderId: OrderId): OrderDetails? =
         database.suspendTransaction {
             val order = orderRepository.getOrderOrNull(orderId) ?: return@suspendTransaction null
             val subOrders = orderRepository.getSubOrders(orderId).map { subOrder ->

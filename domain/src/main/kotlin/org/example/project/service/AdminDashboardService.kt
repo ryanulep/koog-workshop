@@ -39,7 +39,7 @@ class AdminDashboardService(
             dashboardRepository.getOrderSummaries(limit = null)
         }
 
-    suspend fun loadOrderDetails(orderId: OrderId): AdminOrderDetail? =
+    suspend fun loadOrderDetailsOrNull(orderId: OrderId): AdminOrderDetail? =
         database.suspendTransaction {
             val order = orderRepository.getOrderOrNull(orderId) ?: return@suspendTransaction null
             val characterName = characterRepository.getCharacterOrNull(order.characterId)?.name
