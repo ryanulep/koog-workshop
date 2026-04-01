@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.PersistentList
 import org.example.project.domain.admin.AdminOrderDetail
 import org.example.project.domain.admin.AdminOrderHistoryEvent
 import org.example.project.domain.admin.AdminOrderItemDetail
@@ -162,7 +163,7 @@ fun ErrorCard(
 
 @Composable
 fun OrderHistoryCard(
-    orders: List<RecentOrderSummary>,
+    orders: PersistentList<RecentOrderSummary>,
     onOrderClick: (RecentOrderSummary) -> Unit
 ) {
     Column(
