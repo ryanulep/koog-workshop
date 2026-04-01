@@ -3,6 +3,7 @@ package org.example.project.admin
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,20 +25,20 @@ class DashboardViewModel(
 
     suspend fun loadRecentOrders() {
         loadOrders(
-            loader = { dashboardService.loadRecentOrders() },
+            loader = { dashboardService.loadRecentOrders().toPersistentList() },
             errorMessage = "Unable to load recent orders."
         )
     }
 
     suspend fun loadOrderHistory() {
         loadOrders(
-            loader = { dashboardService.loadOrderHistory() },
+            loader = { dashboardService.loadOrderHistory().toPersistentList() },
             errorMessage = "Unable to load order history."
         )
     }
 
     private suspend fun loadOrders(
-        loader: suspend () -> List<RecentOrderSummary>,
+        loader: suspend () -> PersistentList<RecentOrderSummary>,
         errorMessage: String
     ) {
         val version = loadVersion.incrementAndGet()

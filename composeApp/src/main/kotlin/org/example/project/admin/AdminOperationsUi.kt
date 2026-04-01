@@ -50,6 +50,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.example.project.domain.admin.AdminOrderDetail
 import org.example.project.domain.admin.AdminOrderHistoryEvent
@@ -62,6 +64,7 @@ import org.example.project.domain.admin.ProductAdminService
 import org.example.project.domain.admin.ProductDetail
 import org.example.project.domain.admin.ProductListItem
 import org.example.project.domain.admin.ProductReviewSummary
+import org.example.project.domain.catalog.Merchant
 import org.example.project.domain.catalog.ProductCategory
 import org.example.project.domain.order.OrderStatus
 import org.example.project.domain.shared.MerchantId
@@ -180,20 +183,20 @@ fun AdminRoute(
                                 ) {
                                     FilterGroup(
                                         title = "Category",
-                                        options = listOf("All" to null) + ProductCategory.entries.map { it.labelize() to it },
+                                        options = persistentListOf<Pair<String, ProductCategory?>>("All" to null)
+                                            .addAll(ProductCategory.entries.map { it.labelize() to it }),
                                         selected = productState.filter.category,
                                         onSelect = { category ->
                                             coroutineScope.launch {
-                                                productViewModel.updateCategory(
-                                                    category
-                                                )
+                                                productViewModel.updateCategory(category)
                                             }
                                         },
                                         modifier = Modifier.weight(1f)
                                     )
                                     FilterGroup(
                                         title = "Merchant",
-                                        options = listOf("All" to null) + productState.merchants.map { it.name to it.id },
+                                        options = persistentListOf<Pair<String, MerchantId?>>("All" to null).addAll(
+                                            productState.merchants.map { it.name to it.id }),
                                         selected = productState.filter.merchantId,
                                         onSelect = { id -> coroutineScope.launch { productViewModel.updateMerchant(id) } },
                                         modifier = Modifier.weight(1f)
@@ -208,9 +211,7 @@ fun AdminRoute(
                                     value = orderState.filter.orderIdQuery,
                                     onValueChange = { query ->
                                         coroutineScope.launch {
-                                            orderViewModel.updateOrderIdQuery(
-                                                query
-                                            )
+                                            orderViewModel.updateOrderIdQuery(query)
                                         }
                                     },
                                     placeholder = "Filter by order ID"
@@ -220,7 +221,7 @@ fun AdminRoute(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     val orderStatusOptions =
-                                        listOf(null to "All") + OrderStatus.entries.map { it to it.labelize() }
+                                        persistentListOf(null to "All") + OrderStatus.entries.map { it to it.labelize() }
                                     orderStatusOptions.forEach { (status, label) ->
                                         FilterChip(
                                             selected = status == orderState.filter.orderStatus,
@@ -235,7 +236,8 @@ fun AdminRoute(
                                 ) {
                                     FilterGroup(
                                         title = "Sub-order status",
-                                        options = listOf("All" to null) + OrderStatus.entries.map { it.labelize() to it },
+                                        options = persistentListOf<Pair<String, OrderStatus?>>("All" to null)
+                                            .addAll(OrderStatus.entries.map { it.labelize() to it }),
                                         selected = orderState.filter.subOrderStatus,
                                         onSelect = { status ->
                                             coroutineScope.launch {
@@ -248,7 +250,8 @@ fun AdminRoute(
                                     )
                                     FilterGroup(
                                         title = "Merchant",
-                                        options = listOf("All" to null) + orderState.merchants.map { it.name to it.id },
+                                        options = persistentListOf<Pair<String, MerchantId?>>("All" to null)
+                                            .addAll(orderState.merchants.map { it.name to it.id }),
                                         selected = orderState.filter.merchantId,
                                         onSelect = { id -> coroutineScope.launch { orderViewModel.updateMerchant(id) } },
                                         modifier = Modifier.weight(1f)
@@ -413,7 +416,7 @@ private fun ProductOperationsScreen(
 private fun ProductListPanel(
     modifier: Modifier,
     isLoading: Boolean,
-    products: List<ProductListItem>,
+    products: PersistentList<ProductListItem>,
     selectedProductId: ProductId?,
     onSelectProduct: (ProductId) -> Unit
 ) {
@@ -730,7 +733,7 @@ private fun OrderOperationsScreen(
 private fun OrderListPanel(
     modifier: Modifier,
     isLoading: Boolean,
-    orders: List<OrderListItem>,
+    orders: PersistentList<OrderListItem>,
     selectedOrderId: OrderId?,
     onSelectOrder: (OrderId) -> Unit
 ) {
@@ -1270,7 +1273,7 @@ private fun DetailMetricsRow(vararg metrics: DetailMetric) {
 @Composable
 private fun <T> FilterGroup(
     title: String,
-    options: List<Pair<String, T>>,
+    options: PersistentList<Pair<String, T>>,
     selected: T,
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier
