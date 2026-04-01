@@ -25,11 +25,11 @@ class OrderServiceTest {
     private lateinit var characterService: CharacterService
     private lateinit var shippingService: ShippingService
 
-    private var goldId: CurrencyId = CurrencyId(kotlin.uuid.Uuid.random())
-    private var merchantId: MerchantId = MerchantId(kotlin.uuid.Uuid.random())
-    private var characterId: CharacterId = CharacterId(kotlin.uuid.Uuid.random())
-    private var shippingMethodId: ShippingMethodId = ShippingMethodId(kotlin.uuid.Uuid.random())
-    private var swordId: ProductId = ProductId(kotlin.uuid.Uuid.random())
+    private var goldId: CurrencyId = CurrencyId(kotlin.uuid.Uuid.generateV7())
+    private var merchantId: MerchantId = MerchantId(kotlin.uuid.Uuid.generateV7())
+    private var characterId: CharacterId = CharacterId(kotlin.uuid.Uuid.generateV7())
+    private var shippingMethodId: ShippingMethodId = ShippingMethodId(kotlin.uuid.Uuid.generateV7())
+    private var swordId: ProductId = ProductId(kotlin.uuid.Uuid.generateV7())
 
     @BeforeTest
     fun setup() {
@@ -57,7 +57,7 @@ class OrderServiceTest {
 
             swordId = catalogService.createProduct(
                 Product.Weapon(
-                    id = ProductId(kotlin.uuid.Uuid.random()),
+                    id = ProductId(kotlin.uuid.Uuid.generateV7()),
                     name = "Test Sword",
                     description = null,
                     rarity = Rarity.COMMON,
@@ -185,7 +185,7 @@ class OrderServiceTest {
 
     @Test
     fun testCheckoutRejectsNegativePersistedProductPrice() = runBlocking {
-        val corruptedProductId = ProductId(kotlin.uuid.Uuid.random())
+        val corruptedProductId = ProductId(kotlin.uuid.Uuid.generateV7())
         insertRawProduct(
             productId = corruptedProductId,
             name = "Corrupted Relic",
@@ -202,7 +202,7 @@ class OrderServiceTest {
 
     @Test
     fun testCheckoutRejectsNegativePersistedShippingCost() = runBlocking {
-        val safeProductId = ProductId(kotlin.uuid.Uuid.random())
+        val safeProductId = ProductId(kotlin.uuid.Uuid.generateV7())
         insertRawProduct(
             productId = safeProductId,
             name = "Legit Trinket",
@@ -211,7 +211,7 @@ class OrderServiceTest {
         )
         cartService.addToCart(characterId, safeProductId, 1)
 
-        val corruptedShippingMethodId = ShippingMethodId(kotlin.uuid.Uuid.random())
+        val corruptedShippingMethodId = ShippingMethodId(kotlin.uuid.Uuid.generateV7())
         insertRawShippingMethod(
             shippingMethodId = corruptedShippingMethodId,
             name = "Corrupted Courier",
@@ -232,7 +232,7 @@ class OrderServiceTest {
 
         val silverTrinketId = catalogService.createProduct(
             Product.MiscItem(
-                id = ProductId(kotlin.uuid.Uuid.random()),
+                id = ProductId(kotlin.uuid.Uuid.generateV7()),
                 name = "Silver Trinket",
                 description = null,
                 rarity = Rarity.COMMON,

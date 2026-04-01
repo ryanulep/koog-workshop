@@ -11,12 +11,13 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,6 +30,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -100,7 +102,8 @@ fun AdminRoute(
     productAdminService: ProductAdminService,
     orderAdminService: OrderAdminService
 ) {
-    val productViewModel: ProductAdminViewModel = viewModel(factory = ProductAdminViewModel.factory(productAdminService))
+    val productViewModel: ProductAdminViewModel =
+        viewModel(factory = ProductAdminViewModel.factory(productAdminService))
     val orderViewModel: OrderAdminViewModel = viewModel(factory = OrderAdminViewModel.factory(orderAdminService))
     val productState by productViewModel.uiState.collectAsState()
     val orderState by orderViewModel.uiState.collectAsState()
@@ -118,29 +121,148 @@ fun AdminRoute(
         color = MaterialTheme.colorScheme.background
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            AdminTitleBar(
+            AdminAppBar(
                 selectedTab = selectedTab,
-                onTabSelected = { tab -> selectedTab = tab }
+                onTabSelected = { tab -> selectedTab = tab },
+                onRefresh = {
+                    when (selectedTab) {
+                        AdminWorkspaceTab.Products -> coroutineScope.launch { productViewModel.refresh() }
+                        AdminWorkspaceTab.Orders -> coroutineScope.launch { orderViewModel.refresh() }
+                    }
+                },
+                activeFilterCount = when (selectedTab) {
+                    AdminWorkspaceTab.Products ->
+                        productSecondaryFilterSummaries(productState).size +
+                                (if (productState.filter.nameQuery.isNotBlank()) 1 else 0) +
+                                (if (productState.filter.activeFilter != ProductActiveFilter.ALL) 1 else 0)
+
+                    AdminWorkspaceTab.Orders ->
+                        orderSecondaryFilterSummaries(orderState).size +
+                                (if (orderState.filter.orderIdQuery.isNotBlank()) 1 else 0) +
+                                (if (orderState.filter.orderStatus != null) 1 else 0)
+                },
+                filterContent = {
+                    when (selectedTab) {
+                        AdminWorkspaceTab.Products -> {
+                            Column(verticalArrangement = Arrangement.spacedBy(sectionSpacing)) {
+                                ToolbarTextFilter(
+                                    value = productState.filter.nameQuery,
+                                    onValueChange = { query ->
+                                        coroutineScope.launch {
+                                            productViewModel.updateNameQuery(
+                                                query
+                                            )
+                                        }
+                                    },
+                                    placeholder = "Search products"
+                                )
+                                Row(
+                                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    ProductActiveFilter.entries.forEach { filter ->
+                                        FilterChip(
+                                            selected = filter == productState.filter.activeFilter,
+                                            onClick = {
+                                                coroutineScope.launch {
+                                                    productViewModel.updateActiveFilter(
+                                                        filter
+                                                    )
+                                                }
+                                            },
+                                            label = { Text(filter.labelize()) }
+                                        )
+                                    }
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                                ) {
+                                    FilterGroup(
+                                        title = "Category",
+                                        options = listOf("All" to null) + ProductCategory.entries.map { it.labelize() to it },
+                                        selected = productState.filter.category,
+                                        onSelect = { category ->
+                                            coroutineScope.launch {
+                                                productViewModel.updateCategory(
+                                                    category
+                                                )
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    FilterGroup(
+                                        title = "Merchant",
+                                        options = listOf("All" to null) + productState.merchants.map { it.name to it.id },
+                                        selected = productState.filter.merchantId,
+                                        onSelect = { id -> coroutineScope.launch { productViewModel.updateMerchant(id) } },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                        }
+
+                        AdminWorkspaceTab.Orders -> {
+                            Column(verticalArrangement = Arrangement.spacedBy(sectionSpacing)) {
+                                ToolbarTextFilter(
+                                    value = orderState.filter.orderIdQuery,
+                                    onValueChange = { query ->
+                                        coroutineScope.launch {
+                                            orderViewModel.updateOrderIdQuery(
+                                                query
+                                            )
+                                        }
+                                    },
+                                    placeholder = "Filter by order ID"
+                                )
+                                Row(
+                                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    val orderStatusOptions =
+                                        listOf(null to "All") + OrderStatus.entries.map { it to it.labelize() }
+                                    orderStatusOptions.forEach { (status, label) ->
+                                        FilterChip(
+                                            selected = status == orderState.filter.orderStatus,
+                                            onClick = { coroutineScope.launch { orderViewModel.updateOrderStatus(status) } },
+                                            label = { Text(label) }
+                                        )
+                                    }
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                                ) {
+                                    FilterGroup(
+                                        title = "Sub-order status",
+                                        options = listOf("All" to null) + OrderStatus.entries.map { it.labelize() to it },
+                                        selected = orderState.filter.subOrderStatus,
+                                        onSelect = { status ->
+                                            coroutineScope.launch {
+                                                orderViewModel.updateSubOrderStatusFilter(
+                                                    status
+                                                )
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    FilterGroup(
+                                        title = "Merchant",
+                                        options = listOf("All" to null) + orderState.merchants.map { it.name to it.id },
+                                        selected = orderState.filter.merchantId,
+                                        onSelect = { id -> coroutineScope.launch { orderViewModel.updateMerchant(id) } },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             )
 
             when (selectedTab) {
                 AdminWorkspaceTab.Products -> ProductOperationsScreen(
                     uiState = productState,
-                    onRefresh = {
-                        coroutineScope.launch { productViewModel.refresh() }
-                    },
-                    onNameQueryChange = { query ->
-                        coroutineScope.launch { productViewModel.updateNameQuery(query) }
-                    },
-                    onCategoryChange = { category ->
-                        coroutineScope.launch { productViewModel.updateCategory(category) }
-                    },
-                    onMerchantChange = { merchantId ->
-                        coroutineScope.launch { productViewModel.updateMerchant(merchantId) }
-                    },
-                    onActiveFilterChange = { activeFilter ->
-                        coroutineScope.launch { productViewModel.updateActiveFilter(activeFilter) }
-                    },
                     onSelectProduct = { productId ->
                         coroutineScope.launch { productViewModel.selectProduct(productId) }
                     },
@@ -154,21 +276,6 @@ fun AdminRoute(
 
                 AdminWorkspaceTab.Orders -> OrderOperationsScreen(
                     uiState = orderState,
-                    onRefresh = {
-                        coroutineScope.launch { orderViewModel.refresh() }
-                    },
-                    onOrderIdQueryChange = { query ->
-                        coroutineScope.launch { orderViewModel.updateOrderIdQuery(query) }
-                    },
-                    onOrderStatusChange = { status ->
-                        coroutineScope.launch { orderViewModel.updateOrderStatus(status) }
-                    },
-                    onSubOrderStatusChange = { status ->
-                        coroutineScope.launch { orderViewModel.updateSubOrderStatusFilter(status) }
-                    },
-                    onMerchantChange = { merchantId ->
-                        coroutineScope.launch { orderViewModel.updateMerchant(merchantId) }
-                    },
                     onSelectOrder = { orderId ->
                         coroutineScope.launch { orderViewModel.selectOrder(orderId) }
                     },
@@ -182,45 +289,76 @@ fun AdminRoute(
 }
 
 @Composable
-private fun AdminTitleBar(
+private fun AdminAppBar(
     selectedTab: AdminWorkspaceTab,
-    onTabSelected: (AdminWorkspaceTab) -> Unit
+    onTabSelected: (AdminWorkspaceTab) -> Unit,
+    onRefresh: () -> Unit,
+    activeFilterCount: Int,
+    filterContent: @Composable () -> Unit
 ) {
+    var filtersOpen by rememberSaveable(selectedTab) { mutableStateOf(false) }
+
     Surface(
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
         tonalElevation = 1.dp,
-        shadowElevation = 2.dp
+        shadowElevation = 3.dp
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = screenPadding, vertical = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = screenPadding, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
                     text = "Fantasy Store Admin",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold
                 )
-                Text(
-                    text = selectedTab.subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    AdminWorkspaceTab.entries.forEach { tab ->
+                        FilterChip(
+                            selected = tab == selectedTab,
+                            onClick = { onTabSelected(tab) },
+                            label = { Text(tab.title) }
+                        )
+                    }
+                }
+
+                VerticalDivider(modifier = Modifier.height(24.dp))
+
+                OutlinedButton(
+                    onClick = onRefresh,
+                    contentPadding = compactChromeButtonPadding
+                ) { Text("Refresh") }
+
+                val filtersLabel = if (activeFilterCount > 0 && !filtersOpen)
+                    "Filters ($activeFilterCount)" else "Filters"
+                FilterChip(
+                    selected = filtersOpen || activeFilterCount > 0,
+                    onClick = { filtersOpen = !filtersOpen },
+                    label = { Text(filtersLabel) }
                 )
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                AdminWorkspaceTab.entries.forEach { tab ->
-                    FilterChip(
-                        selected = tab == selectedTab,
-                        onClick = { onTabSelected(tab) },
-                        label = { Text(tab.title) }
-                    )
+            AnimatedVisibility(
+                visible = filtersOpen,
+                enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
+                exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
+            ) {
+                Column {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = screenPadding, vertical = 10.dp)
+                    ) {
+                        filterContent()
+                    }
                 }
             }
         }
@@ -230,11 +368,6 @@ private fun AdminTitleBar(
 @Composable
 private fun ProductOperationsScreen(
     uiState: ProductAdminUiState,
-    onRefresh: () -> Unit,
-    onNameQueryChange: (String) -> Unit,
-    onCategoryChange: (ProductCategory?) -> Unit,
-    onMerchantChange: (MerchantId?) -> Unit,
-    onActiveFilterChange: (ProductActiveFilter) -> Unit,
     onSelectProduct: (ProductId) -> Unit,
     onAdjustStock: (Int) -> Unit,
     onSetActive: (Boolean) -> Unit
@@ -245,15 +378,6 @@ private fun ProductOperationsScreen(
             .padding(horizontal = screenPadding, vertical = chromeSectionPadding),
         verticalArrangement = Arrangement.spacedBy(sectionSpacing)
     ) {
-        ProductFilterCard(
-            uiState = uiState,
-            onRefresh = onRefresh,
-            onNameQueryChange = onNameQueryChange,
-            onCategoryChange = onCategoryChange,
-            onMerchantChange = onMerchantChange,
-            onActiveFilterChange = onActiveFilterChange
-        )
-
         uiState.errorMessage?.let { message ->
             InlineErrorCard(message = message)
         }
@@ -283,57 +407,6 @@ private fun ProductOperationsScreen(
             )
         }
     }
-}
-
-@Composable
-private fun ProductFilterCard(
-    uiState: ProductAdminUiState,
-    onRefresh: () -> Unit,
-    onNameQueryChange: (String) -> Unit,
-    onCategoryChange: (ProductCategory?) -> Unit,
-    onMerchantChange: (MerchantId?) -> Unit,
-    onActiveFilterChange: (ProductActiveFilter) -> Unit
-) {
-    CompactFilterToolbar(
-        title = "Product filters",
-        onRefresh = onRefresh,
-        summaryLabels = productSecondaryFilterSummaries(uiState),
-        primaryContent = {
-            ToolbarTextFilter(
-                value = uiState.filter.nameQuery,
-                onValueChange = onNameQueryChange,
-                placeholder = "Search products"
-            )
-
-            FilterGroup(
-                title = "Active state",
-                options = ProductActiveFilter.entries.map { filter ->
-                    filter.labelize() to filter
-                },
-                selected = uiState.filter.activeFilter,
-                onSelect = onActiveFilterChange
-            )
-        },
-        advancedContent = {
-            FilterGroup(
-                title = "Category",
-                options = listOf("All" to null) + ProductCategory.entries.map { category ->
-                    category.labelize() to category
-                },
-                selected = uiState.filter.category,
-                onSelect = onCategoryChange
-            )
-
-            FilterGroup(
-                title = "Merchant",
-                options = listOf("All" to null) + uiState.merchants.map { merchant ->
-                    merchant.name to merchant.id
-                },
-                selected = uiState.filter.merchantId,
-                onSelect = onMerchantChange
-            )
-        }
-    )
 }
 
 @Composable
@@ -521,13 +594,14 @@ private fun ProductDetailPanel(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            product.description?.takeIf { description -> description.isNotBlank() }?.let { description ->
-                                Text(
-                                    text = description,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                            product.description?.takeIf { description -> description.isNotBlank() }
+                                ?.let { description ->
+                                    Text(
+                                        text = description,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                         }
 
                         AssistChip(
@@ -613,11 +687,6 @@ private fun ProductDetailPanel(
 @Composable
 private fun OrderOperationsScreen(
     uiState: OrderAdminUiState,
-    onRefresh: () -> Unit,
-    onOrderIdQueryChange: (String) -> Unit,
-    onOrderStatusChange: (OrderStatus?) -> Unit,
-    onSubOrderStatusChange: (OrderStatus?) -> Unit,
-    onMerchantChange: (MerchantId?) -> Unit,
     onSelectOrder: (OrderId) -> Unit,
     onUpdateSubOrderStatus: (SubOrderId, OrderStatus) -> Unit
 ) {
@@ -627,15 +696,6 @@ private fun OrderOperationsScreen(
             .padding(horizontal = screenPadding, vertical = chromeSectionPadding),
         verticalArrangement = Arrangement.spacedBy(sectionSpacing)
     ) {
-        OrderFilterCard(
-            uiState = uiState,
-            onRefresh = onRefresh,
-            onOrderIdQueryChange = onOrderIdQueryChange,
-            onOrderStatusChange = onOrderStatusChange,
-            onSubOrderStatusChange = onSubOrderStatusChange,
-            onMerchantChange = onMerchantChange
-        )
-
         uiState.errorMessage?.let { message ->
             InlineErrorCard(message = message)
         }
@@ -664,57 +724,6 @@ private fun OrderOperationsScreen(
             )
         }
     }
-}
-
-@Composable
-private fun OrderFilterCard(
-    uiState: OrderAdminUiState,
-    onRefresh: () -> Unit,
-    onOrderIdQueryChange: (String) -> Unit,
-    onOrderStatusChange: (OrderStatus?) -> Unit,
-    onSubOrderStatusChange: (OrderStatus?) -> Unit,
-    onMerchantChange: (MerchantId?) -> Unit
-) {
-    CompactFilterToolbar(
-        title = "Order filters",
-        onRefresh = onRefresh,
-        summaryLabels = orderSecondaryFilterSummaries(uiState),
-        primaryContent = {
-            ToolbarTextFilter(
-                value = uiState.filter.orderIdQuery,
-                onValueChange = onOrderIdQueryChange,
-                placeholder = "Filter by order ID"
-            )
-
-            FilterGroup(
-                title = "Order status",
-                options = listOf("All" to null) + OrderStatus.entries.map { status ->
-                    status.labelize() to status
-                },
-                selected = uiState.filter.orderStatus,
-                onSelect = onOrderStatusChange
-            )
-        },
-        advancedContent = {
-            FilterGroup(
-                title = "Sub-order status",
-                options = listOf("All" to null) + OrderStatus.entries.map { status ->
-                    status.labelize() to status
-                },
-                selected = uiState.filter.subOrderStatus,
-                onSelect = onSubOrderStatusChange
-            )
-
-            FilterGroup(
-                title = "Merchant",
-                options = listOf("All" to null) + uiState.merchants.map { merchant ->
-                    merchant.name to merchant.id
-                },
-                selected = uiState.filter.merchantId,
-                onSelect = onMerchantChange
-            )
-        }
-    )
 }
 
 @Composable
@@ -853,6 +862,7 @@ private fun OrderDetailPanel(
     order: AdminOrderDetail?,
     onUpdateSubOrderStatus: (SubOrderId, OrderStatus) -> Unit
 ) {
+    val scrollState = rememberScrollState()
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
@@ -867,64 +877,70 @@ private fun OrderDetailPanel(
             )
 
             else -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(screenPadding),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    PanelHeader(
-                        title = "Order ${order.order.id.value}",
-                        subtitle = order.characterName
-                    )
-
-                    if (isLoading) {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    }
-
-                    DetailMetricsRow(
-                        DetailMetric("Status", order.order.status.labelize()),
-                        DetailMetric("Total", order.order.totalPrice.formatAmount(order.currencyCode)),
-                        DetailMetric("Sub-orders", order.subOrders.size.toString())
-                    )
-                    DetailMetricsRow(
-                        DetailMetric("Created", order.order.createdAt.formatAdminInstant()),
-                        DetailMetric("Updated", order.order.updatedAt.formatAdminInstant())
-                    )
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            text = "Sub-orders",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(scrollState)
+                            .padding(screenPadding),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        PanelHeader(
+                            title = "Order ${order.order.id.value}",
+                            subtitle = order.characterName
                         )
 
-                        order.subOrders.forEach { subOrder ->
-                            SubOrderCard(
-                                detail = subOrder,
-                                onUpdateStatus = onUpdateSubOrderStatus
-                            )
-                        }
-                    }
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            text = "History",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold
+                        DetailMetricsRow(
+                            DetailMetric("Status", order.order.status.labelize()),
+                            DetailMetric("Total", order.order.totalPrice.formatAmount(order.currencyCode)),
+                            DetailMetric("Sub-orders", order.subOrders.size.toString())
+                        )
+                        DetailMetricsRow(
+                            DetailMetric("Created", order.order.createdAt.formatAdminInstant()),
+                            DetailMetric("Updated", order.order.updatedAt.formatAdminInstant())
                         )
 
-                        if (order.history.isEmpty()) {
-                            DetailBlock(
-                                title = "No events",
-                                body = "No history events were recorded for this order."
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                text = "Sub-orders",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold
                             )
-                        } else {
-                            order.history.forEach { event ->
-                                HistoryEventCard(event = event)
+
+                            order.subOrders.forEach { subOrder ->
+                                SubOrderCard(
+                                    detail = subOrder,
+                                    onUpdateStatus = onUpdateSubOrderStatus
+                                )
                             }
                         }
+
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                text = "History",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+
+                            if (order.history.isEmpty()) {
+                                DetailBlock(
+                                    title = "No events",
+                                    body = "No history events were recorded for this order."
+                                )
+                            } else {
+                                order.history.forEach { event ->
+                                    HistoryEventCard(event = event)
+                                }
+                            }
+                        }
+                    }
+
+                    if (isLoading) {
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.TopCenter)
+                        )
                     }
                 }
             }
@@ -1210,129 +1226,19 @@ private data class DetailMetric(
 )
 
 @Composable
-private fun CompactFilterToolbar(
-    title: String,
-    onRefresh: () -> Unit,
-    summaryLabels: List<String>,
-    modifier: Modifier = Modifier,
-    primaryContent: @Composable ColumnScope.() -> Unit,
-    advancedContent: @Composable ColumnScope.() -> Unit
-) {
-    var expanded by rememberSaveable(title) { mutableStateOf(false) }
-
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f)
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(compactChromePadding),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    if (!expanded && summaryLabels.isNotEmpty()) {
-                        Text(
-                            text = "${summaryLabels.size} advanced filter${if (summaryLabels.size == 1) "" else "s"} active",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                OutlinedButton(
-                    onClick = onRefresh,
-                    contentPadding = compactChromeButtonPadding
-                ) {
-                    Text("Refresh")
-                }
-
-                FilledTonalButton(
-                    onClick = { expanded = !expanded },
-                    contentPadding = compactChromeButtonPadding
-                ) {
-                    Text(if (expanded) "Hide advanced" else "Advanced")
-                }
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                primaryContent()
-            }
-
-            AnimatedVisibility(
-                visible = !expanded && summaryLabels.isNotEmpty(),
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                SummaryChipRow(labels = summaryLabels)
-            }
-
-            AnimatedVisibility(
-                visible = expanded,
-                enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
-                exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                    advancedContent()
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun ToolbarTextFilter(
     value: String,
     onValueChange: (String) -> Unit,
-    placeholder: String
+    placeholder: String,
+    modifier: Modifier = Modifier.fillMaxWidth()
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         singleLine = true,
         placeholder = { Text(placeholder) }
     )
-}
-
-@Composable
-private fun SummaryChipRow(labels: List<String>) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        labels.forEach { label ->
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-                shape = MaterialTheme.shapes.extraLarge
-            ) {
-                Text(
-                    text = label,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        }
-    }
 }
 
 @Composable
@@ -1366,9 +1272,10 @@ private fun <T> FilterGroup(
     title: String,
     options: List<Pair<String, T>>,
     selected: T,
-    onSelect: (T) -> Unit
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             text = title,
             style = MaterialTheme.typography.labelLarge,

@@ -12,8 +12,8 @@ class CatalogServiceTest {
     private lateinit var database: Database
     private lateinit var catalogService: CatalogService
     private lateinit var currencyService: CurrencyService
-    private var goldId: CurrencyId = CurrencyId(kotlin.uuid.Uuid.random())
-    private var merchantId: MerchantId = MerchantId(kotlin.uuid.Uuid.random())
+    private var goldId: CurrencyId = CurrencyId(kotlin.uuid.Uuid.generateV7())
+    private var merchantId: MerchantId = MerchantId(kotlin.uuid.Uuid.generateV7())
 
     @BeforeTest
     fun setup() {
@@ -32,7 +32,7 @@ class CatalogServiceTest {
         price: Long = 100,
         stock: Int = 10
     ) = Product.Weapon(
-        id = ProductId(kotlin.uuid.Uuid.random()),
+        id = ProductId(kotlin.uuid.Uuid.generateV7()),
         name = name,
         description = null,
         rarity = Rarity.COMMON,
@@ -50,7 +50,7 @@ class CatalogServiceTest {
     )
 
     private fun createPotion(name: String = "Health Potion") = Product.Potion(
-        id = ProductId(kotlin.uuid.Uuid.random()),
+        id = ProductId(kotlin.uuid.Uuid.generateV7()),
         name = name,
         description = null,
         rarity = Rarity.COMMON,

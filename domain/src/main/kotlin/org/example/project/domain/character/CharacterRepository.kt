@@ -97,7 +97,7 @@ class CharacterRepository {
         updatedAt = row[Characters.updatedAt]
     )
 
-    private fun mapToTransaction(row: ResultRow) = org.example.project.domain.character.Transaction(
+    private fun mapToTransaction(row: ResultRow) = Transaction(
         id = TransactionId(row[Transactions.id].value),
         characterId = CharacterId(row[Transactions.character].value),
         currencyId = CurrencyId(row[Transactions.currency].value),

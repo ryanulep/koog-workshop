@@ -15,8 +15,8 @@ class ShippingServiceTest {
     private lateinit var shippingService: ShippingService
     private lateinit var catalogService: CatalogService
     private lateinit var currencyService: CurrencyService
-    private var goldId: CurrencyId = CurrencyId(kotlin.uuid.Uuid.random())
-    private var merchantId: MerchantId = MerchantId(kotlin.uuid.Uuid.random())
+    private var goldId: CurrencyId = CurrencyId(kotlin.uuid.Uuid.generateV7())
+    private var merchantId: MerchantId = MerchantId(kotlin.uuid.Uuid.generateV7())
 
     @BeforeTest
     fun setup() {

@@ -12,7 +12,7 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "Fantasy Store Admin",
         state = rememberWindowState(
-            size = DpSize(1200.dp, 800.dp)
+            size = DpSize(1500.dp, 800.dp)
         )
     ) {
         App()

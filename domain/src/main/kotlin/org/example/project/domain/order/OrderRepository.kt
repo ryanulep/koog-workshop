@@ -207,7 +207,7 @@ class OrderRepository {
         characterId = CharacterId(row[Transactions.character].value),
         currencyId = CurrencyId(row[Transactions.currency].value),
         amount = row[Transactions.amount],
-        type = org.example.project.domain.character.TransactionType.valueOf(row[Transactions.type]),
+        type = TransactionType.valueOf(row[Transactions.type]),
         referenceId = row[Transactions.referenceId],
         referenceType = row[Transactions.referenceType],
         description = row[Transactions.description],

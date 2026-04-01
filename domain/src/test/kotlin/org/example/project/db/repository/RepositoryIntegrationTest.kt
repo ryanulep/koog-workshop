@@ -106,7 +106,7 @@ class RepositoryIntegrationTest {
         database.suspendTransaction {
             val products = productRepo.getAllProducts()
             assertEquals(1, products.size)
-            val sword = products.first() as org.example.project.domain.catalog.Product.Weapon
+            val sword = products.first() as Product.Weapon
             assertEquals("Repo Sword", sword.name)
             assertEquals(5, sword.damage)
 
@@ -164,8 +164,8 @@ class RepositoryIntegrationTest {
                 it[name] = "Repo Alchemist"
             }
 
-            val potion = org.example.project.domain.catalog.Product.Potion(
-                id = ProductId(kotlin.uuid.Uuid.random()),
+            val potion = Product.Potion(
+                id = ProductId(kotlin.uuid.Uuid.generateV7()),
                 name = "Null Duration Potion",
                 description = null,
                 rarity = Rarity.COMMON,
@@ -175,8 +175,8 @@ class RepositoryIntegrationTest {
                 stock = 4,
                 imageUrl = null,
                 isActive = true,
-                createdAt = kotlin.time.Instant.DISTANT_PAST,
-                updatedAt = kotlin.time.Instant.DISTANT_PAST,
+                createdAt = Instant.DISTANT_PAST,
+                updatedAt = Instant.DISTANT_PAST,
                 effect = "Leaves duration unspecified",
                 duration = null
             )

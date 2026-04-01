@@ -27,12 +27,12 @@ class ReviewServiceTest {
     private lateinit var characterService: CharacterService
     private lateinit var shippingService: ShippingService
 
-    private var goldId: CurrencyId = CurrencyId(kotlin.uuid.Uuid.random())
-    private var merchantId: MerchantId = MerchantId(kotlin.uuid.Uuid.random())
-    private var characterId: CharacterId = CharacterId(kotlin.uuid.Uuid.random())
-    private var productId: ProductId = ProductId(kotlin.uuid.Uuid.random())
-    private var orderItemId: OrderItemId = OrderItemId(kotlin.uuid.Uuid.random())
-    private var shippingMethodId: ShippingMethodId = ShippingMethodId(kotlin.uuid.Uuid.random())
+    private var goldId: CurrencyId = CurrencyId(kotlin.uuid.Uuid.generateV7())
+    private var merchantId: MerchantId = MerchantId(kotlin.uuid.Uuid.generateV7())
+    private var characterId: CharacterId = CharacterId(kotlin.uuid.Uuid.generateV7())
+    private var productId: ProductId = ProductId(kotlin.uuid.Uuid.generateV7())
+    private var orderItemId: OrderItemId = OrderItemId(kotlin.uuid.Uuid.generateV7())
+    private var shippingMethodId: ShippingMethodId = ShippingMethodId(kotlin.uuid.Uuid.generateV7())
 
     @BeforeTest
     fun setup() {
@@ -59,7 +59,7 @@ class ReviewServiceTest {
 
             productId = catalogService.createProduct(
                 Product.Weapon(
-                    id = ProductId(kotlin.uuid.Uuid.random()),
+                    id = ProductId(kotlin.uuid.Uuid.generateV7()),
                     name = "Test Sword", description = null, rarity = Rarity.COMMON,
                     price = 100, currencyId = goldId, merchantId = merchantId, stock = 10,
                     imageUrl = null, isActive = true,
@@ -145,7 +145,7 @@ class ReviewServiceTest {
     fun testReviewRejectsMismatchedProduct() = runBlocking {
         val otherProductId = catalogService.createProduct(
             Product.Weapon(
-                id = ProductId(kotlin.uuid.Uuid.random()),
+                id = ProductId(kotlin.uuid.Uuid.generateV7()),
                 name = "Wrong Sword", description = null, rarity = Rarity.COMMON,
                 price = 120, currencyId = goldId, merchantId = merchantId, stock = 5,
                 imageUrl = null, isActive = true,

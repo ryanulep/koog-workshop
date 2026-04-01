@@ -147,7 +147,7 @@ class CharacterAndCurrencyTest {
             val goldId = Currencies.insertAndGetId { it[code] = "GOLD"; it[name] = "Gold"; it[symbol] = "G" }
             val crownId = Currencies.insertAndGetId { it[code] = "CROWN"; it[name] = "Crown"; it[symbol] = "C" }
             
-            val exchangeRefId = UUID.randomUUID().toKotlinUuid()
+            val exchangeRefId = kotlin.uuid.Uuid.generateV7()
             
             // Debit Gold
             Transactions.insert {
@@ -185,7 +185,7 @@ class CharacterAndCurrencyTest {
             
             assertFails {
                 Transactions.insert {
-                    it[character] = EntityID(UUID.randomUUID().toKotlinUuid(), Characters) // Nonexistent character
+                    it[character] = EntityID(kotlin.uuid.Uuid.generateV7(), Characters) // Nonexistent character
                     it[currency] = goldId
                     it[amount] = 100
                     it[type] = TransactionType.DEPOSIT.name

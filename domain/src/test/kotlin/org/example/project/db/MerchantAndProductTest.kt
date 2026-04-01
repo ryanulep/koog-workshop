@@ -243,7 +243,7 @@ class MerchantAndProductTest {
                     it[rarity] = Rarity.COMMON.name
                     it[price] = 10
                     it[currency] = goldId
-                    it[merchant] = EntityID(UUID.randomUUID().toKotlinUuid(), Merchants)
+                    it[merchant] = EntityID(Uuid.generateV7(), Merchants)
                 }
             }
 
@@ -254,7 +254,7 @@ class MerchantAndProductTest {
                     it[category] = ProductCategory.MISCELLANEOUS.name
                     it[rarity] = Rarity.COMMON.name
                     it[price] = 10
-                    it[currency] = EntityID(UUID.randomUUID().toKotlinUuid(), Currencies)
+                    it[currency] = EntityID(Uuid.generateV7(), Currencies)
                     it[merchant] = merchantId
                 }
             }

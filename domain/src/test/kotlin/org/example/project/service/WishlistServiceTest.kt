@@ -17,10 +17,10 @@ class WishlistServiceTest {
     private lateinit var catalogService: CatalogService
     private lateinit var currencyService: CurrencyService
     private lateinit var characterService: CharacterService
-    private var goldId: CurrencyId = CurrencyId(kotlin.uuid.Uuid.random())
-    private var merchantId: MerchantId = MerchantId(kotlin.uuid.Uuid.random())
-    private var characterId: CharacterId = CharacterId(kotlin.uuid.Uuid.random())
-    private var productId: ProductId = ProductId(kotlin.uuid.Uuid.random())
+    private var goldId: CurrencyId = CurrencyId(kotlin.uuid.Uuid.generateV7())
+    private var merchantId: MerchantId = MerchantId(kotlin.uuid.Uuid.generateV7())
+    private var characterId: CharacterId = CharacterId(kotlin.uuid.Uuid.generateV7())
+    private var productId: ProductId = ProductId(kotlin.uuid.Uuid.generateV7())
 
     @BeforeTest
     fun setup() {
@@ -36,7 +36,7 @@ class WishlistServiceTest {
             characterId = characterService.createCharacter("Test Hero")
             productId = catalogService.createProduct(
                 Product.Weapon(
-                    id = ProductId(kotlin.uuid.Uuid.random()),
+                    id = ProductId(kotlin.uuid.Uuid.generateV7()),
                     name = "Test Sword",
                     description = null,
                     rarity = Rarity.COMMON,
@@ -66,7 +66,7 @@ class WishlistServiceTest {
 
     @Test
     fun testAddToWishlistValidatesProduct(): Unit = runBlocking {
-        val fakeProductId = ProductId(kotlin.uuid.Uuid.random())
+        val fakeProductId = ProductId(kotlin.uuid.Uuid.generateV7())
         assertFailsWith<IllegalArgumentException> {
             wishlistService.addToWishlist(characterId, fakeProductId)
         }
@@ -84,7 +84,7 @@ class WishlistServiceTest {
     fun testClearWishlist() = runBlocking {
         val armorId = catalogService.createProduct(
             Product.Armor(
-                id = ProductId(kotlin.uuid.Uuid.random()),
+                id = ProductId(kotlin.uuid.Uuid.generateV7()),
                 name = "Test Shield",
                 description = null,
                 rarity = Rarity.COMMON,

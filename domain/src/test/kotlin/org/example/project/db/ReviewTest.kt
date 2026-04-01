@@ -339,7 +339,7 @@ class ReviewTest {
                 Reviews.insert {
                     it[character] = charId
                     it[product] = prodId
-                    it[orderItem] = EntityID(UUID.randomUUID().toKotlinUuid(), OrderItems)
+                    it[orderItem] = EntityID(kotlin.uuid.Uuid.generateV7(), OrderItems)
                     it[rating] = 5
                 }
             }
