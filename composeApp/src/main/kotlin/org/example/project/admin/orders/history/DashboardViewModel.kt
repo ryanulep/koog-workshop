@@ -42,7 +42,6 @@ class DashboardViewModel(
         errorMessage: String
     ) {
         val version = loadVersion.incrementAndGet()
-        _uiState.value = DashboardUiState.Loading
 
         val nextState = try {
             loader().toUiState()
