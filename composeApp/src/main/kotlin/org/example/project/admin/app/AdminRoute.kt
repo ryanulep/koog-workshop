@@ -88,34 +88,6 @@ fun AdminRoute(
         color = MaterialTheme.colorScheme.background
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            val filterContent: (@Composable () -> Unit)? = when (selectedTab) {
-                AdminWorkspaceTab.Products -> {
-                    {
-                        ProductFilterContent(
-                            uiState = productState,
-                            onUpdateNameQuery = productViewModel::updateNameQuery,
-                            onUpdateActiveFilter = productViewModel::updateActiveFilter,
-                            onUpdateCategory = productViewModel::updateCategory,
-                            onUpdateMerchant = productViewModel::updateMerchant
-                        )
-                    }
-                }
-
-                AdminWorkspaceTab.Merchants -> null
-
-                AdminWorkspaceTab.Orders -> {
-                    {
-                        OrderFilterContent(
-                            uiState = orderState,
-                            onUpdateOrderIdQuery = orderViewModel::updateOrderIdQuery,
-                            onUpdateOrderStatusFilter = orderViewModel::updateOrderStatusFilter,
-                            onUpdateSubOrderStatusFilter = orderViewModel::updateSubOrderStatusFilter,
-                            onUpdateMerchant = orderViewModel::updateMerchant
-                        )
-                    }
-                }
-            }
-
             AdminAppBar(
                 selectedTab = selectedTab,
                 onTabSelected = { tab -> selectedTab = tab },
@@ -130,9 +102,28 @@ fun AdminRoute(
                     AdminWorkspaceTab.Products -> productActiveFilterCount(productState)
                     AdminWorkspaceTab.Merchants -> 0
                     AdminWorkspaceTab.Orders -> orderActiveFilterCount(orderState)
-                },
-                filterContent = filterContent
-            )
+                }
+            ) {
+                when (selectedTab) {
+                    AdminWorkspaceTab.Merchants -> {}
+                    AdminWorkspaceTab.Products ->
+                        ProductFilterContent(
+                            uiState = productState,
+                            onUpdateNameQuery = productViewModel::updateNameQuery,
+                            onUpdateActiveFilter = productViewModel::updateActiveFilter,
+                            onUpdateCategory = productViewModel::updateCategory,
+                            onUpdateMerchant = productViewModel::updateMerchant
+                        )
+
+                    AdminWorkspaceTab.Orders -> OrderFilterContent(
+                        uiState = orderState,
+                        onUpdateOrderIdQuery = orderViewModel::updateOrderIdQuery,
+                        onUpdateOrderStatusFilter = orderViewModel::updateOrderStatusFilter,
+                        onUpdateSubOrderStatusFilter = orderViewModel::updateSubOrderStatusFilter,
+                        onUpdateMerchant = orderViewModel::updateMerchant
+                    )
+                }
+            }
 
             when (selectedTab) {
                 AdminWorkspaceTab.Products -> ProductOperationsScreen(
