@@ -47,8 +47,6 @@ class OrderAdminViewModel(
         reload()
     }
 
-    fun updateOrderStatus(status: OrderStatus?) = updateOrderStatusFilter(status)
-
     fun updateOrderStatus(orderId: OrderId, status: OrderStatus) = viewModelScope.launch {
         updateOrderStatusInternal(orderId, status)
     }
