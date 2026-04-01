@@ -11,7 +11,6 @@ import org.example.project.domain.shared.OrderId
 
 @Immutable
 data class OrderAdminUiState(
-    val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val filter: OrderFilter = OrderFilter(),
     val merchants: PersistentList<OrderMerchantOption> = persistentListOf(),

@@ -31,4 +31,9 @@ class OrderAdminService(
         database.suspendTransaction {
             orderRepository.updateSubOrderStatus(subOrderId, status)
         }
+
+    suspend fun updateOrderStatus(orderId: OrderId, status: OrderStatus): Boolean =
+        database.suspendTransaction {
+            orderRepository.updateOrderStatus(orderId, status)
+        }
 }

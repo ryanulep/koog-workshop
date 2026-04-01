@@ -10,9 +10,6 @@ import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.dao.id.*
 import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import kotlinx.datetime.Clock
-import java.util.UUID
-import kotlin.uuid.toKotlinUuid
 import kotlin.test.*
 
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)

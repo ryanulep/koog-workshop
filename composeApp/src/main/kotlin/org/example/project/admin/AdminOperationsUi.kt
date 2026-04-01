@@ -26,12 +26,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -46,6 +44,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -192,6 +193,11 @@ fun AdminRoute(
                                     onValueChange = orderViewModel::updateOrderIdQuery,
                                     placeholder = "Filter by order ID"
                                 )
+                                Text(
+                                    text = "Filter by order status",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                                 Row(
                                     modifier = Modifier.horizontalScroll(rememberScrollState()),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -201,7 +207,7 @@ fun AdminRoute(
                                     orderStatusOptions.forEach { (status, label) ->
                                         FilterChip(
                                             selected = status == orderState.filter.orderStatus,
-                                            onClick = { orderViewModel.updateOrderStatus(status) },
+                                            onClick = { orderViewModel.updateOrderStatusFilter(status) },
                                             label = { Text(label) }
                                         )
                                     }
@@ -244,6 +250,7 @@ fun AdminRoute(
                 AdminWorkspaceTab.Orders -> OrderOperationsScreen(
                     uiState = orderState,
                     onSelectOrder = orderViewModel::selectOrder,
+                    onUpdateOrderStatus = orderViewModel::updateOrderStatus,
                     onUpdateSubOrderStatus = orderViewModel::updateSubOrderStatus
                 )
             }
@@ -424,6 +431,10 @@ private fun ProductRow(
     onClick: () -> Unit
 ) {
     Card(
+        modifier = Modifier.semantics {
+            contentDescription = product.productRowAccessibilityDescription()
+            stateDescription = product.productRowAccessibilityState()
+        },
         onClick = onClick,
         colors = CardDefaults.cardColors(
             containerColor = if (selected) {
@@ -612,7 +623,13 @@ private fun ProductDetailPanel(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             listOf(-5, -1, 1, 5).forEach { quantityChange ->
-                                FilledTonalButton(onClick = { onAdjustStock(quantityChange) }) {
+                                FilledTonalButton(
+                                    modifier = Modifier.semantics {
+                                        contentDescription =
+                                            stockAdjustmentAccessibilityDescription(quantityChange)
+                                    },
+                                    onClick = { onAdjustStock(quantityChange) }
+                                ) {
                                     Text(
                                         text = if (quantityChange > 0) "+$quantityChange stock" else "$quantityChange stock"
                                     )
@@ -636,6 +653,7 @@ private fun ProductDetailPanel(
 private fun OrderOperationsScreen(
     uiState: OrderAdminUiState,
     onSelectOrder: (OrderId) -> Unit,
+    onUpdateOrderStatus: (OrderId, OrderStatus) -> Unit,
     onUpdateSubOrderStatus: (SubOrderId, OrderStatus) -> Unit
 ) {
     Column(
@@ -656,7 +674,6 @@ private fun OrderOperationsScreen(
                 modifier = Modifier
                     .weight(0.85f)
                     .fillMaxHeight(),
-                isLoading = uiState.isLoading,
                 orders = uiState.orders,
                 selectedOrderId = uiState.selectedOrderId,
                 onSelectOrder = onSelectOrder
@@ -666,8 +683,8 @@ private fun OrderOperationsScreen(
                 modifier = Modifier
                     .weight(1.15f)
                     .fillMaxHeight(),
-                isLoading = uiState.isLoading,
                 order = uiState.selectedOrder,
+                onUpdateOrderStatus = onUpdateOrderStatus,
                 onUpdateSubOrderStatus = onUpdateSubOrderStatus
             )
         }
@@ -677,7 +694,6 @@ private fun OrderOperationsScreen(
 @Composable
 private fun OrderListPanel(
     modifier: Modifier,
-    isLoading: Boolean,
     orders: PersistentList<OrderListItem>,
     selectedOrderId: OrderId?,
     onSelectOrder: (OrderId) -> Unit
@@ -699,13 +715,7 @@ private fun OrderListPanel(
                 subtitle = "${orders.size} matching orders"
             )
 
-            if (isLoading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
-
-            if (orders.isEmpty() && isLoading) {
-                PanelLoadingState()
-            } else if (orders.isEmpty()) {
+            if (orders.isEmpty()) {
                 PanelEmptyState(message = "No orders match the current filters.")
             } else {
                 LazyColumn(
@@ -735,6 +745,10 @@ private fun OrderRow(
     onClick: () -> Unit
 ) {
     Card(
+        modifier = Modifier.semantics {
+            contentDescription = order.orderRowAccessibilityDescription()
+            stateDescription = order.orderRowAccessibilityState()
+        },
         onClick = onClick,
         colors = CardDefaults.cardColors(
             containerColor = if (selected) {
@@ -806,8 +820,8 @@ private fun OrderRow(
 @Composable
 private fun OrderDetailPanel(
     modifier: Modifier,
-    isLoading: Boolean,
     order: AdminOrderDetail?,
+    onUpdateOrderStatus: (OrderId, OrderStatus) -> Unit,
     onUpdateSubOrderStatus: (SubOrderId, OrderStatus) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -817,11 +831,10 @@ private fun OrderDetailPanel(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
         )
     ) {
-        when {
-            order == null && isLoading -> PanelLoadingState(modifier = Modifier.fillMaxSize())
-            order == null -> PanelEmptyState(
+        when (order) {
+            null -> PanelEmptyState(
                 modifier = Modifier.fillMaxSize(),
-                message = "Select an order to inspect the hierarchy and update sub-order status."
+                message = "Select an order to inspect the hierarchy and update order and sub-order status."
             )
 
             else -> {
@@ -847,6 +860,30 @@ private fun OrderDetailPanel(
                             DetailMetric("Created", order.order.createdAt.formatAdminInstant()),
                             DetailMetric("Updated", order.order.updatedAt.formatAdminInstant())
                         )
+
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                text = "Update order status",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+
+                            Row(
+                                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                OrderStatus.entries.forEach { status ->
+                                    FilterChip(
+                                        modifier = Modifier.semantics {
+                                            contentDescription = orderStatusAccessibilityDescription(status)
+                                        },
+                                        selected = order.order.status == status,
+                                        onClick = { onUpdateOrderStatus(order.order.id, status) },
+                                        label = { Text(status.labelize()) }
+                                    )
+                                }
+                            }
+                        }
 
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(
@@ -882,14 +919,6 @@ private fun OrderDetailPanel(
                             }
                         }
                     }
-
-                    if (isLoading) {
-                        LinearProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.TopCenter)
-                        )
-                    }
                 }
             }
         }
@@ -902,6 +931,10 @@ private fun SubOrderCard(
     onUpdateStatus: (SubOrderId, OrderStatus) -> Unit
 ) {
     Card(
+        modifier = Modifier.semantics {
+            contentDescription = detail.subOrderAccessibilityDescription()
+            stateDescription = detail.subOrder.status.labelize()
+        },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
         )
@@ -965,6 +998,10 @@ private fun SubOrderCard(
                 ) {
                     OrderStatus.entries.forEach { status ->
                         FilterChip(
+                            modifier = Modifier.semantics {
+                                contentDescription =
+                                    subOrderStatusAccessibilityDescription(detail.subOrder.id, status)
+                            },
                             selected = detail.subOrder.status == status,
                             onClick = { onUpdateStatus(detail.subOrder.id, status) },
                             label = { Text(status.labelize()) }
@@ -1093,16 +1130,6 @@ private fun PanelHeader(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-    }
-}
-
-@Composable
-private fun PanelLoadingState(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
     }
 }
 
@@ -1247,6 +1274,36 @@ private fun <T> FilterGroup(
 }
 
 private fun Long.formatAmount(currencyCode: String): String = "$this $currencyCode"
+
+private fun ProductListItem.productRowAccessibilityDescription(): String =
+    "Product $name from $merchantName"
+
+private fun ProductListItem.productRowAccessibilityState(): String =
+    "${if (isActive) "Active" else "Inactive"}, stock $stock"
+
+private fun OrderListItem.orderRowAccessibilityDescription(): String =
+    "Order ${orderId.value} for $characterName"
+
+private fun OrderListItem.orderRowAccessibilityState(): String =
+    "${status.labelize()}, $merchantCount merchants, ${totalPrice.formatAmount(currencyCode)}"
+
+private fun AdminSubOrderDetail.subOrderAccessibilityDescription(): String =
+    "Sub-order ${subOrder.id.value} for $merchantName"
+
+private fun stockAdjustmentAccessibilityDescription(quantityChange: Int): String =
+    if (quantityChange >= 0) {
+        "Increase stock by $quantityChange"
+    } else {
+        "Decrease stock by ${-quantityChange}"
+    }
+
+private fun orderStatusAccessibilityDescription(status: OrderStatus): String =
+    "Set order status to ${status.labelize()}"
+
+private fun subOrderStatusAccessibilityDescription(
+    subOrderId: SubOrderId,
+    status: OrderStatus
+): String = "Set sub-order ${subOrderId.value} status to ${status.labelize()}"
 
 private fun Enum<*>.labelize(): String = name.labelize()
 

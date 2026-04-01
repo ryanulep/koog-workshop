@@ -70,6 +70,21 @@ class OrderAdminServiceTest {
         )
     }
 
+    @Test
+    fun `updateOrderStatus updates the top-level order`() = runBlocking {
+        val database = createDatabase()
+        val fixture = seedOrders(database)
+        val service = OrderAdminService(database)
+
+        assertTrue(service.updateOrderStatus(fixture.pendingOrderId, OrderStatus.CANCELLED))
+
+        val afterUpdate = service.loadOrderDetailOrNull(fixture.pendingOrderId)
+
+        assertNotNull(afterUpdate)
+        assertEquals(OrderStatus.CANCELLED, afterUpdate.order.status)
+        assertTrue(afterUpdate.order.updatedAt > afterUpdate.order.createdAt)
+    }
+
     private fun createDatabase(): Database {
         val databaseFile = java.io.File.createTempFile("order_admin_", ".db").apply {
             deleteOnExit()

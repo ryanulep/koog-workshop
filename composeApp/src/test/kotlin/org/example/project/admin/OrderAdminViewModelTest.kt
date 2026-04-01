@@ -87,6 +87,35 @@ class OrderAdminViewModelTest {
         }
     }
 
+    @Test
+    fun `order status updates reload selected order`() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+        try {
+            val database = createDatabase()
+            val fixture = seedOrders(database)
+            val viewModel = OrderAdminViewModel(OrderAdminService(database))
+
+            viewModel.refresh()
+            awaitCondition {
+                viewModel.uiState.value.selectedOrderId == fixture.pendingOrderId &&
+                        viewModel.uiState.value.selectedOrder != null
+            }
+
+            viewModel.updateOrderStatus(fixture.pendingOrderId, OrderStatus.CANCELLED)
+            awaitCondition {
+                viewModel.uiState.value.selectedOrder
+                    ?.order
+                    ?.status == OrderStatus.CANCELLED
+            }
+
+            val state = viewModel.uiState.value
+            assertNotNull(state.selectedOrder)
+            assertEquals(OrderStatus.CANCELLED, state.selectedOrder.order.status)
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
     private fun createDatabase(): Database {
         val databaseFile = java.io.File.createTempFile("order_vm_", ".db").apply {
             deleteOnExit()

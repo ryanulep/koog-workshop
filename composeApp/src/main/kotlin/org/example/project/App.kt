@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import org.example.project.admin.AdminRoute
 import org.example.project.admin.createAdminDatabase
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.example.project.domain.admin.OrderAdminService
 import org.example.project.domain.admin.ProductAdminService
 
@@ -38,9 +39,7 @@ private val AdminColorScheme: ColorScheme = lightColorScheme(
 )
 
 @Composable
-@Preview
-fun App() {
-    val database = remember { createAdminDatabase() }
+fun App(database: Database) {
     val productAdminService = remember(database) { ProductAdminService(database) }
     val orderAdminService = remember(database) { OrderAdminService(database) }
 
@@ -50,4 +49,11 @@ fun App() {
             orderAdminService = orderAdminService
         )
     }
+}
+
+@Composable
+@Preview
+fun App() {
+    val database = remember { createAdminDatabase() }
+    App(database = database)
 }

@@ -40,11 +40,17 @@ class OrderAdminViewModel(
         reload()
     }
 
-    fun updateOrderStatus(status: OrderStatus?) = viewModelScope.launch {
+    fun updateOrderStatusFilter(status: OrderStatus?) = viewModelScope.launch {
         _uiState.value = _uiState.value.copy(
             filter = _uiState.value.filter.copy(orderStatus = status)
         )
         reload()
+    }
+
+    fun updateOrderStatus(status: OrderStatus?) = updateOrderStatusFilter(status)
+
+    fun updateOrderStatus(orderId: OrderId, status: OrderStatus) = viewModelScope.launch {
+        updateOrderStatusInternal(orderId, status)
     }
 
     fun updateSubOrderStatusFilter(status: OrderStatus?) = viewModelScope.launch {
@@ -73,23 +79,21 @@ class OrderAdminViewModel(
         val version = loadVersion.incrementAndGet()
         val current = _uiState.value
         _uiState.value = current.copy(
-            isLoading = true,
             errorMessage = null,
-            selectedOrderId = orderId
+            selectedOrderId = orderId,
+            selectedOrder = current.selectedOrder?.takeIf { order -> order.order.id == orderId }
         )
 
         val nextState = try {
             val detail = orderAdminService.loadOrderDetailOrNull(orderId)
             if (detail == null) {
                 current.copy(
-                    isLoading = false,
                     errorMessage = "Order ${orderId.value} was not found.",
                     selectedOrderId = null,
                     selectedOrder = null
                 )
             } else {
                 current.copy(
-                    isLoading = false,
                     errorMessage = null,
                     selectedOrderId = orderId,
                     selectedOrder = detail
@@ -99,7 +103,6 @@ class OrderAdminViewModel(
             throw cancellation
         } catch (throwable: Throwable) {
             current.copy(
-                isLoading = false,
                 errorMessage = throwable.message ?: "Unable to load order details."
             )
         }
@@ -111,7 +114,7 @@ class OrderAdminViewModel(
 
     private suspend fun updateSubOrderStatusInternal(subOrderId: SubOrderId, status: OrderStatus) {
         val current = _uiState.value
-        _uiState.value = current.copy(isLoading = true, errorMessage = null)
+        _uiState.value = current.copy(errorMessage = null)
 
         val success = try {
             orderAdminService.updateSubOrderStatus(subOrderId, status)
@@ -119,7 +122,6 @@ class OrderAdminViewModel(
             throw cancellation
         } catch (throwable: Throwable) {
             _uiState.value = current.copy(
-                isLoading = false,
                 errorMessage = throwable.message ?: "Unable to update sub-order status."
             )
             return
@@ -127,8 +129,32 @@ class OrderAdminViewModel(
 
         if (!success) {
             _uiState.value = current.copy(
-                isLoading = false,
                 errorMessage = "Unable to update sub-order status."
+            )
+            return
+        }
+
+        reload()
+    }
+
+    private suspend fun updateOrderStatusInternal(orderId: OrderId, status: OrderStatus) {
+        val current = _uiState.value
+        _uiState.value = current.copy(errorMessage = null)
+
+        val success = try {
+            orderAdminService.updateOrderStatus(orderId, status)
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (throwable: Throwable) {
+            _uiState.value = current.copy(
+                errorMessage = throwable.message ?: "Unable to update order status."
+            )
+            return
+        }
+
+        if (!success) {
+            _uiState.value = current.copy(
+                errorMessage = "Unable to update order status."
             )
             return
         }
@@ -139,7 +165,7 @@ class OrderAdminViewModel(
     private suspend fun reload() {
         val version = loadVersion.incrementAndGet()
         val current = _uiState.value
-        _uiState.value = current.copy(isLoading = true, errorMessage = null)
+        _uiState.value = current.copy(errorMessage = null)
 
         val nextState = try {
             val merchants = orderAdminService.loadMerchantOptions().toPersistentList()
@@ -150,7 +176,6 @@ class OrderAdminViewModel(
             val selectedOrder = selectedOrderId?.let { orderAdminService.loadOrderDetailOrNull(it) }
 
             current.copy(
-                isLoading = false,
                 errorMessage = null,
                 merchants = merchants,
                 orders = orders,
@@ -161,7 +186,6 @@ class OrderAdminViewModel(
             throw cancellation
         } catch (throwable: Throwable) {
             current.copy(
-                isLoading = false,
                 errorMessage = throwable.message ?: "Unable to load order operations."
             )
         }
