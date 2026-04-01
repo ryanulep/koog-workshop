@@ -1,4 +1,4 @@
-- Use Gradle MCP
+- Use ./gradlew to build the project.
 - To use Exposed correctly with the specific project requirements Exposed v1:
     - Package structure: Exposed v1 uses org.jetbrains.exposed.v1.* e.g., org.jetbrains.exposed.v1.core.*,
       org.jetbrains.exposed.v1.jdbc.*.
