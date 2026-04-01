@@ -10,11 +10,10 @@ Use this skill to validate small Kotlin/JVM ideas against compiled project outpu
 ## Workflow
 
 1. Pick the narrowest JVM-capable module or target that covers the code under test.
-2. Refresh compiled outputs first so the REPL sees current classes and resources.
-3. Prefer the Gradle launcher in this skill to resolve the runtime configuration and collect dependency jars automatically.
-4. Assemble the final classpath with module outputs first, then the resolved dependency jars.
-5. Launch the REPL, prove one hypothesis, and record the exact snippet that worked.
-6. Translate the validated snippet into source code or a test.
+2. Run the Gradle launcher from inside that module directory when possible. If you are starting from the repo root, set `MODULE=<module>` as the skill argument.
+3. Let the Gradle launcher compile the target, resolve the runtime configuration, and collect both module outputs and dependency jars automatically.
+4. Launch the REPL, prove one hypothesis, and record the exact snippet that worked.
+5. Translate the validated snippet into source code or a test.
 
 ## Scope Rules
 
@@ -37,22 +36,30 @@ Use this skill to validate small Kotlin/JVM ideas against compiled project outpu
 - Launch the session with `kotlinc -Xrepl`, not `kotlin -Xrepl`.
 - Keep REPL state inside the current project by setting `-J-Duser.home` to a build-owned directory such as `build/codex-repl` or `<module>/build/codex-repl`.
 - Resolve `<skill-dir>` in the examples below to the directory that contains this `SKILL.md`.
-- Prefer [scripts/start-gradle-repl.sh](scripts/start-gradle-repl.sh) for Gradle projects. It compiles the target, resolves the runtime configuration through Gradle, adds common JVM or KMP/JVM output directories, warns about Kotlin version mismatches on the resolved classpath, and then launches the REPL.
+- Prefer [scripts/start-gradle-repl.sh](scripts/start-gradle-repl.sh) for Gradle projects. It auto-detects the nearest `./gradlew`, infers the module from the current working directory or `MODULE=<module>`, asks Gradle for the main output directories when available, resolves dependency jars from the runtime configuration, warns about Kotlin version mismatches on the resolved classpath, and then launches the REPL.
 - Use [scripts/start-repl.sh](scripts/start-repl.sh) only when you already know the classpath and want the low-level launcher.
+- Do not run `:dependencies`, search `~/.gradle/caches`, or manually locate `build/classes/...` unless the Gradle configuration itself is broken. The Gradle launcher is the default path.
 - If you need `kotlin.uuid.Uuid.parse(...)` or similar experimental APIs in the REPL, put the code inside a helper function annotated with `@OptIn(...)`; top-level opt-in annotations may not carry the way you expect between REPL snippets.
 
 ## Gradle JVM Example
 
-```bash
-MODULE=domain
+From inside the module directory:
 
-bash <skill-dir>/scripts/start-gradle-repl.sh --module "$MODULE"
+```bash
+cd "$PROJECT_DIR/domain"
+bash <skill-dir>/scripts/start-gradle-repl.sh
+```
+
+From the repo root, pass the module as the skill argument:
+
+```bash
+MODULE=domain bash <skill-dir>/scripts/start-gradle-repl.sh
 ```
 
 Inspect or reuse the generated classpath without launching the REPL:
 
 ```bash
-bash <skill-dir>/scripts/start-gradle-repl.sh --module "$MODULE" --print-classpath
+MODULE=domain bash <skill-dir>/scripts/start-gradle-repl.sh --print-classpath
 ```
 
 ## Gradle KMP/JVM Example
@@ -60,17 +67,14 @@ bash <skill-dir>/scripts/start-gradle-repl.sh --module "$MODULE" --print-classpa
 Use a concrete JVM target when the code lives in `commonMain`:
 
 ```bash
-MODULE=shared
-
-bash <skill-dir>/scripts/start-gradle-repl.sh --module "$MODULE" --kind kmp-jvm
+MODULE=shared bash <skill-dir>/scripts/start-gradle-repl.sh --kind kmp-jvm
 ```
 
 If the project does not use the default `jvm` target names, list the available runtime configurations first and then override the defaults:
 
 ```bash
-bash <skill-dir>/scripts/start-gradle-repl.sh --module "$MODULE" --list-configurations
-bash <skill-dir>/scripts/start-gradle-repl.sh \
-  --module "$MODULE" \
+MODULE=shared bash <skill-dir>/scripts/start-gradle-repl.sh --list-configurations
+MODULE=shared bash <skill-dir>/scripts/start-gradle-repl.sh \
   --kind kmp-jvm \
   --configuration desktopRuntimeClasspath \
   --build-task compileKotlinDesktop \

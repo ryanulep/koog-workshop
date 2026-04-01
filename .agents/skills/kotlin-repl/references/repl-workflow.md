@@ -7,6 +7,7 @@ Use a REPL when you need to validate a small Kotlin/JVM idea against compiled pr
 - Choose the smallest JVM-capable module or source set that contains the code.
 - For multiplatform code, compile a concrete JVM target such as `jvmMain`, desktop, or server. Do not point the REPL at `commonMain` alone.
 - Skip the REPL for Native-only or JS-only code.
+- When you are at the repo root, pass `MODULE=<module>` to the launcher. When you are already inside the module directory, let the launcher infer the module from the current working directory.
 
 ## 2. Refresh compiled outputs
 
@@ -21,7 +22,7 @@ Use a REPL when you need to validate a small Kotlin/JVM idea against compiled pr
 - Put compiled module outputs first.
 - Add resources only when the directory exists and the snippet needs them.
 - Resolve dependency jars from the build tool rather than guessing file paths manually.
-- For Gradle projects, use `scripts/start-gradle-repl.sh` so the runtime jars come from the resolved configuration instead of a hand-built classpath.
+- For Gradle projects, use `scripts/start-gradle-repl.sh` so the runtime jars come from the resolved configuration and the module outputs come from Gradle or the standard build directories instead of a hand-built classpath.
 
 Common output roots:
 
@@ -47,32 +48,32 @@ Common output roots:
 Gradle JVM example:
 
 ```bash
-bash <skill-dir>/scripts/start-gradle-repl.sh --module domain
+cd "$PROJECT_DIR/domain"
+bash <skill-dir>/scripts/start-gradle-repl.sh
 ```
 
 Inspect the resolved classpath without launching:
 
 ```bash
-bash <skill-dir>/scripts/start-gradle-repl.sh --module domain --print-classpath
+MODULE=domain bash <skill-dir>/scripts/start-gradle-repl.sh --print-classpath
 ```
 
 Gradle KMP/JVM example:
 
 ```bash
-bash <skill-dir>/scripts/start-gradle-repl.sh --module shared --kind kmp-jvm
+MODULE=shared bash <skill-dir>/scripts/start-gradle-repl.sh --kind kmp-jvm
 ```
 
 Discover configuration names when the project uses a custom JVM target:
 
 ```bash
-bash <skill-dir>/scripts/start-gradle-repl.sh --module shared --list-configurations
+MODULE=shared bash <skill-dir>/scripts/start-gradle-repl.sh --list-configurations
 ```
 
 Override the defaults for a custom target name:
 
 ```bash
-bash <skill-dir>/scripts/start-gradle-repl.sh \
-  --module shared \
+MODULE=shared bash <skill-dir>/scripts/start-gradle-repl.sh \
   --kind kmp-jvm \
   --configuration desktopRuntimeClasspath \
   --build-task compileKotlinDesktop \
