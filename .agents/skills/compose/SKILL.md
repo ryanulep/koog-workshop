@@ -40,6 +40,7 @@ Read the relevant reference file(s) from `references/` before answering:
 | `LazyColumn`, `LazyRow`, `LazyGrid`, `Pager`, keys, content types | `references/lists-scrolling.md` |
 | `NavHost`, type-safe routes, deep links, shared element transitions | `references/navigation.md` |
 | Recomposition skipping, stability, baseline profiles, benchmarking | `references/performance.md` |
+| Semantics, content descriptions, traversal order, testing | `references/accessibility.md` |
 
 ### 3. Apply and verify
 - Write code that follows the patterns in the reference
