@@ -219,12 +219,6 @@ fun AdminRoute(dashboardService: AdminDashboardService) {
 private sealed interface AdminScreen {
     data object OrderList : AdminScreen
 
-    data class OrderDetail(
-        val orderId: OrderId
-    ) : AdminScreen
-
-    data class ItemDetail(
-        val orderId: OrderId,
-        val itemId: OrderItemId
-    ) : AdminScreen
+    data class OrderDetail(val orderId: OrderId) : AdminScreen
+    data class ItemDetail(val orderId: OrderId, val itemId: OrderItemId) : AdminScreen
 }
