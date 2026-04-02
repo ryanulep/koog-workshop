@@ -18,7 +18,7 @@ internal class AdminAppHarness(
 
     fun launch(database: Database) {
         rule.setContent {
-            App(database = database)
+            AdminApp(database = database)
         }
         rule.waitUntilExists(hasContentDescription(AdminAccessibility.ProductListPanel))
     }
