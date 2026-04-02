@@ -8,7 +8,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.example.project.db.connectSqlite
 import org.example.project.db.createTables
-import org.example.project.domain.admin.MerchantAdminService
+import org.example.project.domain.admin.MerchantService
 import org.example.project.domain.catalog.Merchants
 import org.example.project.domain.catalog.ProductCategory
 import org.example.project.domain.catalog.Products
@@ -44,7 +44,7 @@ class MerchantAdminViewModelTest {
         try {
             val database = createDatabase()
             val fixture = seedMerchants(database)
-            val viewModel = MerchantAdminViewModel(MerchantAdminService(database))
+            val viewModel = MerchantAdminViewModel(MerchantService(database))
 
             viewModel.refresh()
             awaitCondition {
@@ -70,7 +70,7 @@ class MerchantAdminViewModelTest {
         try {
             val database = createDatabase()
             val fixture = seedMerchants(database)
-            val service = MerchantAdminService(database)
+            val service = MerchantService(database)
             val viewModel = MerchantAdminViewModel(service)
 
             viewModel.refresh()
@@ -118,7 +118,7 @@ class MerchantAdminViewModelTest {
         try {
             val database = createDatabase()
             val fixture = seedMerchants(database)
-            val service = MerchantAdminService(database)
+            val service = MerchantService(database)
             val viewModel = MerchantAdminViewModel(service)
 
             viewModel.refresh()
@@ -159,7 +159,7 @@ class MerchantAdminViewModelTest {
         try {
             val database = createDatabase()
             val fixture = seedMerchants(database)
-            val viewModel = MerchantAdminViewModel(MerchantAdminService(database))
+            val viewModel = MerchantAdminViewModel(MerchantService(database))
 
             viewModel.refresh()
             awaitCondition {

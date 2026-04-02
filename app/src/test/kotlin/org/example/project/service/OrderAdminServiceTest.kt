@@ -24,13 +24,13 @@ import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-class OrderAdminServiceTest {
+class OrderServiceTest {
 
     @Test
     fun `loadOrders applies merchant and status filters`() = runBlocking {
         val database = createDatabase()
         val fixture = seedOrders(database)
-        val service = OrderAdminService(database)
+        val service = OrderService(database)
 
         val filteredOrders = service.loadOrders(
             OrderFilter(
@@ -48,7 +48,7 @@ class OrderAdminServiceTest {
     fun `loadOrderDetailOrNull returns hierarchy and respects status updates`() = runBlocking {
         val database = createDatabase()
         val fixture = seedOrders(database)
-        val service = OrderAdminService(database)
+        val service = OrderService(database)
 
         val beforeUpdate = service.loadOrderDetailOrNull(fixture.pendingOrderId)
 
@@ -75,7 +75,7 @@ class OrderAdminServiceTest {
     fun `updateOrderStatus updates the top-level order`() = runBlocking {
         val database = createDatabase()
         val fixture = seedOrders(database)
-        val service = OrderAdminService(database)
+        val service = OrderService(database)
 
         assertTrue(service.updateOrderStatus(fixture.pendingOrderId, OrderStatus.CANCELLED))
 

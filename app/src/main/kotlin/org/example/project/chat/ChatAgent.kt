@@ -22,7 +22,6 @@ import org.example.project.koog.AskQuestionTool
 private data class ToolMessage(val message: String)
 
 class ChatAgent(
-    private val sessionId: String,
     private val executor: PromptExecutor,
     val history: ChatHistoryProvider
 ) {
@@ -34,6 +33,7 @@ class ChatAgent(
                 is Message.Assistant -> ChatUi.Message.CustomerSupport(message.content)
                 is Message.Reasoning -> ChatUi.Message.CustomerSupport(message.content)
                 is Message.System -> ChatUi.Message.CustomerSupport(message.content)
+
                 is Message.Tool.Call if message.tool == "askQuestion" -> {
                     val message = Json.decodeFromString<ToolMessage>(message.parts.single().text).message
                     ChatUi.Message.CustomerSupport(message)
@@ -49,6 +49,7 @@ class ChatAgent(
     }
 
     suspend fun sendMessage(
+        sessionId: String,
         userMessage: String,
         askQuestion: suspend (message: String) -> String
     ): ChatUi.Message.CustomerSupport {
@@ -63,8 +64,8 @@ class ChatAgent(
                 tools(AskQuestionTool(askQuestion))
             }
         ) {
-            install(ChatMemory.Feature) {
-                this.chatHistoryProvider = history
+            install(ChatMemory) {
+                chatHistoryProvider = history
                 windowSize(50)
             }
             install(Tracing) {

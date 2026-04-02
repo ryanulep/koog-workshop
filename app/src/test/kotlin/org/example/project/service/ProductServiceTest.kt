@@ -28,13 +28,13 @@ import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-class ProductAdminServiceTest {
+class ProductServiceTest {
 
     @Test
     fun `loadProducts applies filters and exposes review summary`() = runBlocking {
         val database = createDatabase()
         val fixture = seedProducts(database)
-        val service = ProductAdminService(database)
+        val service = ProductService(database)
 
         val merchantProducts = service.loadProducts(
             ProductFilter(
@@ -61,7 +61,7 @@ class ProductAdminServiceTest {
     fun `product mutations are reflected in detail`() = runBlocking {
         val database = createDatabase()
         val fixture = seedProducts(database)
-        val service = ProductAdminService(database)
+        val service = ProductService(database)
 
         assertTrue(service.adjustStock(fixture.bronzeBladeId, -2))
         assertTrue(service.setProductActive(fixture.bronzeBladeId, false))

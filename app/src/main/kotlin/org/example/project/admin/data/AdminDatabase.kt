@@ -17,11 +17,10 @@ private const val ADMIN_DATABASE_FILE = "agent-fantasy-store.db"
 fun adminDatabasePath(): Path =
     Paths.get(ADMIN_DATABASE_DIRECTORY, ADMIN_DATABASE_FILE)
 
-fun createAdminDatabase(dataSource: DataSource, clock: Clock = Clock.System): Database {
-    return Database.connect(dataSource)
+fun createDatabase(dataSource: DataSource, clock: Clock = Clock.System): Database =
+    Database.connect(dataSource)
         .createTables()
         .seedAdminDemoDataIfEmpty(clock)
-}
 
 fun createDataSource(path: Path = adminDatabasePath()): SQLiteDataSource {
     val normalizedPath = path.toAbsolutePath().normalize()

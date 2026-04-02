@@ -14,15 +14,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.example.project.domain.admin.MerchantAdminService
-import org.example.project.domain.admin.MerchantDetail
-import org.example.project.domain.shared.MerchantId
-import org.example.project.domain.shared.ShippingMethodId
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.reflect.KClass
 
 class MerchantAdminViewModel(
-    private val merchantAdminService: org.example.project.domain.admin.MerchantAdminService
+    private val merchantService: org.example.project.domain.admin.MerchantService
 ) : ViewModel() {
 
     private val loadVersion = AtomicLong(0L)
@@ -45,7 +41,7 @@ class MerchantAdminViewModel(
             failureMessage = "Unable to update merchant ${merchantId1.value}.",
             merchantId = merchantId1
         ) {
-            merchantAdminService.setMerchantActive(merchantId1, isActive)
+            merchantService.setMerchantActive(merchantId1, isActive)
         }
     }
 
@@ -56,7 +52,7 @@ class MerchantAdminViewModel(
             failureMessage = "Unable to update shipping method ${shippingMethodId.value}.",
             merchantId = merchantId1
         ) {
-            merchantAdminService.setShippingMethodActive(shippingMethodId, isActive)
+            merchantService.setShippingMethodActive(shippingMethodId, isActive)
         }
     }
 
@@ -80,7 +76,7 @@ class MerchantAdminViewModel(
             failureMessage = "Unable to save shipping assignments for merchant ${merchantId1.value}.",
             merchantId = merchantId1
         ) {
-            merchantAdminService.replaceMerchantShippingMethods(
+            merchantService.replaceMerchantShippingMethods(
                 merchantId = merchantId1,
                 shippingMethodIds = current1.selectedShippingMethodIds
             )
@@ -97,7 +93,7 @@ class MerchantAdminViewModel(
         )
 
         val nextState = try {
-            val detail = merchantAdminService.loadMerchantDetailOrNull(merchantId)
+            val detail = merchantService.loadMerchantDetailOrNull(merchantId)
             if (detail == null) {
                 current.copy(
                     errorMessage = "Merchant ${merchantId.value} was not found.",
@@ -135,11 +131,11 @@ class MerchantAdminViewModel(
         _uiState.value = current.copy(errorMessage = null)
 
         val nextState = try {
-            val merchants = merchantAdminService.loadMerchants().toPersistentList()
+            val merchants = merchantService.loadMerchants().toPersistentList()
             val selectedMerchantId = preferredMerchantId
                 ?.takeIf { selectedId -> merchants.any { merchant -> merchant.id == selectedId } }
                 ?: merchants.firstOrNull()?.id
-            val selectedMerchant = selectedMerchantId?.let { merchantAdminService.loadMerchantDetailOrNull(it) }
+            val selectedMerchant = selectedMerchantId?.let { merchantService.loadMerchantDetailOrNull(it) }
 
             current.copy(
                 errorMessage = null,
@@ -198,12 +194,12 @@ class MerchantAdminViewModel(
             ?: persistentSetOf()
 
     companion object {
-        fun factory(merchantAdminService: org.example.project.domain.admin.MerchantAdminService): ViewModelProvider.Factory =
+        fun factory(merchantService: org.example.project.domain.admin.MerchantService): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
                     if (modelClass == MerchantAdminViewModel::class) {
-                        return MerchantAdminViewModel(merchantAdminService) as T
+                        return MerchantAdminViewModel(merchantService) as T
                     }
                     throw IllegalArgumentException(
                         "Unknown ViewModel class: ${modelClass.simpleName ?: "unknown"}"

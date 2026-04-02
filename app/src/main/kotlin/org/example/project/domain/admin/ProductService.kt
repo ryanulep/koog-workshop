@@ -5,7 +5,7 @@ import org.example.project.domain.catalog.ProductRepository
 import org.example.project.domain.shared.ProductId
 import org.jetbrains.exposed.v1.jdbc.Database
 
-class ProductAdminService(
+class ProductService(
     private val database: Database,
     private val adminProductRepository: AdminProductRepository = AdminProductRepository(),
     private val productRepository: ProductRepository = ProductRepository()

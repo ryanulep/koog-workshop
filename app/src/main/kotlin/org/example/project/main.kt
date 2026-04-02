@@ -1,5 +1,6 @@
 package org.example.project
 
+import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.prompt.executor.llms.all.simpleOpenAIExecutor
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -19,20 +20,25 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import androidx.lifecycle.viewmodel.compose.viewModel
+import aws.smithy.kotlin.runtime.io.closeIfCloseable
+import org.example.project.admin.app.AdminRoute
+import org.example.project.admin.data.createDatabase
 import org.example.project.admin.data.createDataSource
 import org.example.project.chat.ChatAgent
 import org.example.project.chat.ChatScreen
 import org.example.project.chat.ChatTopBar
 import org.example.project.chat.ChatViewModel
+import org.example.project.domain.admin.MerchantService
+import org.example.project.domain.admin.OrderService
+import org.example.project.domain.admin.ProductService
 import org.example.project.koog.JdbcChatHistoryProvider
 import java.lang.System.getenv
+import javax.sql.DataSource
+
 
 fun main() {
-    val session = "single-chat-3"//Uuid.random().toString()
-    val dataSource = createDataSource()
-    val history = JdbcChatHistoryProvider(dataSource).also { it.createTable() }
-    val executor = simpleOpenAIExecutor(requireNotNull(getenv("OPENAI_API_KEY")) { "OPENAI_API_KEY not set" })
-    val chat = ChatAgent(executor = executor, history = history, sessionId = session)
+    val session = "single-chat-4"//Uuid.random().toString()
+    val dependencies = dependencies()
 
     application {
         var adminWindowOpen by remember { mutableStateOf(false) }
@@ -45,7 +51,8 @@ fun main() {
                     size = DpSize(1200.dp, 800.dp)
                 )
             ) {
-                val chatViewModel: ChatViewModel = viewModel(factory = ChatViewModel.factory(session, chat))
+                val chatViewModel: ChatViewModel =
+                    viewModel(factory = ChatViewModel.factory(session, dependencies.chat))
                 val chatUiState by chatViewModel.uiState.collectAsState()
 
                 LaunchedEffect(Unit) { chatViewModel.loadHistory() }
@@ -73,7 +80,7 @@ fun main() {
                             position = WindowPosition(100.dp, 100.dp)
                         )
                     ) {
-                        AdminApp()
+                        AdminRoute(dependencies.services)
                     }
                 }
             }

@@ -65,9 +65,9 @@ internal fun orderActiveFilterCount(uiState: OrderAdminUiState): Int =
 internal fun OrderFilterContent(
     uiState: OrderAdminUiState,
     onUpdateOrderIdQuery: (String) -> Unit,
-    onUpdateOrderStatusFilter: (org.example.project.domain.order.OrderStatus?) -> Unit,
-    onUpdateSubOrderStatusFilter: (org.example.project.domain.order.OrderStatus?) -> Unit,
-    onUpdateMerchant: (org.example.project.domain.shared.MerchantId?) -> Unit
+    onUpdateOrderStatusFilter: (OrderStatus?) -> Unit,
+    onUpdateSubOrderStatusFilter: (OrderStatus?) -> Unit,
+    onUpdateMerchant: (MerchantId?) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(AdminSectionSpacing)) {
         ToolbarTextFilter(
@@ -86,8 +86,8 @@ internal fun OrderFilterContent(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val orderStatusOptions: List<Pair<org.example.project.domain.order.OrderStatus?, String>> =
-                listOf(null to "All") + _root_ide_package_.org.example.project.domain.order.OrderStatus.entries.map { it to it.labelize() }
+            val orderStatusOptions: List<Pair<OrderStatus?, String>> =
+                listOf(null to "All") + OrderStatus.entries.map { it to it.labelize() }
             orderStatusOptions.forEach { (status, label) ->
                 FilterChip(
                     modifier = Modifier.semantics {
@@ -105,8 +105,8 @@ internal fun OrderFilterContent(
         ) {
             FilterGroup(
                 title = "Sub-order status",
-                options = persistentListOf<Pair<String, org.example.project.domain.order.OrderStatus?>>("All" to null)
-                    .addAll(_root_ide_package_.org.example.project.domain.order.OrderStatus.entries.map { it.labelize() to it }),
+                options = persistentListOf<Pair<String, OrderStatus?>>("All" to null)
+                    .addAll(OrderStatus.entries.map { it.labelize() to it }),
                 selected = uiState.filter.subOrderStatus,
                 onSelect = onUpdateSubOrderStatusFilter,
                 optionContentDescription = { _, value -> AdminAccessibility.subOrderStatusFilter(value) },
@@ -114,7 +114,7 @@ internal fun OrderFilterContent(
             )
             FilterGroup(
                 title = "Merchant",
-                options = persistentListOf<Pair<String, org.example.project.domain.shared.MerchantId?>>("All" to null)
+                options = persistentListOf<Pair<String, MerchantId?>>("All" to null)
                     .addAll(uiState.merchants.map { it.name to it.id }),
                 selected = uiState.filter.merchantId,
                 onSelect = onUpdateMerchant,
@@ -129,8 +129,8 @@ internal fun OrderFilterContent(
 fun OrderOperationsScreen(
     uiState: OrderAdminUiState,
     onSelectOrder: (org.example.project.domain.shared.OrderId) -> Unit,
-    onUpdateOrderStatus: (org.example.project.domain.shared.OrderId, org.example.project.domain.order.OrderStatus) -> Unit,
-    onUpdateSubOrderStatus: (org.example.project.domain.shared.SubOrderId, org.example.project.domain.order.OrderStatus) -> Unit
+    onUpdateOrderStatus: (org.example.project.domain.shared.OrderId, OrderStatus) -> Unit,
+    onUpdateSubOrderStatus: (org.example.project.domain.shared.SubOrderId, OrderStatus) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -299,8 +299,8 @@ private fun OrderRow(
 private fun OrderDetailPanel(
     modifier: Modifier,
     order: org.example.project.domain.admin.AdminOrderDetail?,
-    onUpdateOrderStatus: (org.example.project.domain.shared.OrderId, org.example.project.domain.order.OrderStatus) -> Unit,
-    onUpdateSubOrderStatus: (org.example.project.domain.shared.SubOrderId, org.example.project.domain.order.OrderStatus) -> Unit
+    onUpdateOrderStatus: (org.example.project.domain.shared.OrderId, OrderStatus) -> Unit,
+    onUpdateSubOrderStatus: (org.example.project.domain.shared.SubOrderId, OrderStatus) -> Unit
 ) {
     Card(
         modifier = modifier.semantics {
@@ -354,7 +354,7 @@ private fun OrderDetailPanel(
                             modifier = Modifier.horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            _root_ide_package_.org.example.project.domain.order.OrderStatus.entries.forEach { status ->
+                            OrderStatus.entries.forEach { status ->
                                 FilterChip(
                                     modifier = Modifier.semantics {
                                         contentDescription = orderStatusAccessibilityDescription(status)
@@ -409,7 +409,7 @@ private fun OrderDetailPanel(
 @Composable
 private fun SubOrderCard(
     detail: org.example.project.domain.admin.AdminSubOrderDetail,
-    onUpdateStatus: (org.example.project.domain.shared.SubOrderId, org.example.project.domain.order.OrderStatus) -> Unit
+    onUpdateStatus: (org.example.project.domain.shared.SubOrderId, OrderStatus) -> Unit
 ) {
     Card(
         modifier = Modifier.semantics {
@@ -479,7 +479,7 @@ private fun SubOrderCard(
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    _root_ide_package_.org.example.project.domain.order.OrderStatus.entries.forEach { status ->
+                    OrderStatus.entries.forEach { status ->
                         FilterChip(
                             modifier = Modifier.semantics {
                                 contentDescription =
@@ -616,10 +616,10 @@ private fun org.example.project.domain.admin.OrderListItem.orderRowAccessibility
 private fun org.example.project.domain.admin.AdminSubOrderDetail.subOrderAccessibilityDescription(): String =
     "Sub-order ${subOrder.id.value} for $merchantName"
 
-private fun orderStatusAccessibilityDescription(status: org.example.project.domain.order.OrderStatus): String =
+private fun orderStatusAccessibilityDescription(status: OrderStatus): String =
     "Set order status to ${status.labelize()}"
 
 private fun subOrderStatusAccessibilityDescription(
     subOrderId: org.example.project.domain.shared.SubOrderId,
-    status: org.example.project.domain.order.OrderStatus
+    status: OrderStatus
 ): String = "Set sub-order ${subOrderId.value} status to ${status.labelize()}"

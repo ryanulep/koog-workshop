@@ -24,7 +24,6 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,6 +36,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.example.project.Dependencies
 import org.example.project.admin.orders.operations.OrderAdminViewModel
 import org.example.project.admin.orders.operations.ui.OrderFilterContent
 import org.example.project.admin.orders.operations.ui.OrderOperationsScreen
@@ -49,9 +49,6 @@ import org.example.project.admin.products.ui.ProductOperationsScreen
 import org.example.project.admin.products.ui.productActiveFilterCount
 import org.example.project.admin.shared.ui.AdminCompactChromeButtonPadding
 import org.example.project.admin.shared.ui.AdminScreenPadding
-import org.example.project.domain.admin.MerchantAdminService
-import org.example.project.domain.admin.OrderAdminService
-import org.example.project.domain.admin.ProductAdminService
 
 private enum class AdminWorkspaceTab(val title: String) {
     Products("Products"),
@@ -60,17 +57,13 @@ private enum class AdminWorkspaceTab(val title: String) {
 }
 
 @Composable
-fun AdminRoute(
-    productAdminService: org.example.project.domain.admin.ProductAdminService,
-    merchantAdminService: org.example.project.domain.admin.MerchantAdminService,
-    orderAdminService: org.example.project.domain.admin.OrderAdminService
-) {
+fun AdminRoute(services: Dependencies.Services) {
     val productViewModel: ProductAdminViewModel =
-        viewModel(factory = ProductAdminViewModel.factory(productAdminService))
+        viewModel(factory = ProductAdminViewModel.factory(services.productService))
     val merchantViewModel: MerchantAdminViewModel =
-        viewModel(factory = MerchantAdminViewModel.factory(merchantAdminService))
+        viewModel(factory = MerchantAdminViewModel.factory(services.merchantService))
     val orderViewModel: OrderAdminViewModel =
-        viewModel(factory = OrderAdminViewModel.factory(orderAdminService))
+        viewModel(factory = OrderAdminViewModel.factory(services.orderService))
     val productState by productViewModel.uiState.collectAsState()
     val merchantState by merchantViewModel.uiState.collectAsState()
     val orderState by orderViewModel.uiState.collectAsState()

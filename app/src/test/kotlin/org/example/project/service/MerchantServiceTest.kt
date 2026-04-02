@@ -29,13 +29,13 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Instant
 
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-class MerchantAdminServiceTest {
+class MerchantServiceTest {
 
     @Test
     fun `loadMerchants and detail expose counts and assignments`() = runBlocking {
         val database = createDatabase()
         val fixture = seedMerchants(database)
-        val service = MerchantAdminService(database)
+        val service = MerchantService(database)
 
         val merchants = service.loadMerchants()
         val detail = service.loadMerchantDetailOrNull(fixture.blackforgeMerchantId)
@@ -53,7 +53,7 @@ class MerchantAdminServiceTest {
     fun `merchant mutations update active state and assignments`() = runBlocking {
         val database = createDatabase()
         val fixture = seedMerchants(database)
-        val service = MerchantAdminService(database)
+        val service = MerchantService(database)
 
         assertTrue(service.setMerchantActive(fixture.blackforgeMerchantId, false))
         assertTrue(service.setShippingMethodActive(fixture.portalShippingId, false))

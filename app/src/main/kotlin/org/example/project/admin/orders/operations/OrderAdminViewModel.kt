@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.example.project.domain.admin.OrderAdminService
+import org.example.project.domain.admin.OrderService
 import org.example.project.domain.order.OrderStatus
 import org.example.project.domain.shared.MerchantId
 import org.example.project.domain.shared.OrderId
@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlin.reflect.KClass
 
 class OrderAdminViewModel(
-    private val orderAdminService: org.example.project.domain.admin.OrderAdminService
+    private val orderService: OrderService
 ) : ViewModel() {
 
     private val loadVersion = AtomicLong(0L)
@@ -40,40 +40,40 @@ class OrderAdminViewModel(
         reload()
     }
 
-    fun updateOrderStatusFilter(status: org.example.project.domain.order.OrderStatus?) = viewModelScope.launch {
+    fun updateOrderStatusFilter(status: OrderStatus?) = viewModelScope.launch {
         _uiState.value = _uiState.value.copy(
             filter = _uiState.value.filter.copy(orderStatus = status)
         )
         reload()
     }
 
-    fun updateOrderStatus(orderId: org.example.project.domain.shared.OrderId, status: org.example.project.domain.order.OrderStatus) = viewModelScope.launch {
+    fun updateOrderStatus(orderId: OrderId, status: OrderStatus) = viewModelScope.launch {
         updateOrderStatusInternal(orderId, status)
     }
 
-    fun updateSubOrderStatusFilter(status: org.example.project.domain.order.OrderStatus?) = viewModelScope.launch {
+    fun updateSubOrderStatusFilter(status: OrderStatus?) = viewModelScope.launch {
         _uiState.value = _uiState.value.copy(
             filter = _uiState.value.filter.copy(subOrderStatus = status)
         )
         reload()
     }
 
-    fun updateMerchant(merchantId: org.example.project.domain.shared.MerchantId?) = viewModelScope.launch {
+    fun updateMerchant(merchantId: MerchantId?) = viewModelScope.launch {
         _uiState.value = _uiState.value.copy(
             filter = _uiState.value.filter.copy(merchantId = merchantId)
         )
         reload()
     }
 
-    fun selectOrder(orderId: org.example.project.domain.shared.OrderId) = viewModelScope.launch {
+    fun selectOrder(orderId: OrderId) = viewModelScope.launch {
         selectOrderInternal(orderId)
     }
 
-    fun updateSubOrderStatus(subOrderId: org.example.project.domain.shared.SubOrderId, status: org.example.project.domain.order.OrderStatus) = viewModelScope.launch {
+    fun updateSubOrderStatus(subOrderId: SubOrderId, status: OrderStatus) = viewModelScope.launch {
         updateSubOrderStatusInternal(subOrderId, status)
     }
 
-    private suspend fun selectOrderInternal(orderId: org.example.project.domain.shared.OrderId) {
+    private suspend fun selectOrderInternal(orderId: OrderId) {
         val version = loadVersion.incrementAndGet()
         val current = _uiState.value
         _uiState.value = current.copy(
@@ -83,7 +83,7 @@ class OrderAdminViewModel(
         )
 
         val nextState = try {
-            val detail = orderAdminService.loadOrderDetailOrNull(orderId)
+            val detail = orderService.loadOrderDetailOrNull(orderId)
             if (detail == null) {
                 current.copy(
                     errorMessage = "Order ${orderId.value} was not found.",
@@ -110,12 +110,12 @@ class OrderAdminViewModel(
         }
     }
 
-    private suspend fun updateSubOrderStatusInternal(subOrderId: org.example.project.domain.shared.SubOrderId, status: org.example.project.domain.order.OrderStatus) {
+    private suspend fun updateSubOrderStatusInternal(subOrderId: SubOrderId, status: OrderStatus) {
         val current = _uiState.value
         _uiState.value = current.copy(errorMessage = null)
 
         val success = try {
-            orderAdminService.updateSubOrderStatus(subOrderId, status)
+            orderService.updateSubOrderStatus(subOrderId, status)
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (throwable: Throwable) {
@@ -135,12 +135,12 @@ class OrderAdminViewModel(
         reload()
     }
 
-    private suspend fun updateOrderStatusInternal(orderId: org.example.project.domain.shared.OrderId, status: org.example.project.domain.order.OrderStatus) {
+    private suspend fun updateOrderStatusInternal(orderId: OrderId, status: OrderStatus) {
         val current = _uiState.value
         _uiState.value = current.copy(errorMessage = null)
 
         val success = try {
-            orderAdminService.updateOrderStatus(orderId, status)
+            orderService.updateOrderStatus(orderId, status)
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (throwable: Throwable) {
@@ -166,12 +166,12 @@ class OrderAdminViewModel(
         _uiState.value = current.copy(errorMessage = null)
 
         val nextState = try {
-            val merchants = orderAdminService.loadMerchantOptions().toPersistentList()
-            val orders = orderAdminService.loadOrders(current.filter).toPersistentList()
+            val merchants = orderService.loadMerchantOptions().toPersistentList()
+            val orders = orderService.loadOrders(current.filter).toPersistentList()
             val selectedOrderId = current.selectedOrderId
                 ?.takeIf { selectedId -> orders.any { order -> order.orderId == selectedId } }
                 ?: orders.firstOrNull()?.orderId
-            val selectedOrder = selectedOrderId?.let { orderAdminService.loadOrderDetailOrNull(it) }
+            val selectedOrder = selectedOrderId?.let { orderService.loadOrderDetailOrNull(it) }
 
             current.copy(
                 errorMessage = null,
@@ -194,12 +194,12 @@ class OrderAdminViewModel(
     }
 
     companion object {
-        fun factory(orderAdminService: org.example.project.domain.admin.OrderAdminService): ViewModelProvider.Factory =
+        fun factory(orderService: OrderService): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
                     if (modelClass == OrderAdminViewModel::class) {
-                        return OrderAdminViewModel(orderAdminService) as T
+                        return OrderAdminViewModel(orderService) as T
                     }
                     throw IllegalArgumentException(
                         "Unknown ViewModel class: ${modelClass.simpleName ?: "unknown"}"

@@ -7,7 +7,7 @@ import org.example.project.domain.shared.OrderId
 import org.example.project.domain.shared.SubOrderId
 import org.jetbrains.exposed.v1.jdbc.Database
 
-class OrderAdminService(
+class OrderService(
     private val database: Database,
     private val adminOrderRepository: AdminOrderRepository = AdminOrderRepository(),
     private val orderRepository: OrderRepository = OrderRepository()

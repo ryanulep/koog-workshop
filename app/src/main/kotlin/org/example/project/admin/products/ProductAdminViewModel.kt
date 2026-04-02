@@ -12,16 +12,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.example.project.domain.admin.ProductActiveFilter
-import org.example.project.domain.admin.ProductAdminService
-import org.example.project.domain.catalog.ProductCategory
-import org.example.project.domain.shared.MerchantId
-import org.example.project.domain.shared.ProductId
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.reflect.KClass
 
 class ProductAdminViewModel(
-    private val productAdminService: org.example.project.domain.admin.ProductAdminService
+    private val productService: org.example.project.domain.admin.ProductService
 ) : ViewModel() {
 
     private val loadVersion = AtomicLong(0L)
@@ -71,7 +66,7 @@ class ProductAdminViewModel(
             failureMessage = "Unable to update stock for product ${productId1.value}.",
             productId = productId1
         ) {
-            productAdminService.adjustStock(productId1, quantityChange)
+            productService.adjustStock(productId1, quantityChange)
         }
     }
 
@@ -82,7 +77,7 @@ class ProductAdminViewModel(
             failureMessage = "Unable to update the product state for ${productId1.value}.",
             productId = productId1
         ) {
-            productAdminService.setProductActive(productId1, isActive)
+            productService.setProductActive(productId1, isActive)
         }
     }
 
@@ -96,7 +91,7 @@ class ProductAdminViewModel(
         )
 
         val nextState = try {
-            val detail = productAdminService.loadProductDetailOrNull(productId)
+            val detail = productService.loadProductDetailOrNull(productId)
             if (detail == null) {
                 current.copy(
                     errorMessage = "Product ${productId.value} was not found.",
@@ -131,12 +126,12 @@ class ProductAdminViewModel(
         _uiState.value = current.copy(errorMessage = null)
 
         val nextState = try {
-            val merchants = productAdminService.loadMerchantOptions().toPersistentList()
-            val products = productAdminService.loadProducts(current.filter).toPersistentList()
+            val merchants = productService.loadMerchantOptions().toPersistentList()
+            val products = productService.loadProducts(current.filter).toPersistentList()
             val selectedProductId = current.selectedProductId
                 ?.takeIf { selectedId -> products.any { product -> product.id == selectedId } }
                 ?: products.firstOrNull()?.id
-            val selectedProduct = selectedProductId?.let { productAdminService.loadProductDetailOrNull(it) }
+            val selectedProduct = selectedProductId?.let { productService.loadProductDetailOrNull(it) }
 
             current.copy(
                 errorMessage = null,
@@ -187,7 +182,7 @@ class ProductAdminViewModel(
         // Only reload the specific product detail and update the list item
         val version = loadVersion.incrementAndGet()
         val nextState = try {
-            val updatedDetail = productAdminService.loadProductDetailOrNull(productId)
+            val updatedDetail = productService.loadProductDetailOrNull(productId)
             if (updatedDetail == null) {
                 current.copy(
                     errorMessage = "Product ${productId.value} was not found after update."
@@ -225,12 +220,12 @@ class ProductAdminViewModel(
     }
 
     companion object {
-        fun factory(productAdminService: org.example.project.domain.admin.ProductAdminService): ViewModelProvider.Factory =
+        fun factory(productService: org.example.project.domain.admin.ProductService): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
                     if (modelClass == ProductAdminViewModel::class) {
-                        return ProductAdminViewModel(productAdminService) as T
+                        return ProductAdminViewModel(productService) as T
                     }
                     throw IllegalArgumentException(
                         "Unknown ViewModel class: ${modelClass.simpleName ?: "unknown"}"
