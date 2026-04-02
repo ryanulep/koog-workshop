@@ -1,13 +1,12 @@
 package org.example.project
 
-import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.prompt.executor.llms.all.simpleOpenAIExecutor
 import org.example.project.admin.data.createDataSource
 import org.example.project.admin.data.createDatabase
 import org.example.project.chat.ChatAgent
 import org.example.project.domain.admin.MerchantService
 import org.example.project.domain.admin.ProductService
-import org.example.project.domain.order.OrderService
+import org.example.project.domain.admin.OrderService
 import org.example.project.koog.JdbcChatHistoryProvider
 import java.lang.System.getenv
 

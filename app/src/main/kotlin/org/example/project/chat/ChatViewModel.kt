@@ -92,7 +92,7 @@ class ChatViewModel(
                     )
                 }
 
-                val reply = chat.sendMessage(message) { question ->
+                val reply = chat.sendMessage(session, message) { question ->
                     val deferred = CompletableDeferred<String>()
                     updateState(ChatState.AwaitingUserAnswer(deferred)) {
                         copy(messages = messages.add(ChatUi.Message.CustomerSupport(question)))
