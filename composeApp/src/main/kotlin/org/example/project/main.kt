@@ -22,10 +22,9 @@ import org.example.project.admin.data.createDataSource
 import org.example.project.chat.ChatScreen
 import org.example.project.chat.ChatTopBar
 import org.example.project.chat.ChatViewModel
-import org.example.project.chat.agent.ChatAgent
-import org.example.project.chat.agent.JdbcChatHistoryProvider
+import org.example.project.chat.ChatAgent
+import org.example.project.koog.JdbcChatHistoryProvider
 import java.lang.System.getenv
-import javax.sql.DataSource
 import kotlin.uuid.Uuid
 
 fun main() {

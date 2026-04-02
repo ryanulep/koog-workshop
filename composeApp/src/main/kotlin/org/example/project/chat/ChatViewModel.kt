@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.example.project.chat.ChatUi.Message.User
-import org.example.project.chat.agent.ChatAgent
 import kotlin.reflect.KClass
 import kotlin.uuid.Uuid
 
@@ -27,6 +26,7 @@ data class ChatUi(
             override val id: String = Uuid.random().toString()
             override val content: String = user
         }
+
         data class CustomerSupport(val customerSupport: String) : Message {
             override val id: String = Uuid.random().toString()
             override val content: String = customerSupport

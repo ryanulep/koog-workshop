@@ -1,4 +1,4 @@
-package org.example.project.chat.agent
+package org.example.project.koog
 
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.prompt.message.Message
@@ -31,7 +31,7 @@ class JdbcChatHistoryProvider(private val source: DataSource) : ChatHistoryProvi
                 stmt.executeQuery().use { rs ->
                     if (rs.next()) {
                         val messages = rs.getString("messages")
-                        Json.decodeFromString(messages)
+                        Json.Default.decodeFromString(messages)
                     } else emptyList()
                 }
             }

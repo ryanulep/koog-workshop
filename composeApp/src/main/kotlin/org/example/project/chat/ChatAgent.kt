@@ -1,4 +1,4 @@
-package org.example.project.chat.agent
+package org.example.project.chat
 
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.agents.chatMemory.feature.ChatMemory
@@ -8,7 +8,6 @@ import ai.koog.prompt.executor.model.PromptExecutor
 import ai.koog.prompt.message.Message
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
-import org.example.project.chat.ChatUi
 
 class ChatAgent(
     private val sessionId: String,
@@ -30,12 +29,12 @@ class ChatAgent(
     }
 
     suspend fun sendMessage(userMessage: String): ChatUi.Message.CustomerSupport {
-        val agent = AIAgent(
+        val agent = AIAgent.Companion(
             promptExecutor = executor,
             systemPrompt = "You are a helpful Fantasy Store assistant. Help customers with products, orders, and general inquiries.",
-            llmModel = OpenAIModels.Chat.GPT5_4,
+            llmModel = OpenAIModels.Chat.GPT5_4
         ) {
-            install(ChatMemory) {
+            install(ChatMemory.Feature) {
                 this.chatHistoryProvider = history
                 windowSize(50)
             }
