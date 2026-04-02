@@ -8,28 +8,28 @@ import org.sqlite.SQLiteDataSource
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import javax.sql.DataSource
 import kotlin.time.Clock
 
 private const val ADMIN_DATABASE_DIRECTORY = ".agent-fantasy-store"
 private const val ADMIN_DATABASE_FILE = "agent-fantasy-store.db"
 
 fun adminDatabasePath(): Path =
-    Paths.get(System.getProperty("user.home"), ADMIN_DATABASE_DIRECTORY, ADMIN_DATABASE_FILE)
+    Paths.get(ADMIN_DATABASE_DIRECTORY, ADMIN_DATABASE_FILE)
 
-fun createAdminDatabase(
-    path: Path = adminDatabasePath(),
-    clock: Clock = Clock.System
-): Database {
+fun createAdminDatabase(dataSource: DataSource, clock: Clock = Clock.System): Database {
+    return Database.connect(dataSource)
+        .createTables()
+        .seedAdminDemoDataIfEmpty(clock)
+}
+
+fun createDataSource(path: Path = adminDatabasePath()): SQLiteDataSource {
     val normalizedPath = path.toAbsolutePath().normalize()
     Files.createDirectories(normalizedPath.parent)
 
-    val dataSource = SQLiteDataSource(SQLiteConfig().apply {
+    return SQLiteDataSource(SQLiteConfig().apply {
         enforceForeignKeys(true)
     }).apply {
         url = "jdbc:sqlite:${normalizedPath.toUri().toASCIIString()}"
     }
-
-    return Database.connect(dataSource)
-        .createTables()
-        .seedAdminDemoDataIfEmpty(clock)
 }

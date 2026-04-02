@@ -10,7 +10,12 @@ plugins {
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
-        freeCompilerArgs.addAll("-Xcontext-parameters")
+        freeCompilerArgs.addAll(
+            "-Xcontext-parameters",
+            "-Xskip-prerelease-check",
+            "-Xexplicit-backing-fields"
+        )
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 }
 
@@ -25,12 +30,12 @@ if (enableMetrics) {
             freeCompilerArgs.addAll(
                 "-P",
                 "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" +
-                    project.layout.buildDirectory.asFile.get().absolutePath + "/compose_metrics"
+                        project.layout.buildDirectory.asFile.get().absolutePath + "/compose_metrics"
             )
             freeCompilerArgs.addAll(
                 "-P",
                 "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" +
-                    project.layout.buildDirectory.asFile.get().absolutePath + "/compose_metrics"
+                        project.layout.buildDirectory.asFile.get().absolutePath + "/compose_metrics"
             )
         }
     }

@@ -13,12 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.example.project.domain.chat.ChatMessage
-import org.example.project.domain.chat.MessageRole
+import kotlin.time.Instant
 
 @Composable
 fun ChatScreen(
-    uiState: ChatUiState,
+    uiState: ChatUi,
     onInputChange: (String) -> Unit,
     onSendMessage: () -> Unit
 ) {
@@ -27,7 +26,7 @@ fun ChatScreen(
             messages = uiState.messages,
             modifier = Modifier.weight(1f)
         )
-        
+
         InputArea(
             inputText = uiState.inputText,
             isSending = uiState.isSending,
@@ -39,17 +38,17 @@ fun ChatScreen(
 
 @Composable
 private fun MessageList(
-    messages: List<ChatMessage>,
+    messages: List<ChatUi.Message>,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
-    
+
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.size - 1)
         }
     }
-    
+
     LazyColumn(
         modifier = modifier.fillMaxWidth().padding(16.dp),
         state = listState,
@@ -62,20 +61,20 @@ private fun MessageList(
 }
 
 @Composable
-private fun MessageBubble(message: ChatMessage) {
-    val isUser = message.role == MessageRole.User
-    val arrangement = if (isUser) Arrangement.End else Arrangement.Start
-    val bubbleColor = if (isUser) {
-        MaterialTheme.colorScheme.primaryContainer
-    } else {
-        MaterialTheme.colorScheme.secondaryContainer
+private fun MessageBubble(message: ChatUi.Message) {
+    val arrangement = when (message) {
+        is ChatUi.Message.User -> Arrangement.End
+        is ChatUi.Message.CustomerSupport -> Arrangement.Start
     }
-    val textColor = if (isUser) {
-        MaterialTheme.colorScheme.onPrimaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSecondaryContainer
+    val bubbleColor = when (message) {
+        is ChatUi.Message.User -> MaterialTheme.colorScheme.primaryContainer
+        is ChatUi.Message.CustomerSupport -> MaterialTheme.colorScheme.secondaryContainer
     }
-    
+    val textColor = when (message) {
+        is ChatUi.Message.User -> MaterialTheme.colorScheme.onPrimaryContainer
+        is ChatUi.Message.CustomerSupport -> MaterialTheme.colorScheme.onSecondaryContainer
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = arrangement
@@ -90,14 +89,6 @@ private fun MessageBubble(message: ChatMessage) {
                 text = message.content,
                 style = MaterialTheme.typography.bodyLarge,
                 color = textColor
-            )
-            
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            Text(
-                text = formatTimestamp(message.timestamp),
-                style = MaterialTheme.typography.labelSmall,
-                color = textColor.copy(alpha = 0.7f)
             )
         }
     }
@@ -129,7 +120,7 @@ private fun InputArea(
                 enabled = !isSending,
                 maxLines = 3
             )
-            
+
             Button(
                 onClick = onSendMessage,
                 enabled = !isSending && inputText.isNotBlank()
@@ -140,7 +131,7 @@ private fun InputArea(
     }
 }
 
-private fun formatTimestamp(timestamp: kotlinx.datetime.Instant): String {
+private fun formatTimestamp(timestamp: Instant): String {
     val localDateTime = timestamp.toLocalDateTime(TimeZone.currentSystemDefault())
     return String.format("%02d:%02d", localDateTime.hour, localDateTime.minute)
 }
