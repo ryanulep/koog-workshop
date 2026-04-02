@@ -58,6 +58,8 @@ dependencies {
     implementation(libs.exposed.kotlin.datetime)
     implementation(libs.sqlite.jdbc)
     implementation(libs.kotlinx.coroutinesSwing)
+    implementation(libs.koog.agents)
+    implementation(libs.koog.memory)
     testImplementation(libs.kotlin.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

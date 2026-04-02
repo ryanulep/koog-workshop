@@ -1,6 +1,6 @@
 package org.example.project.domain.chat
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 data class ChatMessage(
     val id: String,

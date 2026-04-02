@@ -1,10 +1,12 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     alias(libs.plugins.kotlinJvm)
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
-        freeCompilerArgs.addAll("-Xcontext-parameters")
+        freeCompilerArgs.addAll("-Xcontext-parameters", "-Xexplicit-backing-fields")
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 }

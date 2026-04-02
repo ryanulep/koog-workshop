@@ -1,5 +1,6 @@
 package org.example.project
 
+import ai.koog.prompt.executor.llms.all.simpleOpenAIExecutor
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -20,11 +21,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import org.example.project.chat.ChatScreen
 import org.example.project.chat.ChatTopBar
 import org.example.project.chat.ChatViewModel
+import org.example.project.chat.agent.KoogChatAgent
 import org.example.project.domain.chat.ChatMemory
 
 fun main() = application {
+    val executor = simpleOpenAIExecutor(
+        System.getenv("OPENAI_API_KEY") ?: error("OPENAI_API_KEY environment variable not set")
+    )
     var adminWindowOpen by remember { mutableStateOf(false) }
-    val chatMemory = remember { ChatMemory() }
+    val chatMemory = remember { ChatMemory(KoogChatAgent(executor = executor)) }
 
     Window(
         onCloseRequest = ::exitApplication,

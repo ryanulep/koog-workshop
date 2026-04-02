@@ -53,7 +53,7 @@ class ChatViewModel(
 
     private fun refresh() {
         _uiState.value = _uiState.value.copy(
-            messages = chatMemory.getMessages().toPersistentList()
+            messages = chatMemory.mes
         )
     }
 
