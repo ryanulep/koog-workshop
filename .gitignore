@@ -18,3 +18,4 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
 /composeApp/.agent-fantasy-store/agent-fantasy-store.db
+/app/.agent-fantasy-store/agent-fantasy-store.db
