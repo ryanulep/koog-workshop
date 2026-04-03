@@ -17,6 +17,7 @@ import ai.koog.agents.ext.agent.CriticResult
 import ai.koog.agents.ext.agent.subgraphWithTask
 import ai.koog.agents.ext.agent.subgraphWithVerification
 import ai.koog.prompt.dsl.prompt
+import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.llm.LLModel
 import ai.koog.prompt.message.Message
 import ai.koog.prompt.message.RequestMetaInfo
@@ -24,16 +25,19 @@ import kotlinx.serialization.Serializable
 import org.example.project.domain.order.Order
 import org.example.project.domain.order.OrderService
 import org.example.project.domain.order.OrderStatus
+import kotlin.uuid.Uuid
 import org.example.project.domain.shared.CharacterId
 import org.example.project.domain.shared.OrderId
+import org.example.project.domain.shared.Page
 import org.example.project.domain.shared.SubOrderId
+import kotlin.time.Instant
 
 @Serializable
 data class OrderDetails(
-    val orderId: OrderId,
+    val orderId: String,
     val status: OrderStatus,
-    val createdAt: String,
-    val updatedAt: String
+    val createdAt: Instant,
+    val updatedAt: Instant
 )
 
 @Serializable
@@ -44,9 +48,28 @@ class ReadOrderTools(
     val orderService: OrderService
 ) : ToolSet {
     @Tool
-    suspend fun getOrderHistory(offset: Long = 0, limit: Long = 5) = orderService.getOrderHistory(characterId)
+    suspend fun getOrderHistory(offset: Long = 0, limit: Long = 5): List<OrderDetails> =
+        orderService.getOrderHistory(characterId)
+            .items.map {
+                OrderDetails(
+                    it.id.value.toString(),
+                    it.status,
+                    it.createdAt,
+                    it.updatedAt
+                )
+            }
+
     @Tool
-    suspend fun getOrder(orderId: OrderId) = orderService.getOrderDetailsOrNull(orderId)
+    suspend fun getOrderOrNull(orderId: String): OrderDetails? =
+        orderService.getOrderDetailsOrNull(OrderId(Uuid.parse(orderId)))
+            ?.let {
+                OrderDetails(
+                    it.order.id.value.toString(),
+                    it.order.status,
+                    it.order.createdAt,
+                    it.order.updatedAt
+                )
+            }
 }
 
 class UpdateOrderTools(
@@ -55,11 +78,11 @@ class UpdateOrderTools(
 ) : ToolSet {
     // TODO: update cancelOrder such that it guarantees that its characterId is the owner of the order??
     @Tool
-    suspend fun cancelOrder(order: OrderId) = orderService.cancelOrder(order)
+    suspend fun cancelOrder(orderId: String) = orderService.cancelOrder(OrderId(Uuid.parse(orderId)))
 
     @Tool
-    suspend fun updateSubOrderStatus(subOrderId: SubOrderId, status: OrderStatus) =
-        orderService.updateSubOrderStatus(subOrderId, status)
+    suspend fun updateSubOrderStatus(subOrderId: String, status: OrderStatus) =
+        orderService.updateSubOrderStatus(SubOrderId(Uuid.parse(subOrderId)), status)
 }
 
 class CustomerSupportTools(
@@ -73,7 +96,9 @@ operator fun ToolSet.plus(other: ToolSet): List<ToolFromCallable<*>> = asTools()
 fun orderCustomerSupportStrategy(
     tools: CustomerSupportTools
 ) = strategy<String, String>("order-customer-support") {
-    val moderate by nodeLLMModerateString()
+    val moderate by nodeLLMModerateString(
+        moderatingModel = OpenAIModels.Moderation.Omni
+    )
 
     val summarize by subgraphWithTask<String, OrderDetails>(tools = tools.askQuestionTool + tools.readOrderTools) { input ->
         """
@@ -83,13 +108,13 @@ fun orderCustomerSupportStrategy(
 
     val resolve by subgraphWithTask<OrderDetails, IssueSolution>(tools = tools.readOrderTools + tools.updateOrderTools) { details ->
         """
-            Resolve the problem given the details: $details
+            Resolve the problem ${agentInput<String>()} given the details: $details
             Tell us what actions you took to fix the problem when you're done.
         """.trimIndent()
     }
 
     val verify by subgraphWithVerification<IssueSolution>(tools = tools.readOrderTools + tools.askQuestionTool) { solution ->
-        "Verify if $solution fixed the problem. Also verify its actually fixed by checking the system state."
+        "Verify if $solution fixed the problem. Also verify its actually fixed by checking the system state if necessary."
     }
 
     val adjust by subgraphWithTask<CriticResult<IssueSolution>, IssueSolution>(tools = tools.readOrderTools + tools.updateOrderTools) { critique ->

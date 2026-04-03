@@ -57,7 +57,7 @@ fun main() {
                 )
             ) {
                 val chatViewModel: ChatViewModel =
-                    viewModel(factory = ChatViewModel.factory(session, loggedInCharacter?.id, dependencies.chat))
+                    viewModel(factory = ChatViewModel.factory(session, dependencies.chat))
                 val chatUiState by chatViewModel.uiState.collectAsState()
 
                 LaunchedEffect(Unit) { chatViewModel.loadHistory() }
@@ -75,7 +75,7 @@ fun main() {
                         ChatScreen(
                             uiState = chatUiState,
                             onInputChange = chatViewModel::updateInputText,
-                            onSendMessage = chatViewModel::sendMessage
+                            onSendMessage = { chatViewModel.sendMessage(loggedInCharacter?.id) }
                         )
                     }
                 }

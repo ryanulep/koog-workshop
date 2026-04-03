@@ -49,7 +49,6 @@ data class ChatUi(
 
 class ChatViewModel(
     private val session: Uuid,
-    private val characterId: CharacterId?,
     private val chat: ChatAgent
 ) : ViewModel() {
     val uiState: StateFlow<ChatUi>
@@ -71,7 +70,7 @@ class ChatViewModel(
         uiState.value = uiState.value.copy(inputText = text)
     }
 
-    fun sendMessage() = viewModelScope.launch {
+    fun sendMessage(characterId: CharacterId?) = viewModelScope.launch {
         val message = uiState.value.inputText.trim()
         if (message.isEmpty()) return@launch
 
@@ -112,11 +111,11 @@ class ChatViewModel(
     }
 
     companion object {
-        fun factory(session: Uuid, characterId: CharacterId?, chat: ChatAgent): ViewModelProvider.Factory =
+        fun factory(session: Uuid, chat: ChatAgent): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
-                    return ChatViewModel(session, characterId, chat) as T
+                    return ChatViewModel(session, chat) as T
                 }
             }
     }
