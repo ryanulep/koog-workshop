@@ -8,14 +8,19 @@ import org.example.project.domain.character.Transactions
 import org.example.project.domain.catalog.Weapons
 import org.example.project.domain.catalog.ArmorSlot
 import org.example.project.domain.catalog.DamageType
+import org.example.project.domain.catalog.Merchants
 import org.example.project.domain.order.OrderStatus
 import org.example.project.domain.catalog.ProductCategory
 import org.example.project.domain.catalog.Rarity
 import org.example.project.domain.catalog.WeaponSlot
+import org.example.project.domain.character.Characters
+import org.example.project.domain.currency.Currencies
+import org.example.project.domain.order.Orders
 import org.example.project.domain.shared.CurrencyId
 import org.example.project.domain.shared.MerchantId
 import org.example.project.domain.shared.ProductId
 import org.example.project.domain.shared.ShippingMethodId
+import org.example.project.domain.shipping.ShippingMethods
 import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -31,20 +36,20 @@ fun Database.seedDemoDataIfEmpty(
     clock: Clock = Clock.System
 ): Database = apply {
     transaction(this) {
-        if (!shouldSeedAdminDemoData()) return@transaction
+        if (!shouldSeedDemoData()) return@transaction
         AdminDemoDataSeeder(clock.now()).seed()
     }
 }
 
 context(_: Transaction)
-private fun shouldSeedAdminDemoData(): Boolean =
+private fun shouldSeedDemoData(): Boolean =
     listOf(
-        org.example.project.domain.character.Characters,
-        org.example.project.domain.order.Orders,
+        Characters,
+        Orders,
         Products,
-        org.example.project.domain.catalog.Merchants,
-        org.example.project.domain.currency.Currencies,
-        org.example.project.domain.shipping.ShippingMethods
+        Merchants,
+        Currencies,
+        ShippingMethods
     )
         .all { table -> table.selectAll().count() == 0L }
 
@@ -461,10 +466,10 @@ private class AdminDemoDataSeeder(
         name: String,
         symbol: String
     ): CurrencyId = CurrencyId(
-        org.example.project.domain.currency.Currencies.insertAndGetId {
-            it[org.example.project.domain.currency.Currencies.code] = code
-            it[org.example.project.domain.currency.Currencies.name] = name
-            it[org.example.project.domain.currency.Currencies.symbol] = symbol
+        Currencies.insertAndGetId {
+            it[Currencies.code] = code
+            it[Currencies.name] = name
+            it[Currencies.symbol] = symbol
         }.value
     )
 
@@ -475,11 +480,11 @@ private class AdminDemoDataSeeder(
         location: String?,
         theme: String?
     ): MerchantId = MerchantId(
-        org.example.project.domain.catalog.Merchants.insertAndGetId {
-            it[org.example.project.domain.catalog.Merchants.name] = name
-            it[org.example.project.domain.catalog.Merchants.description] = description
-            it[org.example.project.domain.catalog.Merchants.location] = location
-            it[org.example.project.domain.catalog.Merchants.theme] = theme
+        Merchants.insertAndGetId {
+            it[Merchants.name] = name
+            it[Merchants.description] = description
+            it[Merchants.location] = location
+            it[Merchants.theme] = theme
         }.value
     )
 
@@ -492,12 +497,12 @@ private class AdminDemoDataSeeder(
         estimatedDays: Int
     ): ShippingMethodSeed = ShippingMethodSeed(
         id = ShippingMethodId(
-                    org.example.project.domain.shipping.ShippingMethods.insertAndGetId {
-                        it[org.example.project.domain.shipping.ShippingMethods.name] = name
-                        it[org.example.project.domain.shipping.ShippingMethods.description] = description
-                        it[org.example.project.domain.shipping.ShippingMethods.baseCost] = baseCost
+                    ShippingMethods.insertAndGetId {
+                        it[ShippingMethods.name] = name
+                        it[ShippingMethods.description] = description
+                        it[ShippingMethods.baseCost] = baseCost
                         it[currency] = currencyId.value
-                        it[org.example.project.domain.shipping.ShippingMethods.estimatedDays] = estimatedDays
+                        it[ShippingMethods.estimatedDays] = estimatedDays
                     }.value
                 ),
         baseCost = baseCost
@@ -517,8 +522,8 @@ private class AdminDemoDataSeeder(
     context(_: Transaction)
     private fun insertCharacter(name: String): org.example.project.domain.shared.CharacterId =
         _root_ide_package_.org.example.project.domain.shared.CharacterId(
-            org.example.project.domain.character.Characters.insertAndGetId {
-                it[org.example.project.domain.character.Characters.name] = name
+            Characters.insertAndGetId {
+                it[Characters.name] = name
             }.value
         )
 
@@ -531,13 +536,13 @@ private class AdminDemoDataSeeder(
         createdAt: Instant,
         updatedAt: Instant
     ): org.example.project.domain.shared.OrderId = _root_ide_package_.org.example.project.domain.shared.OrderId(
-        org.example.project.domain.order.Orders.insertAndGetId {
+        Orders.insertAndGetId {
             it[character] = characterId.value
-            it[org.example.project.domain.order.Orders.status] = status.name
-            it[org.example.project.domain.order.Orders.totalPrice] = totalPrice
+            it[Orders.status] = status.name
+            it[Orders.totalPrice] = totalPrice
             it[totalCurrency] = currencyId.value
-            it[org.example.project.domain.order.Orders.createdAt] = createdAt
-            it[org.example.project.domain.order.Orders.updatedAt] = updatedAt
+            it[Orders.createdAt] = createdAt
+            it[Orders.updatedAt] = updatedAt
         }.value
     )
 
