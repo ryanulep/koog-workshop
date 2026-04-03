@@ -66,8 +66,8 @@ internal fun ProductFilterContent(
     uiState: ProductAdminUiState,
     onUpdateNameQuery: (String) -> Unit,
     onUpdateActiveFilter: (ProductActiveFilter) -> Unit,
-    onUpdateCategory: (org.example.project.domain.catalog.ProductCategory?) -> Unit,
-    onUpdateMerchant: (org.example.project.domain.shared.MerchantId?) -> Unit
+    onUpdateCategory: (ProductCategory?) -> Unit,
+    onUpdateMerchant: (MerchantId?) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(AdminSectionSpacing)) {
         ToolbarTextFilter(
@@ -98,8 +98,8 @@ internal fun ProductFilterContent(
         ) {
             FilterGroup(
                 title = "Category",
-                options = persistentListOf<Pair<String, org.example.project.domain.catalog.ProductCategory?>>("All" to null)
-                    .addAll(_root_ide_package_.org.example.project.domain.catalog.ProductCategory.entries.map { it.labelize() to it }),
+                options = persistentListOf<Pair<String, ProductCategory?>>("All" to null)
+                    .addAll(ProductCategory.entries.map { it.labelize() to it }),
                 selected = uiState.filter.category,
                 onSelect = onUpdateCategory,
                 optionContentDescription = { _, value -> AdminAccessibility.productCategoryFilter(value) },
@@ -107,7 +107,7 @@ internal fun ProductFilterContent(
             )
             FilterGroup(
                 title = "Merchant",
-                options = persistentListOf<Pair<String, org.example.project.domain.shared.MerchantId?>>("All" to null)
+                options = persistentListOf<Pair<String, MerchantId?>>("All" to null)
                     .addAll(uiState.merchants.map { it.name to it.id }),
                 selected = uiState.filter.merchantId,
                 onSelect = onUpdateMerchant,
@@ -121,7 +121,7 @@ internal fun ProductFilterContent(
 @Composable
 fun ProductOperationsScreen(
     uiState: ProductAdminUiState,
-    onSelectProduct: (org.example.project.domain.shared.ProductId) -> Unit,
+    onSelectProduct: (ProductId) -> Unit,
     onAdjustStock: (Int) -> Unit,
     onSetActive: (Boolean) -> Unit
 ) {
@@ -164,8 +164,8 @@ fun ProductOperationsScreen(
 private fun ProductListPanel(
     modifier: Modifier,
     products: PersistentList<ProductListItem>,
-    selectedProductId: org.example.project.domain.shared.ProductId?,
-    onSelectProduct: (org.example.project.domain.shared.ProductId) -> Unit
+    selectedProductId: ProductId?,
+    onSelectProduct: (ProductId) -> Unit
 ) {
     Card(
         modifier = modifier.semantics {

@@ -54,10 +54,10 @@ import org.example.project.domain.shared.ShippingMethodId
 @Composable
 fun MerchantOperationsScreen(
     uiState: MerchantAdminUiState,
-    onSelectMerchant: (org.example.project.domain.shared.MerchantId) -> Unit,
+    onSelectMerchant: (MerchantId) -> Unit,
     onSetMerchantActive: (Boolean) -> Unit,
-    onSetShippingMethodActive: (org.example.project.domain.shared.ShippingMethodId, Boolean) -> Unit,
-    onUpdateShippingAssignmentSelection: (org.example.project.domain.shared.ShippingMethodId, Boolean) -> Unit,
+    onSetShippingMethodActive: (ShippingMethodId, Boolean) -> Unit,
+    onUpdateShippingAssignmentSelection: (ShippingMethodId, Boolean) -> Unit,
     onSaveShippingAssignments: () -> Unit
 ) {
     Column(
@@ -103,8 +103,8 @@ fun MerchantOperationsScreen(
 private fun MerchantListPanel(
     modifier: Modifier,
     merchants: PersistentList<MerchantListItem>,
-    selectedMerchantId: org.example.project.domain.shared.MerchantId?,
-    onSelectMerchant: (org.example.project.domain.shared.MerchantId) -> Unit
+    selectedMerchantId: MerchantId?,
+    onSelectMerchant: (MerchantId) -> Unit
 ) {
     Card(
         modifier = modifier.semantics {
@@ -215,11 +215,11 @@ private fun MerchantRow(
 private fun MerchantDetailPanel(
     modifier: Modifier,
     merchantDetail: MerchantDetail?,
-    selectedShippingMethodIds: PersistentSet<org.example.project.domain.shared.ShippingMethodId>,
+    selectedShippingMethodIds: PersistentSet<ShippingMethodId>,
     hasPendingShippingAssignments: Boolean,
     onSetMerchantActive: (Boolean) -> Unit,
-    onSetShippingMethodActive: (org.example.project.domain.shared.ShippingMethodId, Boolean) -> Unit,
-    onUpdateShippingAssignmentSelection: (org.example.project.domain.shared.ShippingMethodId, Boolean) -> Unit,
+    onSetShippingMethodActive: (ShippingMethodId, Boolean) -> Unit,
+    onUpdateShippingAssignmentSelection: (ShippingMethodId, Boolean) -> Unit,
     onSaveShippingAssignments: () -> Unit
 ) {
     Card(
@@ -379,10 +379,10 @@ private fun AssignedShippingMethodsSection(
 private fun ShippingAssignmentsEditor(
     merchantName: String,
     availableShippingMethods: List<ShippingMethodAssignmentItem>,
-    selectedShippingMethodIds: PersistentSet<org.example.project.domain.shared.ShippingMethodId>,
+    selectedShippingMethodIds: PersistentSet<ShippingMethodId>,
     hasPendingShippingAssignments: Boolean,
-    onSetShippingMethodActive: (org.example.project.domain.shared.ShippingMethodId, Boolean) -> Unit,
-    onUpdateShippingAssignmentSelection: (org.example.project.domain.shared.ShippingMethodId, Boolean) -> Unit,
+    onSetShippingMethodActive: (ShippingMethodId, Boolean) -> Unit,
+    onUpdateShippingAssignmentSelection: (ShippingMethodId, Boolean) -> Unit,
     onSaveShippingAssignments: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

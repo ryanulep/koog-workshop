@@ -128,9 +128,9 @@ internal fun OrderFilterContent(
 @Composable
 fun OrderOperationsScreen(
     uiState: OrderAdminUiState,
-    onSelectOrder: (org.example.project.domain.shared.OrderId) -> Unit,
-    onUpdateOrderStatus: (org.example.project.domain.shared.OrderId, OrderStatus) -> Unit,
-    onUpdateSubOrderStatus: (org.example.project.domain.shared.SubOrderId, OrderStatus) -> Unit
+    onSelectOrder: (OrderId) -> Unit,
+    onUpdateOrderStatus: (OrderId, OrderStatus) -> Unit,
+    onUpdateSubOrderStatus: (SubOrderId, OrderStatus) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -171,8 +171,8 @@ fun OrderOperationsScreen(
 private fun OrderListPanel(
     modifier: Modifier,
     orders: PersistentList<OrderListItem>,
-    selectedOrderId: org.example.project.domain.shared.OrderId?,
-    onSelectOrder: (org.example.project.domain.shared.OrderId) -> Unit
+    selectedOrderId: OrderId?,
+    onSelectOrder: (OrderId) -> Unit
 ) {
     Card(
         modifier = modifier.semantics {
@@ -299,8 +299,8 @@ private fun OrderRow(
 private fun OrderDetailPanel(
     modifier: Modifier,
     order: AdminOrderDetail?,
-    onUpdateOrderStatus: (org.example.project.domain.shared.OrderId, OrderStatus) -> Unit,
-    onUpdateSubOrderStatus: (org.example.project.domain.shared.SubOrderId, OrderStatus) -> Unit
+    onUpdateOrderStatus: (OrderId, OrderStatus) -> Unit,
+    onUpdateSubOrderStatus: (SubOrderId, OrderStatus) -> Unit
 ) {
     Card(
         modifier = modifier.semantics {
@@ -409,7 +409,7 @@ private fun OrderDetailPanel(
 @Composable
 private fun SubOrderCard(
     detail: AdminSubOrderDetail,
-    onUpdateStatus: (org.example.project.domain.shared.SubOrderId, OrderStatus) -> Unit
+    onUpdateStatus: (SubOrderId, OrderStatus) -> Unit
 ) {
     Card(
         modifier = Modifier.semantics {
@@ -620,6 +620,6 @@ private fun orderStatusAccessibilityDescription(status: OrderStatus): String =
     "Set order status to ${status.labelize()}"
 
 private fun subOrderStatusAccessibilityDescription(
-    subOrderId: org.example.project.domain.shared.SubOrderId,
+    subOrderId: SubOrderId,
     status: OrderStatus
 ): String = "Set sub-order ${subOrderId.value} status to ${status.labelize()}"
