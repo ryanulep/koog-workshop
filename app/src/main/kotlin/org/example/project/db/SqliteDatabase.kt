@@ -48,26 +48,21 @@ fun createDatabase(dataSource: DataSource): Database =
 fun createDataSource(path: Path = adminDatabasePath()): SQLiteDataSource {
     val normalizedPath = path.toAbsolutePath().normalize()
     Files.createDirectories(normalizedPath.parent)
-
-    return SQLiteDataSource(SQLiteConfig().apply {
-        enforceForeignKeys(true)
-    }).apply {
-        url = "jdbc:sqlite:${normalizedPath.toUri().toASCIIString()}"
-    }
+    return sqliteDataSource("jdbc:sqlite:${normalizedPath.toUri().toASCIIString()}")
 }
 
-fun connectSqlite(url: String): Database {
-    val dataSource = SQLiteDataSource(SQLiteConfig().apply {
+private fun sqliteDataSource(url: String): SQLiteDataSource =
+    SQLiteDataSource(SQLiteConfig().apply {
         enforceForeignKeys(true)
     }).apply {
         this.url = url
     }
 
-    return Database.connect(dataSource)
-}
+fun connectSqlite(url: String): Database =
+    Database.connect(sqliteDataSource(url))
 
 fun connectSqlite(path: Path): Database =
-    connectSqlite("jdbc:sqlite:${path.toAbsolutePath().normalize().toUri().toASCIIString()}")
+    Database.connect(createDataSource(path))
 
 fun connectSqlite(file: File): Database =
     connectSqlite(file.toPath())
