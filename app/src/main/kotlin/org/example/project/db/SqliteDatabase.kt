@@ -29,7 +29,32 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.sqlite.SQLiteConfig
 import org.sqlite.SQLiteDataSource
 import java.io.File
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
+import javax.sql.DataSource
+
+private const val DATABASE_DIRECTORY = ".agent-fantasy-store"
+private const val DATABASE_FILE = "agent-fantasy-store.db"
+
+fun adminDatabasePath(): Path =
+    Paths.get(DATABASE_DIRECTORY, DATABASE_FILE)
+
+fun createDatabase(dataSource: DataSource): Database =
+    Database.connect(dataSource)
+        .createTables()
+        .seedDemoDataIfEmpty()
+
+fun createDataSource(path: Path = adminDatabasePath()): SQLiteDataSource {
+    val normalizedPath = path.toAbsolutePath().normalize()
+    Files.createDirectories(normalizedPath.parent)
+
+    return SQLiteDataSource(SQLiteConfig().apply {
+        enforceForeignKeys(true)
+    }).apply {
+        url = "jdbc:sqlite:${normalizedPath.toUri().toASCIIString()}"
+    }
+}
 
 fun connectSqlite(url: String): Database {
     val dataSource = SQLiteDataSource(SQLiteConfig().apply {
@@ -47,7 +72,7 @@ fun connectSqlite(path: Path): Database =
 fun connectSqlite(file: File): Database =
     connectSqlite(file.toPath())
 
-fun adminSchemaTables(): List<Table> = listOf(
+fun schemaTables(): List<Table> = listOf(
     Characters,
     Currencies,
     CurrencyConversions,
@@ -70,7 +95,7 @@ fun adminSchemaTables(): List<Table> = listOf(
 
 fun Database.createTables(): Database = apply {
     transaction(this) {
-        SchemaUtils.create(*adminSchemaTables().toTypedArray())
+        SchemaUtils.create(*schemaTables().toTypedArray())
     }
 }
 

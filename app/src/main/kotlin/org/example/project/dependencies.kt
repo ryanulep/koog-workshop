@@ -2,6 +2,8 @@ package org.example.project
 
 import ai.koog.prompt.executor.llms.all.simpleOpenAIExecutor
 import org.example.project.chat.ChatAgent
+import org.example.project.db.createDataSource
+import org.example.project.db.createDatabase
 import org.example.project.domain.admin.merchants.AdminMerchantService
 import org.example.project.domain.admin.orders.AdminOrderService
 import org.example.project.domain.admin.products.AdminProductService
