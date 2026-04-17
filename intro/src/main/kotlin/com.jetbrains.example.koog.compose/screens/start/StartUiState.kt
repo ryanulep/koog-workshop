@@ -5,19 +5,14 @@ import com.jetbrains.example.koog.compose.NavRoute
 data class StartUiState(
     val demoCards: List<CardItem> = listOf(
         CardItem(
-            title = "Calculator",
-            description = "A calculator agent that can solve math problems. Ask it any calculation and get the result.",
-            agentDemoRoute = NavRoute.AgentDemoRoute.CalculatorScreen
+            title = "Basic Chat",
+            description = "A simple chat agent that can discuss any topic with you. It doesn't use any external tools.",
+            agentDemoRoute = NavRoute.AgentDemoRoute.BasicAgentScreen
         ),
         CardItem(
             title = "Weather Forecast",
             description = "A weather agent that can provide forecasts for any location. Ask about weather conditions, dates, and more.",
             agentDemoRoute = NavRoute.AgentDemoRoute.WeatherScreen
-        ),
-        CardItem(
-            title = "Basic Chat",
-            description = "A simple chat agent that can discuss any topic with you. It doesn't use any external tools.",
-            agentDemoRoute = NavRoute.AgentDemoRoute.BasicAgentScreen
         ),
     )
 )

@@ -46,12 +46,12 @@ fun ComposeApp() = AppTheme {
                     )
                 }
 
-                entry<NavRoute.AgentDemoRoute.CalculatorScreen> {
+                entry<NavRoute.AgentDemoRoute.BasicAgentScreen> {
                     AgentDemoScreen(
                         viewModel = koin.get {
                             parametersOf(
                                 appNavigation,
-                                "calculator",
+                                "basic",
                             )
                         }
                     )
@@ -63,17 +63,6 @@ fun ComposeApp() = AppTheme {
                             parametersOf(
                                 appNavigation,
                                 "weather",
-                            )
-                        }
-                    )
-                }
-
-                entry<NavRoute.AgentDemoRoute.BasicAgentScreen> {
-                    AgentDemoScreen(
-                        viewModel = koin.get {
-                            parametersOf(
-                                appNavigation,
-                                "basic",
                             )
                         }
                     )
@@ -99,9 +88,6 @@ sealed interface NavRoute : NavKey {
      */
     @Serializable
     sealed interface AgentDemoRoute : NavRoute {
-        @Serializable
-        data object CalculatorScreen : AgentDemoRoute
-
         @Serializable
         data object WeatherScreen : AgentDemoRoute
 
