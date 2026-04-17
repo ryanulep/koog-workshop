@@ -66,7 +66,6 @@ fun AgentDemoScreen(viewModel: AgentDemoViewModel) {
         inputText = uiState.inputText,
         isInputEnabled = uiState.isInputEnabled,
         isLoading = uiState.isLoading,
-        isChatEnded = uiState.isChatEnded,
         onEvent = viewModel::onEvent,
     )
 }
@@ -79,7 +78,6 @@ private fun AgentDemoScreenContent(
     inputText: String,
     isInputEnabled: Boolean,
     isLoading: Boolean,
-    isChatEnded: Boolean,
     onEvent: (AgentDemoUiEvents) -> Unit,
 ) {
     val listState = rememberLazyListState()
@@ -141,22 +139,18 @@ private fun AgentDemoScreenContent(
                 }
             }
 
-            // Input area or restart button
-            if (isChatEnded) {
-                RestartButton(onRestartClicked = { onEvent(AgentDemoUiEvents.RestartChat) })
-            } else {
-                InputArea(
-                    text = inputText,
-                    onTextChanged = { onEvent(AgentDemoUiEvents.UpdateInputText(it)) },
-                    onSendClicked = {
-                        onEvent(AgentDemoUiEvents.SendMessage)
-                        focusManager.clearFocus()
-                    },
-                    isEnabled = isInputEnabled,
-                    isLoading = isLoading,
-                    focusRequester = focusRequester
-                )
-            }
+            // Input area
+            InputArea(
+                text = inputText,
+                onTextChanged = { onEvent(AgentDemoUiEvents.UpdateInputText(it)) },
+                onSendClicked = {
+                    onEvent(AgentDemoUiEvents.SendMessage)
+                    focusManager.clearFocus()
+                },
+                isEnabled = isInputEnabled,
+                isLoading = isLoading,
+                focusRequester = focusRequester
+            )
         }
     }
 }
@@ -431,7 +425,6 @@ fun AgentDemoScreenPreview() {
             inputText = "",
             isInputEnabled = true,
             isLoading = false,
-            isChatEnded = false,
             onEvent = {},
         )
     }
@@ -452,7 +445,6 @@ fun AgentDemoScreenEndedPreview() {
             inputText = "",
             isInputEnabled = false,
             isLoading = false,
-            isChatEnded = true,
             onEvent = {},
         )
     }

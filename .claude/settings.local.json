@@ -2,12 +2,15 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:www.jetbrains.com)",
-      "Bash(grep -r serialization /Users/simonvergauwen/Developer/agent-fantasy-store --include=*.gradle*)",
       "Bash(xargs cat:*)",
-      "Bash(grep -r \"json\\\\|serialize\\\\|Json\\\\|Serializer\" /Users/simonvergauwen/Developer/agent-fantasy-store --include=*.kt --include=*.gradle*)",
       "mcp__gradle__kotlin_repl",
       "mcp__gradle__gradle",
-      "mcp__gradle__inspect_build"
+      "mcp__gradle__inspect_build",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(mkdir -p /tmp2)",
+      "Bash(cd /tmp2)",
+      "Bash(unzip:*)"
     ]
   }
 }

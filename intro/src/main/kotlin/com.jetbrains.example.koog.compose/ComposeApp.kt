@@ -67,6 +67,17 @@ fun ComposeApp() = AppTheme {
                         }
                     )
                 }
+
+                entry<NavRoute.AgentDemoRoute.BasicAgentScreen> {
+                    AgentDemoScreen(
+                        viewModel = koin.get {
+                            parametersOf(
+                                appNavigation,
+                                "basic",
+                            )
+                        }
+                    )
+                }
             }
         )
     }
@@ -93,5 +104,8 @@ sealed interface NavRoute : NavKey {
 
         @Serializable
         data object WeatherScreen : AgentDemoRoute
+
+        @Serializable
+        data object BasicAgentScreen : AgentDemoRoute
     }
 }

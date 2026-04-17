@@ -1,5 +1,6 @@
 package com.jetbrains.example.koog.compose.agents.common
 
+import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.agents.core.agent.AIAgent
 
 /**
@@ -17,8 +18,8 @@ interface AgentProvider {
     val description: String
 
     suspend fun provideAgent(
+        historyProvider: ChatHistoryProvider,
         onToolCallEvent: suspend (String) -> Unit,
         onErrorEvent: suspend (String) -> Unit,
-        onAssistantMessage: suspend (String) -> String
     ): AIAgent<String, String>
 }

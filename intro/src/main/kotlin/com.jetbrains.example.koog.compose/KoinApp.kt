@@ -9,6 +9,7 @@ import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.llm.LLModel
 import androidx.compose.runtime.Composable
+import com.jetbrains.example.koog.compose.agents.basic.BasicAgentProvider
 import com.jetbrains.example.koog.compose.agents.calculator.CalculatorAgentProvider
 import com.jetbrains.example.koog.compose.agents.common.AgentProvider
 import com.jetbrains.example.koog.compose.agents.weather.WeatherAgentProvider
@@ -62,6 +63,7 @@ fun KoinApp() = KoinMultiplatformApplication(
                 }
                 single<AgentProvider>(named("calculator")) { CalculatorAgentProvider(provideLLMClient = get()) }
                 single<AgentProvider>(named("weather")) { WeatherAgentProvider(provideLLMClient = get()) }
+                single<AgentProvider>(named("basic")) { BasicAgentProvider(provideLLMClient = get()) }
                 factory { params ->
                     StartViewModel(
                         navigationCallback = params[0],

@@ -7,11 +7,6 @@ data class AgentDemoUiState(
     val inputText: String = "",
     val isInputEnabled: Boolean = true,
     val isLoading: Boolean = false,
-    val isChatEnded: Boolean = false,
-
-    // For handling user responses when agent asks a question
-    val userResponseRequested: Boolean = false,
-    val currentUserResponse: String? = null,
 )
 
 // Define message types for the chat
