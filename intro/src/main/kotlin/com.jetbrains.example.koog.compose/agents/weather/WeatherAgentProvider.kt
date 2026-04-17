@@ -40,49 +40,6 @@ internal class WeatherAgentProvider(
             tool(WeatherTools.WeatherForecastTool())
         }
 
-        val strategy = strategy(title) {
-            val nodeRequestLLM by nodeLLMRequestMultiple()
-            val nodeExecuteToolMultiple by nodeExecuteMultipleTools(parallelTools = true)
-            val nodeSendToolResultMultiple by nodeLLMSendMultipleToolResults()
-            val nodeCompressHistory by nodeLLMCompressHistory<List<ReceivedToolResult>>()
-
-            edge(nodeStart forwardTo nodeRequestLLM)
-
-            edge(
-                nodeRequestLLM forwardTo nodeExecuteToolMultiple
-                    onMultipleToolCalls { true }
-            )
-
-            edge(
-                nodeRequestLLM forwardTo nodeFinish
-                    transformed { it.first() }
-                    onAssistantMessage { true }
-            )
-
-            edge(
-                (nodeExecuteToolMultiple forwardTo nodeCompressHistory)
-                    onCondition { _ -> llm.readSession { prompt.messages.size > 100 } }
-            )
-
-            edge(nodeCompressHistory forwardTo nodeSendToolResultMultiple)
-
-            edge(
-                (nodeExecuteToolMultiple forwardTo nodeSendToolResultMultiple)
-                    onCondition { _ -> llm.readSession { prompt.messages.size <= 100 } }
-            )
-
-            edge(
-                (nodeSendToolResultMultiple forwardTo nodeExecuteToolMultiple)
-                    onMultipleToolCalls { true }
-            )
-
-            edge(
-                nodeSendToolResultMultiple forwardTo nodeFinish
-                    transformed { it.first() }
-                    onAssistantMessage { true }
-            )
-        }
-
         val agentConfig = AIAgentConfig(
             prompt = prompt("test") {
                 system(
@@ -107,7 +64,6 @@ internal class WeatherAgentProvider(
 
         return AIAgent(
             promptExecutor = executor,
-            strategy = strategy,
             agentConfig = agentConfig,
             toolRegistry = toolRegistry,
         ) {
