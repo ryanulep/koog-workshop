@@ -1,4 +1,4 @@
-rootProject.name = "KotlinProject"
+rootProject.name = "koog-workshop"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
@@ -33,3 +33,4 @@ plugins {
 }
 
 include(":app")
+include("intro")
