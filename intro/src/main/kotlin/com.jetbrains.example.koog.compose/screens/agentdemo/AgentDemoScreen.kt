@@ -1,26 +1,11 @@
 package com.jetbrains.example.koog.compose.screens.agentdemo
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -28,23 +13,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,7 +32,7 @@ import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 
-private const val MAX_BUBBLE_WIDTH_FRACTION = 0.85f
+internal const val MAX_BUBBLE_WIDTH_FRACTION = 0.85f
 
 @Composable
 fun AgentDemoScreen(viewModel: AgentDemoViewModel) {
@@ -70,7 +40,7 @@ fun AgentDemoScreen(viewModel: AgentDemoViewModel) {
 
     AgentDemoScreenContent(
         title = uiState.title,
-        messages = uiState.messages,
+        chatMessages = uiState.chatMessages,
         inputText = uiState.inputText,
         isInputEnabled = uiState.isInputEnabled,
         isLoading = uiState.isLoading,
@@ -82,7 +52,7 @@ fun AgentDemoScreen(viewModel: AgentDemoViewModel) {
 @Composable
 private fun AgentDemoScreenContent(
     title: String,
-    messages: List<Message>,
+    chatMessages: List<ChatMessage>,
     inputText: String,
     isInputEnabled: Boolean,
     isLoading: Boolean,
@@ -93,9 +63,9 @@ private fun AgentDemoScreenContent(
     val focusManager = LocalFocusManager.current
 
     // Scroll to bottom when messages change
-    LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) {
-            listState.animateScrollToItem(messages.size - 1)
+    LaunchedEffect(chatMessages.size) {
+        if (chatMessages.isNotEmpty()) {
+            listState.animateScrollToItem(chatMessages.size - 1)
         }
     }
 
@@ -130,15 +100,15 @@ private fun AgentDemoScreenContent(
                 state = listState,
                 verticalArrangement = Arrangement.spacedBy(AppDimension.spacingMedium)
             ) {
-                items(messages) { message ->
+                items(chatMessages) { message ->
                     when (message) {
-                        is Message.UserMessage -> UserMessageBubble(message.text)
-                        is Message.AgentMessage -> AgentMessageBubble(message.text)
-                        is Message.SystemMessage -> SystemMessageItem(message.text)
-                        is Message.ErrorMessage -> ErrorMessageItem(message.text)
-                        is Message.ToolCallMessage -> ToolCallMessageItem(message.toolName, message.args)
-                        is Message.ResultMessage -> ResultMessageItem(message.text)
-                        is Message.LLMCallMessage -> TODO()
+                        is ChatMessage.UserMessage -> UserMessageBubble(message.text)
+                        is ChatMessage.AgentMessage -> AgentMessageBubble(message.text)
+                        is ChatMessage.SystemMessage -> SystemMessageItem(message.text)
+                        is ChatMessage.ErrorMessage -> ErrorMessageItem(message.text)
+                        is ChatMessage.ToolCallMessage -> ToolCallMessageItem(message.toolName, message.args)
+                        is ChatMessage.ResultMessage -> ResultMessageItem(message.text)
+                        is ChatMessage.LLMCallMessage -> LLMCallMessageItem(message.data)
                     }
                 }
 
@@ -484,13 +454,27 @@ fun AgentDemoScreenPreview() {
     AppTheme {
         AgentDemoScreenContent(
             title = "Agent Demo",
-            messages = listOf(
-                Message.SystemMessage("Hi, I'm an agent that can help you"),
-                Message.UserMessage("Hello!"),
-                Message.ToolCallMessage("get_weather", mapOf("location" to "Paris", "date" to "2024-01-15")),
-                Message.ResultMessage("Result: 4"),
-                Message.AgentMessage("Hello! How can I help you today?"),
-                Message.ErrorMessage("Error: Something went wrong")
+            chatMessages = listOf(
+                ChatMessage.SystemMessage("Hi, I'm an agent that can help you"),
+                ChatMessage.UserMessage("Hello!"),
+                ChatMessage.LLMCallMessage(
+                    LlmCallData(
+                        messageHistory = listOf(
+                            LlmCallHistoryItem.System("You are a helpful weather assistant.\nUse tools when needed."),
+                            LlmCallHistoryItem.User("What's the weather in Munich today?"),
+                            LlmCallHistoryItem.ToolCall("currentDatetime", """{"timezone":"Europe/Berlin"}"""),
+                            LlmCallHistoryItem.ToolResult("currentDatetime", "Current datetime: 2026-04-18T11:36:22+02:00")
+                        ),
+                        availableTools = listOf(
+                            LlmCallToolData("addDatetime", listOf("date", "days", "hours", "minutes"), emptyList()),
+                            LlmCallToolData("currentDatetime", listOf("timezone"), emptyList())
+                        )
+                    )
+                ),
+                ChatMessage.ToolCallMessage("get_weather", mapOf("location" to "Paris", "date" to "2024-01-15")),
+                ChatMessage.ResultMessage("Result: 4"),
+                ChatMessage.AgentMessage("Hello! How can I help you today?"),
+                ChatMessage.ErrorMessage("Error: Something went wrong")
             ),
             inputText = "",
             isInputEnabled = true,
@@ -506,11 +490,11 @@ fun AgentDemoScreenEndedPreview() {
     AppTheme {
         AgentDemoScreenContent(
             title = "Agent Demo",
-            messages = listOf(
-                Message.SystemMessage("Hi, I'm an agent that can help you"),
-                Message.UserMessage("Hello!"),
-                Message.AgentMessage("Hello! How can I help you today?"),
-                Message.SystemMessage("The agent has stopped.")
+            chatMessages = listOf(
+                ChatMessage.SystemMessage("Hi, I'm an agent that can help you"),
+                ChatMessage.UserMessage("Hello!"),
+                ChatMessage.AgentMessage("Hello! How can I help you today?"),
+                ChatMessage.SystemMessage("The agent has stopped.")
             ),
             inputText = "",
             isInputEnabled = false,

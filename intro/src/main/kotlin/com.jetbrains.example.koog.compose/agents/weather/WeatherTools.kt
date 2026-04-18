@@ -21,10 +21,10 @@ import kotlin.time.ExperimentalTime
  */
 @Serializable
 enum class Granularity {
-    @SerialName("daily")
+//    @SerialName("daily")
     DAILY,
 
-    @SerialName("hourly")
+//    @SerialName("hourly")
     HOURLY
 }
 

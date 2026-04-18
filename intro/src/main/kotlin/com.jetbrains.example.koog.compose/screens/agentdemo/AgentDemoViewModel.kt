@@ -22,7 +22,7 @@ class AgentDemoViewModel(
     private val _uiState = MutableStateFlow(
         AgentDemoUiState(
             title = agentProvider.title,
-            messages = listOf(Message.SystemMessage(agentProvider.description))
+            chatMessages = listOf(ChatMessage.SystemMessage(agentProvider.description))
         )
     )
     val uiState: StateFlow<AgentDemoUiState> = _uiState.asStateFlow()
@@ -52,7 +52,7 @@ class AgentDemoViewModel(
 
         _uiState.update {
             it.copy(
-                messages = it.messages + Message.UserMessage(userInput),
+                chatMessages = it.chatMessages + ChatMessage.UserMessage(userInput),
                 inputText = "",
                 isInputEnabled = false,
                 isLoading = true
@@ -72,7 +72,7 @@ class AgentDemoViewModel(
                     onToolCallEvent = { toolName, args ->
                         viewModelScope.launch {
                             _uiState.update {
-                                it.copy(messages = it.messages + Message.ToolCallMessage(toolName, args))
+                                it.copy(chatMessages = it.chatMessages + ChatMessage.ToolCallMessage(toolName, args))
                             }
                         }
                     },
@@ -80,18 +80,23 @@ class AgentDemoViewModel(
                         viewModelScope.launch {
                             _uiState.update {
                                 it.copy(
-                                    messages = it.messages + Message.ErrorMessage(errorMessage),
+                                    chatMessages = it.chatMessages + ChatMessage.ErrorMessage(errorMessage),
                                     isInputEnabled = true,
                                     isLoading = false
                                 )
                             }
                         }
                     },
-                    onLLMCallEvent = { promptMessages, toolNames ->
+                    onLLMCallEvent = { messages, tools ->
                         viewModelScope.launch {
                             _uiState.update {
                                 it.copy(
-                                    messages = it.messages + Message.LLMCallMessage(promptMessages, toolNames),
+                                    chatMessages = it.chatMessages + ChatMessage.LLMCallMessage(
+                                        LlmCallData(
+                                            messageHistory = messages.toHistoryItems(),
+                                            availableTools = tools.toToolData()
+                                        )
+                                    ),
                                     isInputEnabled = true,
                                     isLoading = false
                                 )
@@ -104,7 +109,7 @@ class AgentDemoViewModel(
 
                 _uiState.update {
                     it.copy(
-                        messages = it.messages + Message.AgentMessage(result),
+                        chatMessages = it.chatMessages + ChatMessage.AgentMessage(result),
                         isInputEnabled = true,
                         isLoading = false
                     )
@@ -112,7 +117,7 @@ class AgentDemoViewModel(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        messages = it.messages + Message.ErrorMessage("Error: ${e.message}"),
+                        chatMessages = it.chatMessages + ChatMessage.ErrorMessage("Error: ${e.message}"),
                         isInputEnabled = true,
                         isLoading = false
                     )
@@ -128,7 +133,7 @@ class AgentDemoViewModel(
         _uiState.update {
             AgentDemoUiState(
                 title = agentProvider.title,
-                messages = listOf(Message.SystemMessage(agentProvider.description))
+                chatMessages = listOf(ChatMessage.SystemMessage(agentProvider.description))
             )
         }
     }

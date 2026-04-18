@@ -4,11 +4,13 @@ import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.agents.chatMemory.feature.ChatMemory
 import ai.koog.agents.core.agent.AIAgent
 import ai.koog.agents.core.agent.config.AIAgentConfig
+import ai.koog.agents.core.tools.ToolDescriptor
 import ai.koog.agents.features.eventHandler.feature.handleEvents
 import ai.koog.prompt.dsl.prompt
 import ai.koog.prompt.executor.clients.LLMClient
 import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
 import ai.koog.prompt.llm.LLModel
+import ai.koog.prompt.message.Message
 import com.jetbrains.example.koog.compose.agents.common.AgentProvider
 
 /**
@@ -23,7 +25,7 @@ internal class BasicAgentProvider(
     override suspend fun provideAgent(
         historyProvider: ChatHistoryProvider,
         onToolCallEvent: suspend (toolName: String, args: Map<String, String>) -> Unit,
-        onErrorEvent: suspend (String) -> Unit,
+        onLLMCallEvent: suspend (messages: List<Message>, tools: List<ToolDescriptor>) -> Unit,        onErrorEvent: suspend (String) -> Unit,
     ): AIAgent<String, String> {
         val (llmClient, model) = provideLLMClient.invoke()
         val executor = MultiLLMPromptExecutor(llmClient)
@@ -52,8 +54,11 @@ internal class BasicAgentProvider(
                 onAgentExecutionFailed { ctx ->
                     onErrorEvent("${ctx.throwable.message}")
                 }
+
+                onLLMCallStarting { ctx ->
+                    onLLMCallEvent(ctx.prompt.messages, ctx.tools)
+                }
             }
         }
     }
 }
-
