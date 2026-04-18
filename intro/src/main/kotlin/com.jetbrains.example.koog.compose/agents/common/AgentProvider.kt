@@ -20,6 +20,7 @@ interface AgentProvider {
     suspend fun provideAgent(
         historyProvider: ChatHistoryProvider,
         onToolCallEvent: suspend (toolName: String, args: Map<String, String>) -> Unit,
+        onLLMCallEvent: suspend (messages: List<String>, tools: List<String>) -> Unit,
         onErrorEvent: suspend (String) -> Unit,
     ): AIAgent<String, String>
 }

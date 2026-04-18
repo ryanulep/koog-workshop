@@ -29,6 +29,7 @@ internal class WeatherAgentProvider(
     override suspend fun provideAgent(
         historyProvider: ChatHistoryProvider,
         onToolCallEvent: suspend (toolName: String, args: Map<String, String>) -> Unit,
+        onLLMCallEvent: suspend (messages: List<String>, tools: List<String>) -> Unit,
         onErrorEvent: suspend (String) -> Unit,
     ): AIAgent<String, String> {
         val (llmClient, model) = provideLLMClient.invoke()
@@ -76,6 +77,10 @@ internal class WeatherAgentProvider(
 
                 onAgentExecutionFailed { ctx ->
                     onErrorEvent("${ctx.throwable.message}")
+                }
+
+                onLLMCallStarting { ctx ->
+                    onLLMCallEvent(ctx.prompt.messages.map { it.toString() }, ctx.tools.map { it.toString() })
                 }
             }
         }

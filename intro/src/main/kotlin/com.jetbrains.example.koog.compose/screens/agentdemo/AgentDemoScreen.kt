@@ -138,6 +138,7 @@ private fun AgentDemoScreenContent(
                         is Message.ErrorMessage -> ErrorMessageItem(message.text)
                         is Message.ToolCallMessage -> ToolCallMessageItem(message.toolName, message.args)
                         is Message.ResultMessage -> ResultMessageItem(message.text)
+                        is Message.LLMCallMessage -> TODO()
                     }
                 }
 

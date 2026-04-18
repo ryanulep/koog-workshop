@@ -87,6 +87,17 @@ class AgentDemoViewModel(
                             }
                         }
                     },
+                    onLLMCallEvent = { promptMessages, toolNames ->
+                        viewModelScope.launch {
+                            _uiState.update {
+                                it.copy(
+                                    messages = it.messages + Message.LLMCallMessage(promptMessages, toolNames),
+                                    isInputEnabled = true,
+                                    isLoading = false
+                                )
+                            }
+                        }
+                    }
                 ).also { agent = it }
 
                 val result = currentAgent.run(userInput, sessionId)

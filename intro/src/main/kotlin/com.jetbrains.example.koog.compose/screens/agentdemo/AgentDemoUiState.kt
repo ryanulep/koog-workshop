@@ -16,5 +16,6 @@ sealed class Message {
     data class SystemMessage(val text: String) : Message()
     data class ErrorMessage(val text: String) : Message()
     data class ToolCallMessage(val toolName: String, val args: Map<String, String>) : Message()
+    data class LLMCallMessage(val messages: List<String>, val tools: List<String>) : Message()
     data class ResultMessage(val text: String) : Message()
 }
