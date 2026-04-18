@@ -6,13 +6,13 @@ import ai.koog.agents.core.agent.AIAgent
 import ai.koog.agents.core.agent.config.AIAgentConfig
 import ai.koog.agents.core.tools.ToolDescriptor
 import ai.koog.agents.core.tools.ToolRegistry
-import ai.koog.agents.features.eventHandler.feature.handleEvents
 import ai.koog.prompt.dsl.prompt
 import ai.koog.prompt.executor.clients.LLMClient
 import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
 import ai.koog.prompt.llm.LLModel
 import ai.koog.prompt.message.Message
 import com.jetbrains.example.koog.compose.agents.common.AgentProvider
+import com.jetbrains.example.koog.compose.agents.common.trackSystemMessages
 import kotlin.time.ExperimentalTime
 
 /**
@@ -70,19 +70,8 @@ internal class WeatherAgentProvider(
                 chatHistoryProvider = historyProvider
                 windowSize(50)
             }
-            handleEvents {
-                onToolCallStarting { ctx ->
-                    onToolCallEvent(ctx.toolName, ctx.toolArgs.entries.mapValues { it.value.toString() })
-                }
-
-                onAgentExecutionFailed { ctx ->
-                    onErrorEvent("${ctx.throwable.message}")
-                }
-
-                onLLMCallStarting { ctx ->
-                    onLLMCallEvent(ctx.prompt.messages, ctx.tools)
-                }
-            }
+            trackSystemMessages(onToolCallEvent, onErrorEvent, onLLMCallEvent)
         }
     }
 }
+
