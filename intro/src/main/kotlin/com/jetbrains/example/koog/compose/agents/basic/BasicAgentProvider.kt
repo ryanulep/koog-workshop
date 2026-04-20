@@ -25,7 +25,8 @@ internal class BasicAgentProvider(
     override suspend fun provideAgent(
         historyProvider: ChatHistoryProvider,
         onToolCallEvent: suspend (toolName: String, args: Map<String, String>) -> Unit,
-        onLLMCallEvent: suspend (messages: List<Message>, tools: List<ToolDescriptor>) -> Unit,        onErrorEvent: suspend (String) -> Unit,
+        onLLMCallEvent: suspend (messages: List<Message>, tools: List<ToolDescriptor>) -> Unit,
+        onErrorEvent: suspend (String) -> Unit,
     ): AIAgent<String, String> {
         val (llmClient, model) = provideLLMClient.invoke()
         val executor = MultiLLMPromptExecutor(llmClient)
