@@ -1,4 +1,4 @@
-package com.jetbrains.example.koog.compose.agents.basic
+package com.jetbrains.example.koog.compose.basic
 
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.agents.chatMemory.feature.ChatMemory

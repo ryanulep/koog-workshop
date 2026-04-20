@@ -9,7 +9,7 @@ import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.llm.LLModel
 import androidx.compose.runtime.Composable
-import com.jetbrains.example.koog.compose.agents.basic.BasicAgentProvider
+import com.jetbrains.example.koog.compose.basic.BasicAgentProvider
 import com.jetbrains.example.koog.compose.agents.common.AgentProvider
 import com.jetbrains.example.koog.compose.agents.weather.WeatherAgentProvider
 import com.jetbrains.example.koog.compose.screens.agentdemo.AgentDemoViewModel
