@@ -63,7 +63,7 @@ internal class WeatherAgentProvider(
         return AIAgent(
             promptExecutor = executor,
             agentConfig = agentConfig,
-//            strategy = singleRunStrategy(runMode = ToolCalls.SINGLE_RUN_SEQUENTIAL),
+//            strategy = basicSingleRunStrategyByHand(),
             toolRegistry = toolRegistry,
         ) {
             install(ChatMemory) {
