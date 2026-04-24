@@ -39,7 +39,8 @@ class AgentDemoViewModel(
         viewModelScope.launch {
             when (event) {
                 is AgentDemoUiEvents.UpdateInputText -> updateInputText(event.text)
-                is AgentDemoUiEvents.UpdateDebugView -> updateDebugView(event.debugView)
+                is AgentDemoUiEvents.ToggleDebugEnabled -> toggleDebugEnabled()
+                is AgentDemoUiEvents.ToggleDebugOption -> toggleDebugOption(event.option)
                 AgentDemoUiEvents.SendMessage -> sendMessage()
                 AgentDemoUiEvents.RestartChat -> restartChat()
                 AgentDemoUiEvents.NavigateBack -> navigationCallback.goBack()
@@ -51,8 +52,18 @@ class AgentDemoViewModel(
         _uiState.update { it.copy(inputText = text) }
     }
 
-    private fun updateDebugView(debugView: DebugView) {
-        _uiState.update { it.copy(debugView = debugView) }
+    private fun toggleDebugEnabled() {
+        _uiState.update {
+            it.copy(debugView = it.debugView.copy(enabled = !it.debugView.enabled))
+        }
+    }
+
+    private fun toggleDebugOption(option: DebugOption) {
+        _uiState.update {
+            val current = it.debugView
+            val newOptions = if (option in current.options) current.options - option else current.options + option
+            it.copy(debugView = current.copy(options = newOptions))
+        }
     }
 
     private fun sendMessage() {

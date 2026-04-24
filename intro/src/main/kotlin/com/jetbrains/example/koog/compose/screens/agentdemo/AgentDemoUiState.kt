@@ -7,7 +7,7 @@ import ai.koog.prompt.message.Message
 data class AgentDemoUiState(
     val title: String = "Agent Demo",
     val chatMessages: List<ChatMessage> = listOf(ChatMessage.SystemMessage("Hi, I'm an agent that can help you")),
-    val debugView: DebugView = DebugView.Off,
+    val debugView: DebugView = DebugView(),
     val inputText: String = "",
     val isInputEnabled: Boolean = true,
     val isLoading: Boolean = false,
@@ -16,19 +16,40 @@ data class AgentDemoUiState(
     val currentUserResponse: String? = null,
 )
 
-enum class DebugView(val title: String) {
-    Off("Off"),
+enum class DebugOption(val title: String) {
     Tools("Tools"),
-    FullTrace("Full Trace");
+    LlmCalls("LLM Calls"),
+    Nodes("Nodes"),
+    Tasks("Tasks"),
+}
 
+data class DebugView(
+    val enabled: Boolean = false,
+    val options: Set<DebugOption> = DebugOption.entries.toSet(),
+) {
     fun shows(message: ChatMessage): Boolean = shows(message.type)
 
-    fun shows(type: ChatMessageType): Boolean =
-        when (this) {
-            Off -> type in setOf(ChatMessageType.User, ChatMessageType.Agent, ChatMessageType.System, ChatMessageType.Result)
-            Tools -> type !in setOf(ChatMessageType.LlmCall, ChatMessageType.ExecutionTrace)
-            FullTrace -> true
+    fun shows(type: ChatMessageType): Boolean {
+        if (type in alwaysVisible) return true
+        if (!enabled) return false
+        return when (type) {
+            ChatMessageType.Error -> true
+            ChatMessageType.ToolCall -> DebugOption.Tools in options
+            ChatMessageType.LlmCall -> DebugOption.LlmCalls in options
+            ChatMessageType.Node -> DebugOption.Nodes in options
+            ChatMessageType.Task -> DebugOption.Tasks in options
+            else -> true
         }
+    }
+
+    companion object {
+        private val alwaysVisible = setOf(
+            ChatMessageType.User,
+            ChatMessageType.Agent,
+            ChatMessageType.System,
+            ChatMessageType.Result,
+        )
+    }
 }
 
 enum class ChatMessageType {
@@ -39,7 +60,8 @@ enum class ChatMessageType {
     Result,
     ToolCall,
     LlmCall,
-    ExecutionTrace,
+    Node,
+    Task,
 }
 
 // Define message types for the chat
@@ -64,7 +86,10 @@ val ChatMessage.type: ChatMessageType
             is ChatMessage.ResultMessage -> ChatMessageType.Result
             is ChatMessage.ToolCallMessage -> ChatMessageType.ToolCall
             is ChatMessage.LLMCallMessage -> ChatMessageType.LlmCall
-            is ChatMessage.ExecutionTraceMessage -> ChatMessageType.ExecutionTrace
+            is ChatMessage.ExecutionTraceMessage -> when (item) {
+                is ExecutionTraceItem.Node -> ChatMessageType.Node
+                is ExecutionTraceItem.Subgraph -> ChatMessageType.Task
+            }
         }
 
 sealed interface ExecutionTraceItem {

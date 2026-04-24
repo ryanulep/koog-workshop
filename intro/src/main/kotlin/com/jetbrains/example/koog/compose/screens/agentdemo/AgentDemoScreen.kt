@@ -2,8 +2,6 @@ package com.jetbrains.example.koog.compose.screens.agentdemo
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -92,7 +91,8 @@ private fun AgentDemoScreenContent(
                     DebugViewSelector(
                         modifier = Modifier.padding(end = AppDimension.spacingMedium),
                         debugView = debugView,
-                        onDebugViewChanged = { onEvent(AgentDemoUiEvents.UpdateDebugView(it)) }
+                        onToggleEnabled = { onEvent(AgentDemoUiEvents.ToggleDebugEnabled) },
+                        onToggleOption = { onEvent(AgentDemoUiEvents.ToggleDebugOption(it)) },
                     )
                 }
             )
@@ -153,51 +153,57 @@ private fun AgentDemoScreenContent(
 private fun DebugViewSelector(
     modifier: Modifier = Modifier,
     debugView: DebugView,
-    onDebugViewChanged: (DebugView) -> Unit,
+    onToggleEnabled: () -> Unit,
+    onToggleOption: (DebugOption) -> Unit,
 ) {
+    var expanded by remember { mutableStateOf(false) }
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(AppDimension.spacingSmall)
     ) {
         Text(
-            text = "Debug View:",
+            text = "Debug:",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        DebugView.entries.forEach { option ->
-            DebugViewOption(
-                label = option.title,
-                selected = debugView == option,
-                onClick = { onDebugViewChanged(option) }
-            )
+        Switch(
+            checked = debugView.enabled,
+            onCheckedChange = { onToggleEnabled() },
+        )
+        Box {
+            TextButton(
+                onClick = { expanded = true },
+                enabled = debugView.enabled,
+            ) {
+                Text(
+                    text = "View",
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                )
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                DebugOption.entries.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(option.title) },
+                        onClick = { onToggleOption(option) },
+                        leadingIcon = {
+                            Checkbox(
+                                checked = option in debugView.options,
+                                onCheckedChange = null,
+                            )
+                        },
+                    )
+                }
+            }
         }
-    }
-}
-
-@Composable
-private fun DebugViewOption(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    Row(
-        modifier = Modifier.clickable(
-            interactionSource = interactionSource,
-            indication = null,
-            onClick = onClick
-        ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RadioButton(
-            selected = selected,
-            onClick = null
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium
-        )
     }
 }
 
@@ -550,7 +556,7 @@ fun AgentDemoScreenPreview() {
                 ChatMessage.AgentMessage("Hello! How can I help you today?"),
                 ChatMessage.ErrorMessage("Error: Something went wrong")
             ),
-            debugView = DebugView.FullTrace,
+            debugView = DebugView(enabled = true),
             inputText = "",
             isInputEnabled = true,
             isLoading = false,
@@ -571,7 +577,7 @@ fun AgentDemoScreenEndedPreview() {
                 ChatMessage.AgentMessage("Hello! How can I help you today?"),
                 ChatMessage.SystemMessage("The agent has stopped.")
             ),
-            debugView = DebugView.Off,
+            debugView = DebugView(),
             inputText = "",
             isInputEnabled = false,
             isLoading = false,
