@@ -1,24 +1,25 @@
 package com.jetbrains.example.koog.compose.agents.homeservices
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
 /**
  * Shared reference data for the home services scheduling sample.
- * Used as the agent-level system prompt. Built as a function so it captures the current date.
+ * Used as the agent-level system prompt. Built as a function so it captures the current date and time.
  */
 fun homeServicesReferencePrompt(): String {
-    val today = LocalDate.now()
-    val dayName = today.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.US)
-    val formatted = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    val now = LocalDateTime.now()
+    val dayName = now.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.US)
+    val formattedDate = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    val formattedTime = now.format(DateTimeFormatter.ofPattern("HH:mm"))
     return """
     # Hearthside Home Services
 
     You are the scheduling assistant for Hearthside Home Services, a home maintenance company serving one metro area.
 
-    **Today is $dayName, $formatted.**
+    **Today is $dayName, $formattedDate. The current time is $formattedTime.**
 
     ## Your Tools
 
