@@ -63,8 +63,8 @@ val homeServicesIntakeInstructions = """
     - If the user no longer wants to proceed, say goodbye politely and return "cancelled".
     
     ## Safety
-
-    - If the request sounds unsafe, tell the user to call emergency services or their utility provider first. Do not give repair instructions.
+    
+    - If the situation appears unsafe, advise the user to contact 112 or an emergency plumber/electrician, and do not continue with scheduling.
 """.trimIndent()
 
 /**
