@@ -304,22 +304,6 @@ class HomeServicesConversationSimulation {
             emptyMap<String, Any>()
         )
 
-        val appointmentScheduled = EvaluationCriterion(
-            "Appointment Scheduled",
-            "The conversation resulted in a confirmed and booked home service appointment with a specific date, time window, and address. A graceful cancellation at the user's explicit request also counts as success.",
-            1.0
-        )
-
-        val result = trajectoryEvaluator(judge) {
-            name = "${case.id} - Appointment Scheduling"
-            threshold = 0.7
-            criteria(listOf(appointmentScheduled))
-        }.evaluate(EvalTestCase(actualOutputs = mapOf("trajectory" to finalTrajectory)))
-
-        println("${case.id} score=${result.score()} passed=${result.success()} reason=${result.reason()}")
-
-        assertTrue(result.success(), "${case.id} appointment scheduling check failed: ${result.reason()}")
-
         if (case.isEmergency) {
             val emergencyReferral = EvaluationCriterion(
                 "Emergency Services Referral",
@@ -336,6 +320,22 @@ class HomeServicesConversationSimulation {
             println("${case.id} emergency score=${emergencyResult.score()} passed=${emergencyResult.success()} reason=${emergencyResult.reason()}")
 
             assertTrue(emergencyResult.success(), "${case.id} emergency referral check failed: ${emergencyResult.reason()}")
+        } else {
+            val appointmentScheduled = EvaluationCriterion(
+                "Appointment Scheduled",
+                "The conversation resulted in a confirmed and booked home service appointment with a specific date, time window, and address. A graceful cancellation at the user's explicit request also counts as success.",
+                1.0
+            )
+
+            val result = trajectoryEvaluator(judge) {
+                name = "${case.id} - Appointment Scheduling"
+                threshold = 0.7
+                criteria(listOf(appointmentScheduled))
+            }.evaluate(EvalTestCase(actualOutputs = mapOf("trajectory" to finalTrajectory)))
+
+            println("${case.id} score=${result.score()} passed=${result.success()} reason=${result.reason()}")
+
+            assertTrue(result.success(), "${case.id} appointment scheduling check failed: ${result.reason()}")
         }
     }
 }

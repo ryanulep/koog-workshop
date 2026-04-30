@@ -279,6 +279,7 @@ class HomeServicesBookTools(private val schedule: HomeServicesSchedule) : ToolSe
         @LLMDescription("Service type: PLUMBING, ELECTRICAL, HVAC, or HANDYMAN") serviceType: ServiceType,
         @LLMDescription("Slot ID from getAvailableSlots, e.g. svc_shk_0428_2") slotId: String,
         @LLMDescription("Service address") address: String,
+        @LLMDescription("Brief description of the issue to be resolved") issueDescription: String,
         @LLMDescription("Access notes such as gate code, pet, parking, or buzzer instructions") notes: String = "",
     ): String {
         val slot = schedule.slots.find { it.id == slotId }
@@ -301,6 +302,7 @@ class HomeServicesBookTools(private val schedule: HomeServicesSchedule) : ToolSe
         return buildString {
             appendLine("Appointment confirmed!")
             appendLine("  Service: $serviceType")
+            appendLine("  Issue: $issueDescription")
             appendLine("  Specialist: ${slot.specialistType}")
             appendLine("  Customer: $customerName")
             appendLine("  Date: $dayName, ${slot.date.format(DISPLAY_DATE_FORMATTER)}")

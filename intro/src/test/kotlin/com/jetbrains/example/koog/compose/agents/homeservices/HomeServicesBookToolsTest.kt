@@ -27,6 +27,7 @@ class HomeServicesBookToolsTest {
             serviceType = ServiceType.PLUMBING,
             slotId = slotId,
             address = "123 Main St",
+            issueDescription = "Broken pipe",
         )
 
         assertContains(result, "Appointment confirmed!")
@@ -46,6 +47,7 @@ class HomeServicesBookToolsTest {
             serviceType = ServiceType.PLUMBING,
             slotId = slotId,
             address = "123 Main St",
+            issueDescription = "Broken pipe",
         )
 
         assertFalse(schedule.isFree(slotId))
@@ -62,6 +64,7 @@ class HomeServicesBookToolsTest {
             serviceType = ServiceType.PLUMBING,
             slotId = "svc_fake_9999_1",
             address = "123 Main St",
+            issueDescription = "Broken pipe",
         )
         assertContains(result, "Error")
         assertContains(result, "Unknown slot ID")
@@ -77,6 +80,7 @@ class HomeServicesBookToolsTest {
             serviceType = ServiceType.PLUMBING,
             slotId = bookedSlotId,
             address = "123 Main St",
+            issueDescription = "Broken pipe",
         )
         assertContains(result, "Error")
         assertContains(result, "already booked")
@@ -93,6 +97,7 @@ class HomeServicesBookToolsTest {
             serviceType = ServiceType.ELECTRICAL,
             slotId = shkSlotId,
             address = "123 Main St",
+            issueDescription = "Electrical wiring broke",
         )
         assertContains(result, "Error")
         assertContains(result, "cannot handle")
@@ -108,6 +113,7 @@ class HomeServicesBookToolsTest {
             serviceType = ServiceType.HVAC,
             slotId = slotId,
             address = "456 Oak Ave",
+            issueDescription = "Air conditioner malfunction",
         )
         assertContains(result, "Appointment confirmed!")
         assertContains(result, "HVAC")
@@ -124,6 +130,7 @@ class HomeServicesBookToolsTest {
             slotId = slotId,
             address = "789 Elm St",
             notes = "Gate code: 1234",
+            issueDescription = "Electrical wiring broke",
         )
 
         assertContains(result, "Gate code: 1234")
@@ -141,6 +148,7 @@ class HomeServicesBookToolsTest {
             slotId = slotId,
             address = "789 Elm St",
             notes = "  ",
+            issueDescription = "Electrical wiring broke",
         )
 
         assertNull(schedule.getBooking(slotId)!!.notes)
@@ -156,6 +164,7 @@ class HomeServicesBookToolsTest {
             serviceType = ServiceType.ELECTRICAL,
             slotId = slotId,
             address = "789 Elm St",
+            issueDescription = "Electrical wiring broke",
         )
 
         assertNull(schedule.getBooking(slotId)!!.notes)
@@ -171,6 +180,7 @@ class HomeServicesBookToolsTest {
             serviceType = ServiceType.HANDYMAN,
             slotId = slotId,
             address = "111 Pine St",
+            issueDescription = "Broken table",
         )
 
         val result = bookTools.scheduleAppointment(
@@ -178,6 +188,7 @@ class HomeServicesBookToolsTest {
             serviceType = ServiceType.HANDYMAN,
             slotId = slotId,
             address = "222 Birch St",
+            issueDescription = "Broken chair",
         )
         assertContains(result, "Error")
         assertContains(result, "already booked")
@@ -193,6 +204,7 @@ class HomeServicesBookToolsTest {
             serviceType = ServiceType.PLUMBING,
             slotId = slotId,
             address = "123 Main St",
+            issueDescription = "Broken pipe",
         )
 
         assertTrue(
@@ -212,6 +224,7 @@ class HomeServicesBookToolsTest {
             serviceType = ServiceType.PLUMBING,
             slotId = slotId,
             address = "123 Main St",
+            issueDescription = "Broken pipe",
         )
 
         val result = findTools.getAvailableSlots(ServiceType.PLUMBING, limit = 100)

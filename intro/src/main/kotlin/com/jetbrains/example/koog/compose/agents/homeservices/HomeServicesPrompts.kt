@@ -76,20 +76,20 @@ val homeServicesIntakeInstructions = """
 
     1. Review the user's initial message and extract any details already provided.
     2. Classify the service type based on the user's request, e.g. "plumbing" for "leak" or "clogged drain". If you're unsure, ask the user.
-    3. If all required details are present, do not ask redundant questions and skip straight to returning the structured summary.
+    3. If all required details are present, do not ask redundant questions and skip straight to returning the result.
     4. Otherwise, ask only for the missing details — one question at a time.
-    5. Return a short structured text summary of everything collected.
+    5. Return the result as a structured type.
 
     ## Rules
 
     - Never re-ask for information the user already provided.
     - Ask one question at a time using the askUser tool.
-    - Do NOT finish until you have service type, issue summary, address, and customer name.
+    - Do NOT finish until you have all the required fields or the user explicitly cancels.
     - If the guest asks questions along the way, answer them before continuing.
-    - If the user no longer wants to proceed, say goodbye politely and return "cancelled".
+    - If the user no longer wants to proceed, say goodbye politely and return the cancelled JSON.
     
     ## Safety
-    
+
     - If the situation appears unsafe, advise the user to contact 112 or an emergency plumber/electrician, and do not continue with scheduling.
 """.trimIndent()
 
@@ -107,8 +107,8 @@ val homeServicesSlotSelectionInstructions = """
     3. Present the options clearly, showing the exact date and time window for each.
     4. Ask the customer which slot works best, or whether they'd prefer a different day or time.
     5. If the customer wants to see other dates, call getAvailableSlots again with the appropriate startDate or a higher limit.
-    6. Return a short structured summary of the chosen slot (slot ID, date, time window, service type, customer name, address, and notes).
-    
+    6. Return the chosen slot as structrured type. 
+
     ## Appointment Windows
 
     - **Morning (9-12)**
@@ -118,7 +118,7 @@ val homeServicesSlotSelectionInstructions = """
     ## Rules
 
     - Show real availability first, then let the customer choose — do not ask for preferred day/time before checking slots.
-    - Do NOT finish until the customer has picked a slot.
+    - Do NOT finish until the customer has picked a slot or explicitly cancels.
     - If the customer no longer wants to proceed, say goodbye politely and return "cancelled".
     - If the customer asks questions along the way, answer them before continuing.
 """.trimIndent()
@@ -133,9 +133,7 @@ val homeServicesConfirmationInstructions = """
 
     1. Repeat the exact date, time window, service type, and address back to the customer.
     2. Ask for explicit confirmation (e.g. "Shall I go ahead and book this?").
-    3. If the customer confirms, return the selected slot details unchanged.
-    4. If the customer wants a different slot, return "change_requested".
-    5. If the customer wants to cancel, say goodbye politely and return "cancelled".
+    3. Return the result as a structured type.
 """.trimIndent()
 
 /**
@@ -146,7 +144,7 @@ val homeServicesBookingInstructions = """
 
     ## Steps
 
-    1. Call scheduleAppointment with the customer's name, service type, slot ID, address, and notes from the confirmed details.
+    1. Call scheduleAppointment with the customer's name, service type, slot ID, address, issueDescription, and notes from the confirmed details.
     2. Confirm the final appointment with the customer, showing the date, time window, service type, address, and notes.
 
     ## Rules
