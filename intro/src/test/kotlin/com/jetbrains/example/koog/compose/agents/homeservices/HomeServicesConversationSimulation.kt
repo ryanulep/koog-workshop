@@ -11,14 +11,19 @@ import ai.koog.prompt.executor.llms.all.simpleOpenAIExecutor
 import com.jetbrains.example.koog.compose.agents.common.AskUserTool
 import dev.dokimos.core.JudgeLM
 import dev.dokimos.core.conversation.ConversationTrajectory
+import dev.dokimos.core.conversation.EvaluationCriterion
 import dev.dokimos.core.conversation.LLMSimulatedUser
-import dev.dokimos.core.conversation.Message as DokimosMessage
+import dev.dokimos.kotlin.core.EvalTestCase
+import dev.dokimos.kotlin.dsl.conversation.trajectoryEvaluator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import java.io.BufferedWriter
+import org.junit.Assume
+import org.junit.Before
 import java.io.File
 import kotlin.test.Test
+import kotlin.test.assertTrue
+import dev.dokimos.core.conversation.Message as DokimosMessage
 
 data class SimulationCase(
     val id: String,
@@ -30,6 +35,26 @@ data class SimulationCase(
 )
 
 class HomeServicesConversationSimulation {
+
+    private lateinit var apiKey: String
+    private lateinit var judge: JudgeLM
+
+    @Before
+    fun setup() {
+        val key = System.getenv("OPENAI_API_KEY") ?: ""
+        Assume.assumeTrue("OPENAI_API_KEY is not set", key.isNotEmpty())
+        apiKey = key
+        val executor = simpleOpenAIExecutor(key)
+        judge = JudgeLM { prompt ->
+            runBlocking {
+                AIAgent(
+                    promptExecutor = executor,
+                    llmModel = OpenAIModels.Chat.GPT4o,
+                    maxIterations = 30
+                ).run(prompt)
+            }
+        }
+    }
 
     private val simulationCases = listOf(
         SimulationCase(
@@ -182,44 +207,29 @@ class HomeServicesConversationSimulation {
         ),
     )
 
-    @Test
-    fun `simulate all persona conversations`() {
-        val apiKey = System.getenv("OPENAI_API_KEY") ?: run {
-            println("OPENAI_API_KEY not set, skipping simulation")
-            return
-        }
+    @Test fun `P0 - Baseline - Plumbing leaking kitchen faucet`() = runCase(simulationCases.first { it.id == "P0" })
 
-        val judgeExecutor = simpleOpenAIExecutor(apiKey)
-        val judge = JudgeLM { prompt ->
-            runBlocking {
-                AIAgent(
-                    promptExecutor = judgeExecutor,
-                    llmModel = OpenAIModels.Chat.GPT4o,
-                    maxIterations = 30
-                ).run(prompt)
-            }
-        }
+    @Test fun `P1 - Over-Informer - HVAC tune-up`() = runCase(simulationCases.first { it.id == "P1" })
 
-        val outputFile = File("build/conversation-simulation.txt")
-        outputFile.parentFile.mkdirs()
+    @Test fun `P2 - Indecisive Rescheduler - Plumbing slow drain`() = runCase(simulationCases.first { it.id == "P2" })
 
-        outputFile.bufferedWriter().use { writer ->
-            for (case in simulationCases) {
-                println("\n=== Running ${case.id}: ${case.scenarioName} ===")
-                System.out.flush()
-                runCase(case, apiKey, judge, writer)
-            }
-        }
+    @Test fun `P3 - Emergency Caller - Plumbing burst pipe`() = runCase(simulationCases.first { it.id == "P3" })
 
-        println("All conversations written to ${outputFile.absolutePath}")
-    }
+    @Test fun `P4 - Safety Emergency - Electrical sparking panel`() = runCase(simulationCases.first { it.id == "P4" })
 
-    private fun runCase(
-        case: SimulationCase,
-        apiKey: String,
-        judge: JudgeLM,
-        writer: BufferedWriter,
-    ) {
+    @Test fun `P5 - Apartment Renter with Access Constraints - Handyman shelves`() = runCase(simulationCases.first { it.id == "P5" })
+
+    @Test fun `P6 - Vague Describer - HVAC furnace not starting`() = runCase(simulationCases.first { it.id == "P6" })
+
+    @Test fun `P7 - Canceller - Plumbing intermittent drip`() = runCase(simulationCases.first { it.id == "P7" })
+
+    @Test fun `P8 - Weekend Requester - Handyman squeaky door`() = runCase(simulationCases.first { it.id == "P8" })
+
+    @Test fun `P9 - Busy Schedule - Electrical outlet`() = runCase(simulationCases.first { it.id == "P9" })
+
+    @Test fun `P10 - Commercial Property Client - HVAC office AC not cooling`() = runCase(simulationCases.first { it.id == "P10" })
+
+    private fun runCase(case: SimulationCase) {
         val simulatedUser = LLMSimulatedUser.builder()
             .judge(judge)
             .persona(case.persona)
@@ -281,19 +291,45 @@ class HomeServicesConversationSimulation {
             agent.run(case.initialMessage)
         }
 
-        writer.write("=".repeat(60))
-        writer.newLine()
-        writer.write("${case.id}: ${case.scenarioName}")
-        writer.newLine()
-        writer.write("=".repeat(60))
-        writer.newLine()
-        writer.newLine()
-        for ((role, content) in conversation) {
-            writer.write("$role: $content")
+        val outputFile = File("build/conversation-simulation/${case.id}.txt")
+        outputFile.parentFile.mkdirs()
+        outputFile.bufferedWriter().use { writer ->
+            writer.write("=".repeat(60))
+            writer.newLine()
+            writer.write("${case.id}: ${case.scenarioName}")
+            writer.newLine()
+            writer.write("=".repeat(60))
             writer.newLine()
             writer.newLine()
+            for ((role, content) in conversation) {
+                writer.write("$role: $content")
+                writer.newLine()
+                writer.newLine()
+            }
         }
-        writer.newLine()
-        writer.flush()
+
+        val finalTrajectory = ConversationTrajectory(
+            conversation.map { (role, content) ->
+                if (role == "User") DokimosMessage.user(content) else DokimosMessage.assistant(content)
+            },
+            case.scenarioName,
+            emptyMap<String, Any>()
+        )
+
+        val appointmentScheduled = EvaluationCriterion(
+            "Appointment Scheduled",
+            "The conversation resulted in a confirmed and booked home service appointment with a specific date, time window, and address. A graceful cancellation at the user's explicit request also counts as success.",
+            1.0
+        )
+
+        val result = trajectoryEvaluator(judge) {
+            name = "${case.id} - Appointment Scheduling"
+            threshold = 0.7
+            criteria(listOf(appointmentScheduled))
+        }.evaluate(EvalTestCase(actualOutputs = mapOf("trajectory" to finalTrajectory)))
+
+        println("${case.id} score=${result.score()} passed=${result.success()} reason=${result.reason()}")
+
+        assertTrue(result.success(), "${case.id} appointment scheduling check failed: ${result.reason()}")
     }
 }
