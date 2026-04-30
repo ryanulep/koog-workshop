@@ -94,7 +94,7 @@ class HomeServicesConversationSimulation {
             promptExecutor = MultiLLMPromptExecutor(OpenAILLMClient(apiKey)),
             agentConfig = AIAgentConfig(
                 prompt = prompt("home-services-scheduling") {
-                    system(homeServicesReferencePrompt())
+                    system(homeServicesSystemPrompt())
                 },
                 model = OpenAIModels.Chat.GPT4o,
                 maxAgentIterations = 200
