@@ -15,9 +15,14 @@ data class StartUiState(
             agentDemoRoute = NavRoute.AgentDemoRoute.WeatherScreen
         ),
         CardItem(
-            title = "Home Services Scheduling",
-            description = "Schedule plumbing, electrical, HVAC, cleaning, or handyman service. The assistant gathers the missing details and books from sample appointment slots.",
+            title = "Home Services (Graph)",
+            description = "Schedule plumbing, electrical, HVAC, or handyman service using a multi-phase graph strategy with gated tools.",
             agentDemoRoute = NavRoute.AgentDemoRoute.HomeServicesScreen
+        ),
+        CardItem(
+            title = "Home Services (Basic)",
+            description = "Schedule plumbing, electrical, HVAC, or handyman service using a basic loop strategy with all tools available at once.",
+            agentDemoRoute = NavRoute.AgentDemoRoute.HomeServicesBasicScreen
         ),
     )
 )

@@ -11,7 +11,8 @@ import ai.koog.prompt.llm.LLModel
 import androidx.compose.runtime.Composable
 import com.jetbrains.example.koog.compose.agents.basic.SimpleChatAgentProvider
 import com.jetbrains.example.koog.compose.agents.common.AgentProvider
-import com.jetbrains.example.koog.compose.agents.homeservices.HomeServicesSchedulingAgentProvider
+import com.jetbrains.example.koog.compose.agents.homeservices.graph.HomeServicesSchedulingAgentProvider
+import com.jetbrains.example.koog.compose.agents.homeservices.basic.HomeServicesBasicAgentProvider
 import com.jetbrains.example.koog.compose.agents.weather.WeatherAgentProvider
 import com.jetbrains.example.koog.compose.screens.agentdemo.AgentDemoViewModel
 import com.jetbrains.example.koog.compose.screens.settings.SettingsViewModel
@@ -64,6 +65,7 @@ fun KoinApp() = KoinMultiplatformApplication(
                 single<AgentProvider>(named("weather")) { WeatherAgentProvider(provideLLMClient = get()) }
                 single<AgentProvider>(named("basic")) { SimpleChatAgentProvider(provideLLMClient = get()) }
                 single<AgentProvider>(named("home-services")) { HomeServicesSchedulingAgentProvider(provideLLMClient = get()) }
+                single<AgentProvider>(named("home-services-basic")) { HomeServicesBasicAgentProvider(provideLLMClient = get()) }
                 factory { params ->
                     StartViewModel(
                         navigationCallback = params[0],

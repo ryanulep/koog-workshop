@@ -1,4 +1,4 @@
-package com.jetbrains.example.koog.compose.agents.homeservices
+package com.jetbrains.example.koog.compose.agents.homeservices.graph
 
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.agents.chatMemory.feature.ChatMemory
@@ -15,15 +15,16 @@ import com.jetbrains.example.koog.compose.agents.common.AgentExecutionTraceEvent
 import com.jetbrains.example.koog.compose.agents.common.AskUserTool
 import com.jetbrains.example.koog.compose.agents.common.TaskAgentProvider
 import com.jetbrains.example.koog.compose.agents.common.trackSystemMessages
-import com.jetbrains.example.koog.compose.agents.homeservices.graph.homeServicesSchedulingStrategy
-import com.jetbrains.example.koog.compose.agents.homeservices.graph.homeServicesSystemPrompt
+import com.jetbrains.example.koog.compose.agents.homeservices.HomeServicesBookTools
+import com.jetbrains.example.koog.compose.agents.homeservices.HomeServicesFindTools
+import com.jetbrains.example.koog.compose.agents.homeservices.HomeServicesSchedule
 
 internal class HomeServicesSchedulingAgentProvider(
     private val provideLLMClient: suspend () -> Pair<LLMClient, LLModel>,
 ) : TaskAgentProvider {
-    override val title: String = "Home Services Scheduling"
+    override val title: String = "Home Services Scheduling (Graph)"
     override val description: String =
-        "Hi! I'm the home services scheduling assistant. I can gather the details and book a service visit for you."
+        "Hi! I'm the home services scheduling assistant (graph strategy). I can gather the details and book a service visit for you."
 
     override suspend fun provideAgent(
         historyProvider: ChatHistoryProvider,
@@ -48,17 +49,17 @@ internal class HomeServicesSchedulingAgentProvider(
             maxAgentIterations = 200
         )
 
-        return AIAgent(
+        return AIAgent.Companion(
             promptExecutor = executor,
             agentConfig = agentConfig,
             strategy = homeServicesSchedulingStrategy(askUserTool, findTools, bookTools),
-            toolRegistry = ToolRegistry {
+            toolRegistry = ToolRegistry.Companion {
                 tools(askUserTool)
                 tools(findTools)
                 tools(bookTools)
             },
         ) {
-            install(ChatMemory) {
+            install(ChatMemory.Feature) {
                 chatHistoryProvider = historyProvider
             }
             trackSystemMessages(onToolCallEvent, onErrorEvent, onLLMCallEvent, onExecutionTraceEvent)
