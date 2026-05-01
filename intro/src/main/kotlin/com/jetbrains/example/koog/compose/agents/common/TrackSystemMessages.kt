@@ -5,8 +5,7 @@ import ai.koog.agents.core.tools.ToolDescriptor
 import ai.koog.agents.features.eventHandler.feature.handleEvents
 import ai.koog.prompt.message.Message
 
-// FIXME Rename to "trackEvents"? "system messages" sounds confusing in this context, as if we're only tracking LLM system messages
-fun GraphAIAgent.FeatureContext.trackSystemMessages(
+fun GraphAIAgent.FeatureContext.trackEvents(
     onToolCallEvent: suspend (String, Map<String, String>) -> Unit,
     onErrorEvent: suspend (String) -> Unit,
     onLLMCallEvent: suspend (List<Message>, List<ToolDescriptor>) -> Unit,

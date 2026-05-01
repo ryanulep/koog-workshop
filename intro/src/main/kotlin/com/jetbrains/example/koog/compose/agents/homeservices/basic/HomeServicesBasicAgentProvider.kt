@@ -12,10 +12,8 @@ import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
 import ai.koog.prompt.llm.LLModel
 import ai.koog.prompt.message.Message
 import com.jetbrains.example.koog.compose.agents.common.AgentExecutionTraceEvent
-import com.jetbrains.example.koog.compose.agents.common.AskUserTool
 import com.jetbrains.example.koog.compose.agents.common.ChatAgentProvider
-import com.jetbrains.example.koog.compose.agents.common.TaskAgentProvider
-import com.jetbrains.example.koog.compose.agents.common.trackSystemMessages
+import com.jetbrains.example.koog.compose.agents.common.trackEvents
 import com.jetbrains.example.koog.compose.agents.homeservices.HomeServicesBookTools
 import com.jetbrains.example.koog.compose.agents.homeservices.HomeServicesFindTools
 import com.jetbrains.example.koog.compose.agents.homeservices.HomeServicesSchedule
@@ -59,7 +57,7 @@ internal class HomeServicesBasicAgentProvider(
             install(ChatMemory) {
                 chatHistoryProvider = historyProvider
             }
-            trackSystemMessages(onToolCallEvent, onErrorEvent, onLLMCallEvent, onExecutionTraceEvent)
+            trackEvents(onToolCallEvent, onErrorEvent, onLLMCallEvent, onExecutionTraceEvent)
         }
     }
 }

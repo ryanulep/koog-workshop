@@ -13,7 +13,7 @@ import ai.koog.prompt.llm.LLModel
 import ai.koog.prompt.message.Message
 import com.jetbrains.example.koog.compose.agents.common.AgentExecutionTraceEvent
 import com.jetbrains.example.koog.compose.agents.common.ChatAgentProvider
-import com.jetbrains.example.koog.compose.agents.common.trackSystemMessages
+import com.jetbrains.example.koog.compose.agents.common.trackEvents
 import kotlin.time.ExperimentalTime
 
 /**
@@ -72,7 +72,7 @@ internal class WeatherAgentProvider(
                 chatHistoryProvider = historyProvider
                 windowSize(50)
             }
-            trackSystemMessages(onToolCallEvent, onErrorEvent, onLLMCallEvent, onExecutionTraceEvent)
+            trackEvents(onToolCallEvent, onErrorEvent, onLLMCallEvent, onExecutionTraceEvent)
         }
     }
 }
