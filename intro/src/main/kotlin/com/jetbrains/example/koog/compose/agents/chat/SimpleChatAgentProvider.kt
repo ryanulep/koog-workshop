@@ -1,4 +1,4 @@
-package com.jetbrains.example.koog.compose.agents.basic
+package com.jetbrains.example.koog.compose.agents.chat
 
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.agents.chatMemory.feature.ChatMemory
@@ -10,9 +10,9 @@ import ai.koog.prompt.executor.clients.LLMClient
 import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
 import ai.koog.prompt.llm.LLModel
 import ai.koog.prompt.message.Message
-import com.jetbrains.example.koog.compose.agents.common.AgentExecutionTraceEvent
-import com.jetbrains.example.koog.compose.agents.common.ChatAgentProvider
-import com.jetbrains.example.koog.compose.agents.common.trackEvents
+import com.jetbrains.example.koog.compose.agents.util.AgentExecutionTraceEvent
+import com.jetbrains.example.koog.compose.agents.util.ChatAgentProvider
+import com.jetbrains.example.koog.compose.agents.util.trackEvents
 
 /**
  * Factory for creating basic chat agents

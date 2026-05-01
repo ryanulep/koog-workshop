@@ -7,7 +7,7 @@ import ai.koog.agents.core.dsl.builder.strategy
 import ai.koog.agents.core.dsl.extension.nodeLLMCompressHistory
 import ai.koog.agents.core.tools.annotations.LLMDescription
 import ai.koog.agents.ext.agent.subgraphWithTask
-import com.jetbrains.example.koog.compose.agents.common.AskUserTool
+import com.jetbrains.example.koog.compose.agents.util.AskUserTool
 import com.jetbrains.example.koog.compose.agents.homeservices.HomeServicesBookTools
 import com.jetbrains.example.koog.compose.agents.homeservices.HomeServicesFindTools
 import com.jetbrains.example.koog.compose.agents.homeservices.ServiceType

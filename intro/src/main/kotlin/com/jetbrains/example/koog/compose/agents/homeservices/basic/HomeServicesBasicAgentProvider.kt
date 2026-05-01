@@ -11,9 +11,9 @@ import ai.koog.prompt.executor.clients.LLMClient
 import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
 import ai.koog.prompt.llm.LLModel
 import ai.koog.prompt.message.Message
-import com.jetbrains.example.koog.compose.agents.common.AgentExecutionTraceEvent
-import com.jetbrains.example.koog.compose.agents.common.ChatAgentProvider
-import com.jetbrains.example.koog.compose.agents.common.trackEvents
+import com.jetbrains.example.koog.compose.agents.util.AgentExecutionTraceEvent
+import com.jetbrains.example.koog.compose.agents.util.ChatAgentProvider
+import com.jetbrains.example.koog.compose.agents.util.trackEvents
 import com.jetbrains.example.koog.compose.agents.homeservices.HomeServicesBookTools
 import com.jetbrains.example.koog.compose.agents.homeservices.HomeServicesFindTools
 import com.jetbrains.example.koog.compose.agents.homeservices.HomeServicesSchedule

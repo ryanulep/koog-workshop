@@ -5,10 +5,10 @@ import ai.koog.agents.chatMemory.feature.InMemoryChatHistoryProvider
 import ai.koog.agents.core.agent.AIAgent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jetbrains.example.koog.compose.agents.common.AgentProvider
-import com.jetbrains.example.koog.compose.agents.common.AgentExecutionTraceEvent
-import com.jetbrains.example.koog.compose.agents.common.ChatAgentProvider
-import com.jetbrains.example.koog.compose.agents.common.TaskAgentProvider
+import com.jetbrains.example.koog.compose.agents.util.AgentProvider
+import com.jetbrains.example.koog.compose.agents.util.AgentExecutionTraceEvent
+import com.jetbrains.example.koog.compose.agents.util.ChatAgentProvider
+import com.jetbrains.example.koog.compose.agents.util.TaskAgentProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

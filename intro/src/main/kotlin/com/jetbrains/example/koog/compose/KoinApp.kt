@@ -9,8 +9,8 @@ import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.llm.LLModel
 import androidx.compose.runtime.Composable
-import com.jetbrains.example.koog.compose.agents.basic.SimpleChatAgentProvider
-import com.jetbrains.example.koog.compose.agents.common.AgentProvider
+import com.jetbrains.example.koog.compose.agents.chat.SimpleChatAgentProvider
+import com.jetbrains.example.koog.compose.agents.util.AgentProvider
 import com.jetbrains.example.koog.compose.agents.homeservices.graph.HomeServicesSchedulingAgentProvider
 import com.jetbrains.example.koog.compose.agents.homeservices.basic.HomeServicesBasicAgentProvider
 import com.jetbrains.example.koog.compose.agents.weather.WeatherAgentProvider

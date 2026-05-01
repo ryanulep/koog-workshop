@@ -1,4 +1,4 @@
-package com.jetbrains.example.koog.compose.agents.common
+package com.jetbrains.example.koog.compose.agents.util
 
 import ai.koog.agents.core.tools.annotations.LLMDescription
 import ai.koog.agents.core.tools.annotations.Tool
