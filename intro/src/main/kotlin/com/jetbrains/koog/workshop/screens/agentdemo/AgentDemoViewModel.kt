@@ -68,25 +68,33 @@ class AgentDemoViewModel(
         }
     }
 
-    // TODO check structure, maybe refactor
     private fun sendMessage() {
         val userInput = _uiState.value.inputText.trim()
         if (userInput.isEmpty()) return
 
-        val isResponse = _uiState.value.userResponseRequested
+        // If the agent is waiting for a response to a question
+        if (_uiState.value.userResponseRequested) {
+            _uiState.update {
+                it.copy(
+                    chatMessages = it.chatMessages + ChatMessage.UserMessage(userInput),
+                    inputText = "",
+                    isInputEnabled = false,
+                    isLoading = true,
+                    userResponseRequested = false,
+                    currentUserResponse = userInput,
+                )
+            }
+        } else {
+            // Initial message flow - add user message and start the agent
+            _uiState.update {
+                it.copy(
+                    chatMessages = it.chatMessages + ChatMessage.UserMessage(userInput),
+                    inputText = "",
+                    isInputEnabled = false,
+                    isLoading = true,
+                )
+            }
 
-        _uiState.update {
-            it.copy(
-                chatMessages = it.chatMessages + ChatMessage.UserMessage(userInput),
-                inputText = "",
-                isInputEnabled = false,
-                isLoading = true,
-                currentUserResponse = if (isResponse) userInput else null,
-                userResponseRequested = false,
-            )
-        }
-
-        if (!isResponse) {
             viewModelScope.launch {
                 runAgent(userInput)
             }
