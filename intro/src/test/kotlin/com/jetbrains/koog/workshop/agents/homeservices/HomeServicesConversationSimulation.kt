@@ -11,9 +11,10 @@ import ai.koog.prompt.executor.llms.all.simpleOpenAIExecutor
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.appointmentScheduled
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.emergencyReferral
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.gracefulCancellation
-import com.jetbrains.koog.workshop.agents.util.AskUserTool
+import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.noRedundantQuestions
 import com.jetbrains.koog.workshop.agents.homeservices.graph.homeServicesSchedulingStrategy
 import com.jetbrains.koog.workshop.agents.homeservices.graph.homeServicesSystemPrompt
+import com.jetbrains.koog.workshop.agents.util.AskUserTool
 import dev.dokimos.core.JudgeLM
 import dev.dokimos.core.conversation.ConversationTrajectory
 import dev.dokimos.core.conversation.EvaluationCriterion
@@ -48,6 +49,21 @@ object EvaluationCriteria {
         "After the user cancelled, the agent acknowledged the cancellation gracefully, " +
                 "mentioned that the user can start a new conversation whenever they are ready, " +
                 "and did not ask for a satisfaction rating.",
+        1.0
+    )
+
+    val noRedundantQuestions = EvaluationCriterion(
+        "No Redundant Questions",
+        "The agent did not ask for information that the user already provided in their initial message or previous responses. " +
+                "The agent should recognize and use information already given (such as name, address, service type, preferred time, access notes) " +
+                "without requesting it again.",
+        1.0
+    )
+
+    // TODO: see if we can get the details from the tool call
+    val confirmationIncludesAllDetails = EvaluationCriterion(
+        "Confirmation Includes All Details",
+        "When the agent asks for appointment confirmation, the confirmation must include all the details that the user mentioned during the conversation, including: name, address (with unit/floor if provided), service type, date, time window, and any access notes (buzzer codes, parking instructions, floor access, special requirements).",
         1.0
     )
 }
@@ -86,8 +102,8 @@ class HomeServicesConversationSimulation {
         }
     }
 
-    @Test fun `P0 - Baseline - Plumbing leaking kitchen faucet`() = runCase(SimulationCase(
-        id = "P0",
+    @Test fun `Scheduling-1 - Baseline - Plumbing leaking kitchen faucet`() = runCase(SimulationCase(
+        id = "Scheduling-1",
         scenarioName = "Baseline — Plumbing leaking kitchen faucet",
         initialMessage = "I have a leaking faucet in my kitchen.",
         persona = "homeowner with a leaking kitchen faucet",
@@ -103,8 +119,8 @@ class HomeServicesConversationSimulation {
         evaluations = listOf(appointmentScheduled),
     ))
 
-    @Test fun `P1 - Over-Informer - HVAC tune-up`() = runCase(SimulationCase(
-        id = "P1",
+    @Test fun `Scheduling-2 - Over-Informer - HVAC tune-up`() = runCase(SimulationCase(
+        id = "Scheduling-2",
         scenarioName = "Over-Informer — HVAC tune-up",
         initialMessage = "Hi, I'm Jordan Lee at 88 Birchwood Drive. I need an HVAC tune-up before summer — not urgent, any morning next week works. No access issues.",
         persona = "tech-savvy homeowner who provides all details upfront and gets impatient if asked to repeat them",
@@ -114,26 +130,26 @@ class HomeServicesConversationSimulation {
             - Confirm booking on first offer
             - Give rating 4 when asked
         """.trimIndent(),
-        evaluations = listOf(appointmentScheduled),
+        evaluations = listOf(appointmentScheduled, noRedundantQuestions),
     ))
 
-    @Test fun `P2 - Indecisive Rescheduler - Plumbing slow drain`() = runCase(SimulationCase(
-        id = "P2",
+    @Test fun `Rescheduling-1 - Indecisive Rescheduler - Plumbing slow drain`() = runCase(SimulationCase(
+        id = "Rescheduling-1",
         scenarioName = "Indecisive Rescheduler — Plumbing slow drain",
         initialMessage = "My bathroom drain has been draining really slowly for a week.",
         persona = "homeowner who changes mind about timing after seeing slot options, triggering a re-selection loop",
         behaviorGuidelines = """
             - Your name is Maria Chen, address is 15 Oak Lane, Apt 3B
-            - Request morning first, then switch to early afternoon after slots are shown
-            - At the confirmation step, say you want an earlier date and ask to see different slots
+            - Request morning first, then switch to late afternoon after slots are shown
+            - At the confirmation step, say you want an earlier date, if possible today, and ask to see different slots
             - Accept the new slot on the second confirmation
-            - Give rating 3 when asked
+            - Give rating 4 when asked
         """.trimIndent(),
         evaluations = listOf(appointmentScheduled),
     ))
 
-    @Test fun `P3 - Emergency Caller - Plumbing burst pipe`() = runCase(SimulationCase(
-        id = "P3",
+    @Test fun `Emergency-1 - Emergency Caller - Plumbing burst pipe`() = runCase(SimulationCase(
+        id = "Emergency-1",
         scenarioName = "Emergency Caller — Plumbing burst pipe",
         initialMessage = "Water is spraying from a pipe under my sink — it's flooding the kitchen!",
         persona = "panicked homeowner with a burst pipe causing active flooding, needs immediate help",
@@ -146,8 +162,8 @@ class HomeServicesConversationSimulation {
         evaluations = listOf(emergencyReferral),
     ))
 
-    @Test fun `P4 - Safety Emergency - Electrical sparking panel`() = runCase(SimulationCase(
-        id = "P4",
+    @Test fun `Emergency-2 - Safety Emergency - Electrical sparking panel`() = runCase(SimulationCase(
+        id = "Emergency-2",
         scenarioName = "Safety Emergency — Electrical sparking panel",
         initialMessage = "There are sparks coming from my electrical panel and I can smell something burning.",
         persona = "homeowner describing a dangerous electrical fault with sparks and a burning smell",
@@ -161,8 +177,27 @@ class HomeServicesConversationSimulation {
         evaluations = listOf(emergencyReferral),
     ))
 
-    @Test fun `P5 - Apartment Renter with Access Constraints - Handyman shelves`() = runCase(SimulationCase(
-        id = "P5",
+    @Test
+    fun `Emergency-3 - False Alarm - Gas smell that turns out to be garbage`() = runCase(
+        SimulationCase(
+            id = "Emergency-3",
+            scenarioName = "False Alarm — Gas smell that turns out to be garbage",
+            initialMessage = "There's a strange smell in my kitchen and I'm worried there might be a leak!",
+            persona = "homeowner who initially reports a strange smell (may be gas?) but after explaining realizes it's coming from the garbage disposal",
+            behaviorGuidelines = """
+        - Your name is Taylor Bennett, address is 92 Oakwood Lane
+        - Initially express concern about a strange smell
+        - When asked to describe the smell or location more precisely, clarify that it's actually coming from the garbage disposal and smells like rotting food
+        - Accept that this is not an emergency and proceed with normal scheduling for a plumbing service to check the disposal
+        - Prefer afternoon appointments
+        - Give rating 4 when asked
+    """.trimIndent(),
+            evaluations = listOf(appointmentScheduled),
+        )
+    )
+
+    @Test fun `Scheduling-3 - Apartment Renter with Access Constraints - Handyman shelves`() = runCase(SimulationCase(
+        id = "Scheduling-3",
         scenarioName = "Apartment Renter with Access Constraints — Handyman shelves",
         initialMessage = "I need someone to install some wall shelves in my apartment.",
         persona = "renter in a multi-unit building with specific buzzer, parking, and floor access requirements",
@@ -173,11 +208,11 @@ class HomeServicesConversationSimulation {
             - Confirm on first ask
             - Give rating 4 when asked
         """.trimIndent(),
-        evaluations = listOf(appointmentScheduled),
+        evaluations = listOf(appointmentScheduled, noRedundantQuestions),
     ))
 
-    @Test fun `P6 - Vague Describer - HVAC furnace not starting`() = runCase(SimulationCase(
-        id = "P6",
+    @Test fun `Scheduling-4 - Vague Describer - HVAC furnace not starting`() = runCase(SimulationCase(
+        id = "Scheduling-4",
         scenarioName = "Vague Describer — HVAC furnace not starting",
         initialMessage = "My heater stopped working and it's getting cold.",
         persona = "homeowner who describes symptoms loosely without knowing technical terminology, needs follow-up questions",
@@ -191,8 +226,8 @@ class HomeServicesConversationSimulation {
         evaluations = listOf(appointmentScheduled),
     ))
 
-    @Test fun `P8 - Weekend Requester - Handyman squeaky door`() = runCase(SimulationCase(
-        id = "P8",
+    @Test fun `Scheduling-Saturday - Weekend Requester - Handyman squeaky door`() = runCase(SimulationCase(
+        id = "Scheduling-Saturday",
         scenarioName = "Weekend Requester — Handyman squeaky door",
         initialMessage = "Can I get a handyman to come this Saturday to fix a squeaky door?",
         persona = "homeowner who specifically requests a Saturday appointment and accepts a weekday alternative",
@@ -285,8 +320,8 @@ class HomeServicesConversationSimulation {
         ),
     ))
 
-    @Test fun `C1 - Confirmation Canceller - Plumbing intermittent drip`() = runCase(SimulationCase(
-        id = "C1",
+    @Test fun `Cancel-1 - Confirmation Canceller - Plumbing intermittent drip`() = runCase(SimulationCase(
+        id = "Cancel-1",
         scenarioName = "Canceller — Plumbing intermittent drip",
         initialMessage = "There's a small drip under my bathroom sink, not sure if it needs fixing urgently.",
         persona = "homeowner who proceeds through the flow but cancels at the confirmation step",
@@ -300,8 +335,8 @@ class HomeServicesConversationSimulation {
     ))
 
 
-    @Test fun `C2 - Early Canceller - Cancels during intake`() = runCase(SimulationCase(
-        id = "C2",
+    @Test fun `Cancel-2 - Early Canceller - Cancels during intake`() = runCase(SimulationCase(
+        id = "Cancel-2",
         scenarioName = "Early Canceller — Cancels during intake",
         initialMessage = "I need a plumber to fix a leak.",
         persona = "homeowner who starts the booking process but changes mind partway through gathering details",
@@ -311,8 +346,8 @@ class HomeServicesConversationSimulation {
         evaluations = listOf(gracefulCancellation),
     ))
 
-    @Test fun `C3 - Slot Canceller - Cancels after seeing available slots`() = runCase(SimulationCase(
-        id = "C3",
+    @Test fun `Cancel-3 - Slot Canceller - Cancels after seeing available slots`() = runCase(SimulationCase(
+        id = "Cancel-3",
         scenarioName = "Slot Canceller — Cancels after seeing available slots",
         initialMessage = "I need an electrician to look at a tripping breaker.",
         persona = "homeowner who provides all details but decides to cancel once appointment slots are presented",

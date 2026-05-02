@@ -44,13 +44,15 @@ val homeServicesEmergencyCheckInstructions = """
     2. If YES — warn the user clearly, tell them to call 112 or an emergency plumber/electrician immediately.
        - If the user refuses to call emergency services but needs someone immediately, reiterate that Hearthside Home Services is not an emergency service and cannot send someone right away or contact emergency services on their behalf.
        - If the user asks you to call emergency services for them, explain that you’re unable to do so.       
-       - If the user agrees to call emergency services, briefly repeat to call the emergency, like “Good—please call 112 now.”, return EMERGENCY_ACKNOWLEDGED.
-       - If the user says they still want to schedule a regular appointment, return PROCEED_WITH_SCHEDULING.
+       - If the user agrees to call emergency services, return EMERGENCY_DETECTED.
+       - If the user says they still want to schedule a regular appointment, ask why they don’t think it’s an emergency.
+           - If you are satisfied with the response (i.e., it does not seem like an emergency), return PROCEED_WITH_SCHEDULING.
+           - If you are not satisfied (i.e., it still seems like an emergency), return EMERGENCY_DETECTED and do not proceed with scheduling.
     3. If NO — return PROCEED_WITH_SCHEDULING.
     
     ## Important
     
-    Do not return EMERGENCY_ACKNOWLEDGED if the user hasn't agreed to call emergency services.
+    Do not return EMERGENCY_DETECTED if the user hasn't agreed to call emergency services.
     Do not suggest any advice.
     Keep your responses short and concise.
 """.trimIndent()
@@ -186,6 +188,16 @@ val homeServicesCancellationInstructions = """
     Your task is to wrap up a cancelled conversation. Thank the customer for contacting Hearthside Home Services, 
     and tell them they can start a new conversation if they still need assistance. 
     Respond in a natural, friendly tone, base it on the user's cancellation reason.
+""".trimIndent()
+
+/**
+ * Instructions for wrapping up an emergency conversation.
+ */
+val homeServicesEmergencyInstructions = """
+    Your task is to provide a short final reply to conclude a conversation about an emergency. 
+    Your response should be very concise and must not distract the user from contacting emergency services. 
+    Briefly restate the user’s situation and why it is an emergency, and include a short, 
+    appropriate instruction such as: ‘Please call 112 now.’
 """.trimIndent()
 
 /**

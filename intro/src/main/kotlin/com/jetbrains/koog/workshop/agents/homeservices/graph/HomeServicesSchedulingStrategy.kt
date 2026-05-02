@@ -1,6 +1,5 @@
 package com.jetbrains.koog.workshop.agents.homeservices.graph
 
-import ai.koog.agents.core.agent.context.AIAgentGraphContextBase
 import ai.koog.agents.core.agent.context.agentInput
 import ai.koog.agents.core.agent.entity.createStorageKey
 import ai.koog.agents.core.dsl.builder.node
@@ -18,8 +17,8 @@ import kotlinx.serialization.Serializable
 @LLMDescription("Result of the emergency check phase")
 @Serializable
 enum class EmergencyCheckResult {
-    @LLMDescription("User acknowledged the emergency and will call emergency services; do not proceed with scheduling")
-    EMERGENCY_ACKNOWLEDGED,
+    @LLMDescription("The emergency has been detected and the user has been informed; do not proceed with scheduling")
+    EMERGENCY_DETECTED,
     @LLMDescription("No emergency detected; proceed with regular appointment scheduling")
     PROCEED_WITH_SCHEDULING,
     @LLMDescription("User cancelled the scheduling process")
@@ -206,15 +205,21 @@ fun homeServicesSchedulingStrategy(
         }
     }
 
+    // Cancellation path: single LLM call to close the conversation
+    val handleEmergency by node<String, String> { _ ->
+        llm.writeSession {
+            appendPrompt { user(homeServicesEmergencyInstructions) }
+            requestLLM().content
+        }
+    }
+
     nodeStart then checkEmergency
     edge(checkEmergency forwardTo assess onCondition { it == EmergencyCheckResult.PROCEED_WITH_SCHEDULING })
     edge(checkEmergency forwardTo handleCancellation onCondition { it == EmergencyCheckResult.CANCELLED } transformed { "Cancelled" })
-    edge(checkEmergency forwardTo nodeFinish onCondition { it == EmergencyCheckResult.EMERGENCY_ACKNOWLEDGED } transformed { "Handling emergency" })
-
-    val cancellationCondition: suspend AIAgentGraphContextBase.(AssessResult) -> Boolean = { !it.success() }
+    edge(checkEmergency forwardTo handleEmergency onCondition { it == EmergencyCheckResult.EMERGENCY_DETECTED } transformed { "Handling emergency" })
 
     edge(assess forwardTo storeIntake onCondition { it.success() } transformed { it.collected!! })
-    edge(assess forwardTo handleCancellation onCondition cancellationCondition transformed { "Cancelled" })
+    edge(assess forwardTo handleCancellation onCondition { !it.success() } transformed { "Cancelled" })
 
     storeIntake then compressHistory
     compressHistory then selectSlot
@@ -228,6 +233,7 @@ fun homeServicesSchedulingStrategy(
     edge(confirmSlot forwardTo handleCancellation onCondition { it == ConfirmationStatus.CANCELLED } transformed { "Cancelled" })
     edge(confirmSlot forwardTo book onCondition { it == ConfirmationStatus.CONFIRMED } transformed { "Slot confirmed, proceeding to booking." })
 
-    handleCancellation then nodeFinish
     book then finish then nodeFinish
+    handleCancellation then nodeFinish
+    handleEmergency then nodeFinish
 }
