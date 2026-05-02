@@ -10,6 +10,14 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
+enum class Workday(val dayOfWeek: DayOfWeek) {
+    MONDAY(DayOfWeek.MONDAY),
+    TUESDAY(DayOfWeek.TUESDAY),
+    WEDNESDAY(DayOfWeek.WEDNESDAY),
+    THURSDAY(DayOfWeek.THURSDAY),
+    FRIDAY(DayOfWeek.FRIDAY),
+}
+
 enum class ServiceType {
     PLUMBING, ELECTRICAL, HVAC, HANDYMAN
 }
@@ -196,7 +204,7 @@ class HomeServicesSchedule {
     private fun businessDates(): List<LocalDate> {
         val dates = mutableListOf<LocalDate>()
         var cursor = today
-        while (dates.size < 10) {
+        while (dates.size < 30) {
             if (cursor.dayOfWeek != DayOfWeek.SATURDAY && cursor.dayOfWeek != DayOfWeek.SUNDAY) {
                 dates += cursor
             }
@@ -245,11 +253,18 @@ class HomeServicesFindTools(private val schedule: HomeServicesSchedule) : ToolSe
         @LLMDescription("Maximum number of slots to return (default 5)")
         limit: Int = 5,
         @LLMDescription("Earliest date to consider in yyyy-MM-dd format (overrides urgency-based default when provided)")
-        startDate: String = "",
+        startDate: String? = null,
+        @LLMDescription("Filter by time window(s): MORNING (9:00-12:00), EARLY_AFTERNOON (12:00-15:00), LATE_AFTERNOON (15:00-18:00). Empty list means all time windows.")
+        timeWindows: List<TimeWindow> = emptyList(),
+        @LLMDescription("Filter by day(s) of the week: MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY. Empty list means all weekdays.")
+        daysOfWeek: List<Workday> = emptyList(),
     ): String {
+        val timeWindowFilter = timeWindows.toSet()
+        val dayOfWeekFilter = daysOfWeek.map { it.dayOfWeek }.toSet()
+
         val compatibleSpecialists = SpecialistType.entries.filter { serviceType in it.supportedServices }.toSet()
         val now = schedule.currentTime
-        val fromDate = if (startDate.isNotBlank()) {
+        val fromDate = if (!startDate.isNullOrBlank()) {
             try {
                 LocalDate.parse(startDate, DISPLAY_DATE_FORMATTER)
             } catch (_: Exception) {
@@ -263,17 +278,20 @@ class HomeServicesFindTools(private val schedule: HomeServicesSchedule) : ToolSe
             schedule.isFree(slot.id) &&
                 slot.specialistType in compatibleSpecialists &&
                 slot.date >= fromDate &&
-                !(slot.date == schedule.today && now.hour >= slot.timeWindow.startHour)
+                !(slot.date == schedule.today && now.hour >= slot.timeWindow.startHour) &&
+                (timeWindowFilter.isEmpty() || slot.timeWindow in timeWindowFilter) &&
+                (dayOfWeekFilter.isEmpty() || slot.date.dayOfWeek in dayOfWeekFilter)
         }
 
         val matches = allFree.take(limit)
 
         if (matches.isEmpty()) {
-            // Relax the time-of-day filter to find the earliest future slot
             val nextAvailable = schedule.slots.firstOrNull { slot ->
                 schedule.isFree(slot.id) &&
                     slot.specialistType in compatibleSpecialists &&
-                    slot.date >= fromDate
+                    slot.date >= fromDate &&
+                    (timeWindowFilter.isEmpty() || slot.timeWindow in timeWindowFilter) &&
+                    (dayOfWeekFilter.isEmpty() || slot.date.dayOfWeek in dayOfWeekFilter)
             }
             return if (nextAvailable != null) {
                 val day = nextAvailable.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.US)

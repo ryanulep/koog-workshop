@@ -126,12 +126,11 @@ val homeServicesSlotSelectionInstructions = """
 
     ## Steps
 
-    0. If the intake results say "cancelled", stop and return "cancelled".
     1. Briefly recap the customer's request.
     2. Use getAvailableSlots with the collected service type and urgency level to fetch the nearest available slots.
     3. Present the options clearly, showing the exact date and time window for each.
     4. Ask the customer which slot works best, or whether they'd prefer a different day or time.
-    5. If the customer wants to see other dates, call getAvailableSlots again with the appropriate startDate or a higher limit.
+    5. If the customer wants to see other dates, call getAvailableSlots again with the appropriate startDate and filters like preferred day of the week or time window.
     6. Return the chosen slot as the structured type. 
 
     ## Appointment Windows
