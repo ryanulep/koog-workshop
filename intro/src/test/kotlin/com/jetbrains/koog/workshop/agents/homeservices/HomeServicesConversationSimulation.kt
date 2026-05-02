@@ -8,6 +8,9 @@ import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
 import ai.koog.prompt.executor.llms.all.simpleOpenAIExecutor
+import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.appointmentScheduled
+import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.emergencyReferral
+import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.gracefulCancellation
 import com.jetbrains.koog.workshop.agents.util.AskUserTool
 import com.jetbrains.koog.workshop.agents.homeservices.graph.homeServicesSchedulingStrategy
 import com.jetbrains.koog.workshop.agents.homeservices.graph.homeServicesSystemPrompt
@@ -27,14 +30,35 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import dev.dokimos.core.conversation.Message as DokimosMessage
 
+object EvaluationCriteria {
+    val appointmentScheduled = EvaluationCriterion(
+        "Appointment Scheduling",
+        "The conversation resulted in a confirmed and booked home service appointment with a specific date, time window, and address. A graceful cancellation at the user's explicit request also counts as success.",
+        1.0
+    )
+
+    val emergencyReferral = EvaluationCriterion(
+        "Emergency Services Referral",
+        "Instead of proceeding with appointment scheduling, the agent explicitly advised the user to call 112 (emergency services) or contact an emergency plumber or electrician hotline due to the dangerous or urgent nature of the situation.",
+        1.0
+    )
+
+    val gracefulCancellation = EvaluationCriterion(
+        "Graceful Cancellation",
+        "After the user cancelled, the agent acknowledged the cancellation gracefully, " +
+                "mentioned that the user can start a new conversation whenever they are ready, " +
+                "and did not ask for a satisfaction rating.",
+        1.0
+    )
+}
+
 data class SimulationCase(
     val id: String,
     val scenarioName: String,
     val initialMessage: String,
     val persona: String,
     val behaviorGuidelines: String,
-    val isEmergency: Boolean = false,
-    val additionalEvaluation: EvaluationCriterion? = null,
+    val evaluations: List<EvaluationCriterion> = emptyList(),
     val setupSchedule: ((HomeServicesSchedule) -> Unit)? = null,
 )
 
@@ -76,6 +100,7 @@ class HomeServicesConversationSimulation {
             - Confirm booking on first ask
             - Give rating 5 when asked
         """.trimIndent(),
+        evaluations = listOf(appointmentScheduled),
     ))
 
     @Test fun `P1 - Over-Informer - HVAC tune-up`() = runCase(SimulationCase(
@@ -89,6 +114,7 @@ class HomeServicesConversationSimulation {
             - Confirm booking on first offer
             - Give rating 4 when asked
         """.trimIndent(),
+        evaluations = listOf(appointmentScheduled),
     ))
 
     @Test fun `P2 - Indecisive Rescheduler - Plumbing slow drain`() = runCase(SimulationCase(
@@ -103,6 +129,7 @@ class HomeServicesConversationSimulation {
             - Accept the new slot on the second confirmation
             - Give rating 3 when asked
         """.trimIndent(),
+        evaluations = listOf(appointmentScheduled),
     ))
 
     @Test fun `P3 - Emergency Caller - Plumbing burst pipe`() = runCase(SimulationCase(
@@ -116,7 +143,7 @@ class HomeServicesConversationSimulation {
             - Accept the earliest available slot without negotiating
             - Give rating 5 when asked
         """.trimIndent(),
-        isEmergency = true,
+        evaluations = listOf(emergencyReferral),
     ))
 
     @Test fun `P4 - Safety Emergency - Electrical sparking panel`() = runCase(SimulationCase(
@@ -131,7 +158,7 @@ class HomeServicesConversationSimulation {
             - Accept the first available electrical slot
             - Give rating 5 when asked
         """.trimIndent(),
-        isEmergency = true,
+        evaluations = listOf(emergencyReferral),
     ))
 
     @Test fun `P5 - Apartment Renter with Access Constraints - Handyman shelves`() = runCase(SimulationCase(
@@ -146,6 +173,7 @@ class HomeServicesConversationSimulation {
             - Confirm on first ask
             - Give rating 4 when asked
         """.trimIndent(),
+        evaluations = listOf(appointmentScheduled),
     ))
 
     @Test fun `P6 - Vague Describer - HVAC furnace not starting`() = runCase(SimulationCase(
@@ -160,19 +188,7 @@ class HomeServicesConversationSimulation {
             - Confirm once the agent clearly summarises the booking details
             - Give rating 4 when asked
         """.trimIndent(),
-    ))
-
-    @Test fun `P7 - Canceller - Plumbing intermittent drip`() = runCase(SimulationCase(
-        id = "P7",
-        scenarioName = "Canceller — Plumbing intermittent drip",
-        initialMessage = "There's a small drip under my bathroom sink, not sure if it needs fixing urgently.",
-        persona = "homeowner who proceeds through the flow but cancels at the confirmation step",
-        behaviorGuidelines = """
-            - Your name is Dana Ortiz, address is 99 Walnut Court
-            - Proceed normally through information gathering and slot selection
-            - At the confirmation step, cancel: say you will hold off for now and try to fix it yourself
-            - Do not give a rating since you cancelled before booking
-        """.trimIndent(),
+        evaluations = listOf(appointmentScheduled),
     ))
 
     @Test fun `P8 - Weekend Requester - Handyman squeaky door`() = runCase(SimulationCase(
@@ -186,6 +202,7 @@ class HomeServicesConversationSimulation {
             - When told Saturday is unavailable, accept the first weekday morning slot offered
             - Give rating 3 when asked
         """.trimIndent(),
+        evaluations = listOf(appointmentScheduled),
     ))
 
     @Test fun `P9 - Busy Schedule - Electrical outlet`() = runCase(SimulationCase(
@@ -198,6 +215,7 @@ class HomeServicesConversationSimulation {
             - Accept the first slot offered without negotiating
             - Give rating 4 when asked
         """.trimIndent(),
+        evaluations = listOf(appointmentScheduled),
         setupSchedule = { schedule ->
             schedule.slots
                 .filter { ServiceType.ELECTRICAL in it.specialistType.supportedServices }
@@ -220,6 +238,7 @@ class HomeServicesConversationSimulation {
             - Confirm on first ask
             - Give rating 5 when asked
         """.trimIndent(),
+        evaluations = listOf(appointmentScheduled),
     ))
 
     @Test fun `P11 - Urgent Toilet - Only bathroom not flushing`() = runCase(SimulationCase(
@@ -233,11 +252,14 @@ class HomeServicesConversationSimulation {
             - Accept the first available slot
             - Give rating 5 when asked
         """.trimIndent(),
-        additionalEvaluation = EvaluationCriterion(
-            "Urgency Assessment",
-            "The agent asked how many bathrooms the home has, identified that the broken toilet is the only one, " +
-                "and treated the request as urgent — offering appointment slots within the next 2 days.",
-            1.0,
+        evaluations = listOf(
+            appointmentScheduled,
+            EvaluationCriterion(
+                "Urgency Assessment",
+                "The agent asked how many bathrooms the home has, identified that the broken toilet is the only one, " +
+                    "and treated the request as urgent — offering appointment slots within the next 2 days.",
+                1.0,
+            ),
         ),
     ))
 
@@ -252,33 +274,45 @@ class HomeServicesConversationSimulation {
             - Accept the first available slot
             - Give rating 4 when asked
         """.trimIndent(),
-        additionalEvaluation = EvaluationCriterion(
-            "Urgency Assessment",
-            "The agent asked how many bathrooms the home has, identified that a second working bathroom is available, " +
-                "and treated the request as standard (non-urgent) — offering appointment slots starting 2 or more business days from today.",
-            1.0,
+        evaluations = listOf(
+            appointmentScheduled,
+            EvaluationCriterion(
+                "Urgency Assessment",
+                "The agent asked how many bathrooms the home has, identified that a second working bathroom is available, " +
+                    "and treated the request as standard (non-urgent) — offering appointment slots starting 2 or more business days from today.",
+                1.0,
+            ),
         ),
     ))
 
-    @Test fun `P13 - Early Canceller - Cancels during intake`() = runCase(SimulationCase(
-        id = "P13",
+    @Test fun `C1 - Confirmation Canceller - Plumbing intermittent drip`() = runCase(SimulationCase(
+        id = "C1",
+        scenarioName = "Canceller — Plumbing intermittent drip",
+        initialMessage = "There's a small drip under my bathroom sink, not sure if it needs fixing urgently.",
+        persona = "homeowner who proceeds through the flow but cancels at the confirmation step",
+        behaviorGuidelines = """
+            - Your name is Dana Ortiz, address is 99 Walnut Court
+            - Proceed normally through information gathering and slot selection
+            - At the confirmation step, cancel: say you will hold off for now and try to fix it yourself
+            - Do not give a rating since you cancelled before booking
+        """.trimIndent(),
+        evaluations = listOf(gracefulCancellation),
+    ))
+
+
+    @Test fun `C2 - Early Canceller - Cancels during intake`() = runCase(SimulationCase(
+        id = "C2",
         scenarioName = "Early Canceller — Cancels during intake",
         initialMessage = "I need a plumber to fix a leak.",
         persona = "homeowner who starts the booking process but changes mind partway through gathering details",
         behaviorGuidelines = """
             - Answer the first question from the agent, then cancel: say you have decided not to proceed for now
         """.trimIndent(),
-        additionalEvaluation = EvaluationCriterion(
-            "Graceful Cancellation During Intake",
-            "After the user cancelled, the agent acknowledged the cancellation gracefully, " +
-                "mentioned that the user can start a new conversation whenever they are ready, " +
-                "and did not ask for a satisfaction rating.",
-            1.0,
-        ),
+        evaluations = listOf(gracefulCancellation),
     ))
 
-    @Test fun `P14 - Slot Canceller - Cancels after seeing available slots`() = runCase(SimulationCase(
-        id = "P14",
+    @Test fun `C3 - Slot Canceller - Cancels after seeing available slots`() = runCase(SimulationCase(
+        id = "C3",
         scenarioName = "Slot Canceller — Cancels after seeing available slots",
         initialMessage = "I need an electrician to look at a tripping breaker.",
         persona = "homeowner who provides all details but decides to cancel once appointment slots are presented",
@@ -287,13 +321,7 @@ class HomeServicesConversationSimulation {
             - Provide all requested details without hesitation
             - When the agent presents available appointment slots, cancel: say none of the times work and you will call back later
         """.trimIndent(),
-        additionalEvaluation = EvaluationCriterion(
-            "Graceful Cancellation During Slot Selection",
-            "After the user cancelled while viewing slots, the agent acknowledged the cancellation gracefully, " +
-                "mentioned that the user can start a new conversation whenever they are ready, " +
-                "and did not ask for a satisfaction rating.",
-            1.0,
-        ),
+        evaluations = listOf(gracefulCancellation),
     ))
 
     private fun runCase(case: SimulationCase) {
@@ -304,8 +332,9 @@ class HomeServicesConversationSimulation {
             .build()
 
         val conversation = mutableListOf<Pair<String, String>>()
+
         fun addMessage(role: String, content: String) {
-            conversation.add(role to case.initialMessage)
+            conversation.add(role to content)
             println("\n$role: $content")
             System.out.flush()
         }
@@ -358,9 +387,7 @@ class HomeServicesConversationSimulation {
 
         runBlocking {
             val finalMessage = agent.run(case.initialMessage)
-            conversation.add("Assistant" to finalMessage)
-            println("\nAssistant: $finalMessage")
-            System.out.flush()
+            addMessage("Assistant", finalMessage)
         }
 
         if (writeToFile) {
@@ -375,23 +402,7 @@ class HomeServicesConversationSimulation {
             emptyMap<String, Any>()
         )
 
-        if (case.isEmergency) {
-            val emergencyReferral = EvaluationCriterion(
-                "Emergency Services Referral",
-                "Instead of proceeding with appointment scheduling, the agent explicitly advised the user to call 112 (emergency services) or contact an emergency plumber or electrician hotline due to the dangerous or urgent nature of the situation.",
-                1.0
-            )
-            evaluateConversationTrajectory(case, emergencyReferral, finalTrajectory)
-        } else {
-            val appointmentScheduled = EvaluationCriterion(
-                "Appointment Scheduling",
-                "The conversation resulted in a confirmed and booked home service appointment with a specific date, time window, and address. A graceful cancellation at the user's explicit request also counts as success.",
-                1.0
-            )
-            evaluateConversationTrajectory(case, appointmentScheduled, finalTrajectory)
-        }
-
-        case.additionalEvaluation?.let { criterion ->
+        case.evaluations.forEach { criterion ->
             evaluateConversationTrajectory(case, criterion, finalTrajectory)
         }
     }
