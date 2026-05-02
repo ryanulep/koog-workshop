@@ -154,27 +154,18 @@ fun homeServicesSchedulingStrategy(
         """.trimIndent()
     }
 
-    // Phase 4: book the appointment (booking tool now available)
-    val book by subgraphWithTask<String, String>(
-        tools = askUserTool.asTools() + bookTools.asTools()
-    ) { state ->
+    // Phase 4: book the appointment programmatically — all data is already collected
+    val book by node<String, String> { _ ->
         val intake = storage.getValue(intakeResultKey)
         val slot = storage.getValue(selectedSlotKey)
-        """
-        $homeServicesBookingInstructions
-        
-        Agent state: $state
-
-        Confirmed booking details:
-        - Customer: ${intake.customerName}
-        - Service type: ${intake.serviceType}
-        - Issue: ${intake.issueSummary}
-        - Slot ID: ${slot.slotId}
-        - Date: ${slot.date}
-        - Time window: ${slot.timeWindow}
-        - Address: ${intake.address}
-        ${intake.accessNotes?.let { "- Notes: $it" } ?: ""}
-        """.trimIndent()
+        bookTools.scheduleAppointment(
+            customerName = intake.customerName,
+            serviceType = intake.serviceType,
+            slotId = slot.slotId,
+            address = intake.address,
+            issueDescription = intake.issueSummary,
+            notes = intake.accessNotes ?: "",
+        )
     }
 
     // Phase 5: thank the user and ask for a satisfaction rating

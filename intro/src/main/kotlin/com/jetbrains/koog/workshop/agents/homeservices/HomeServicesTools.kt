@@ -330,6 +330,11 @@ class HomeServicesBookTools(private val schedule: HomeServicesSchedule) : ToolSe
             appendLine("  Address: $address")
             if (notes.isNotBlank()) appendLine("  Notes: $notes")
             appendLine("  Booking ID: $slotId")
+        }.also {
+            println("==============")
+            println("This is the log output from the 'bookAppointment' function.")
+            println(it)
+            println("==============")
         }
     }
 }
