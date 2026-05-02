@@ -1,5 +1,6 @@
 package com.jetbrains.koog.workshop.agents.homeservices.graph
 
+import ai.koog.agents.core.agent.context.AIAgentGraphContextBase
 import ai.koog.agents.core.agent.context.agentInput
 import ai.koog.agents.core.agent.entity.createStorageKey
 import ai.koog.agents.core.dsl.builder.node
@@ -49,6 +50,17 @@ data class AssessResult(
     val cancelled: Boolean,
 ) {
     fun success() = collected != null && !cancelled
+}
+
+@LLMDescription("Outcome of the slot selection phase: either a slot was chosen or user cancelled")
+@Serializable
+data class SelectSlotResult(
+    @LLMDescription("The slot selected by the customer, if any")
+    val selected: SelectedSlot?,
+    @LLMDescription("Whether the user chose to cancel the scheduling process")
+    val cancelled: Boolean,
+) {
+    fun success() = selected != null && !cancelled
 }
 
 @LLMDescription("An available appointment slot selected by the customer")
@@ -110,7 +122,7 @@ fun homeServicesSchedulingStrategy(
     val compressHistory by nodeLLMCompressHistory<String>()
 
     // Phase 2: find slots and let the user pick one (no booking tool available)
-    val selectSlot by subgraphWithTask<String, SelectedSlot>(
+    val selectSlot by subgraphWithTask<String, SelectSlotResult>(
         tools = askUserTool.asTools() + findTools.asTools()
     ) { state ->
 
@@ -188,11 +200,18 @@ fun homeServicesSchedulingStrategy(
     edge(checkEmergency forwardTo nodeFinish onCondition { it == EmergencyCheckResult.EMERGENCY_ACKNOWLEDGED } transformed { "Handling emergency" })
     edge(checkEmergency forwardTo assess onCondition { it == EmergencyCheckResult.PROCEED_WITH_SCHEDULING })
 
-    edge(assess forwardTo finish onCondition { !it.success() } transformed { "cancelled" })
+    val cancellationCondition: suspend AIAgentGraphContextBase.(AssessResult) -> Boolean = { !it.success() }
+
     edge(assess forwardTo storeIntake onCondition { it.success() } transformed { it.collected!! })
+    edge(assess forwardTo finish onCondition cancellationCondition transformed { "cancelled" })
 
     storeIntake then compressHistory
-    compressHistory then selectSlot then storeSlot then confirmSlot
+    compressHistory then selectSlot
+
+    edge(selectSlot forwardTo storeSlot onCondition { it.success() } transformed { it.selected!! })
+    edge(selectSlot forwardTo finish onCondition { !it.success() } transformed { "cancelled" })
+
+    storeSlot then confirmSlot
 
     edge(confirmSlot forwardTo selectSlot onCondition { it == ConfirmationStatus.CHANGE_REQUESTED } transformed { "Slot was selected, but the change was requested." })
     edge(confirmSlot forwardTo finish onCondition { it == ConfirmationStatus.CANCELLED } transformed { "cancelled" })

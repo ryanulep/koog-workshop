@@ -186,7 +186,10 @@ val homeServicesFinishInstructions = """
     Your task is to wrap up the conversation.
 
     ## Steps
+    
+    - If the conversation outcome is "cancelled", thank the customer, tell them they can start a new conversation if they still need assistance, and finish without asking for a rating.
 
+    - If the conversation was successful: 
     1. Thank the customer for using Hearthside Home Services.
     2. Ask them to rate their experience on a scale from 1 to 5 (1 = very unsatisfied, 5 = very satisfied).
     3. After receiving the rating, thank them again and wish them a great day.
