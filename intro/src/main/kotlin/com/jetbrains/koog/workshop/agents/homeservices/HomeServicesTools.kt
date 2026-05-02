@@ -14,6 +14,11 @@ enum class ServiceType {
     PLUMBING, ELECTRICAL, HVAC, HANDYMAN
 }
 
+enum class UrgencyLevel {
+    URGENT,
+    STANDARD,
+}
+
 enum class SpecialistType(val idPart: String, val supportedServices: Set<ServiceType>) {
     SHK("shk", setOf(ServiceType.PLUMBING, ServiceType.HVAC)),
     ELECTRICIAN("electrician", setOf(ServiceType.ELECTRICAL)),
@@ -212,6 +217,16 @@ class HomeServicesSchedule {
     }
 }
 
+private fun addBusinessDays(date: LocalDate, days: Int): LocalDate {
+    var result = date
+    var added = 0
+    while (added < days) {
+        result = result.plusDays(1)
+        if (result.dayOfWeek != DayOfWeek.SATURDAY && result.dayOfWeek != DayOfWeek.SUNDAY) added++
+    }
+    return result
+}
+
 /**
  * Tool set for searching available slots. Does NOT include booking.
  */
@@ -220,14 +235,16 @@ class HomeServicesFindTools(private val schedule: HomeServicesSchedule) : ToolSe
     @Tool
     @LLMDescription(
         "Find available appointment slots for a home service. " +
-            "Returns up to `limit` free slots for the requested service type, sorted by earliest date first."
+            "Returns up to `limit` free slots for the requested service type, sorted by earliest date first. "
     )
     fun getAvailableSlots(
         @LLMDescription("Service type: PLUMBING, ELECTRICAL, HVAC, or HANDYMAN")
         serviceType: ServiceType,
+        @LLMDescription("Urgency level: URGENT (slots from today) or STANDARD (slots from today + 2 business days)")
+        urgencyLevel: UrgencyLevel = UrgencyLevel.STANDARD,
         @LLMDescription("Maximum number of slots to return (default 5)")
         limit: Int = 5,
-        @LLMDescription("Earliest date to consider in yyyy-MM-dd format (default: today)")
+        @LLMDescription("Earliest date to consider in yyyy-MM-dd format (overrides urgency-based default when provided)")
         startDate: String = "",
     ): String {
         val compatibleSpecialists = SpecialistType.entries.filter { serviceType in it.supportedServices }.toSet()
@@ -239,7 +256,7 @@ class HomeServicesFindTools(private val schedule: HomeServicesSchedule) : ToolSe
                 return "Error: Invalid startDate '$startDate'. Use yyyy-MM-dd format, e.g. 2026-05-01."
             }
         } else {
-            schedule.today
+            if (urgencyLevel == UrgencyLevel.STANDARD) addBusinessDays(schedule.today, 2) else schedule.today
         }
 
         val allFree = schedule.slots.filter { slot ->

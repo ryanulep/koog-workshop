@@ -11,6 +11,7 @@ import com.jetbrains.koog.workshop.agents.util.AskUserTool
 import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesBookTools
 import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesFindTools
 import com.jetbrains.koog.workshop.agents.homeservices.ServiceType
+import com.jetbrains.koog.workshop.agents.homeservices.UrgencyLevel
 import kotlinx.serialization.Serializable
 
 @LLMDescription("Result of the emergency check phase")
@@ -33,6 +34,8 @@ data class IntakeResult(
     val address: String,
     @LLMDescription("Customer's full name")
     val customerName: String,
+    @LLMDescription("Urgency level: URGENT (significant disruption, within 2 days) or STANDARD (non-critical, scheduled)")
+    val urgencyLevel: UrgencyLevel,
     @LLMDescription("Optional access instructions such as gate code, pet, parking, or buzzer notes")
     val accessNotes: String? = null,
 )
@@ -114,13 +117,14 @@ fun homeServicesSchedulingStrategy(
         val intake = storage.getValue(intakeResultKey)
         """
         $homeServicesSlotSelectionInstructions
-        
+
         Agent state: $state
 
         Intake results:
         - Customer: ${intake.customerName}
         - Service type: ${intake.serviceType}
         - Issue: ${intake.issueSummary}
+        - Urgency: ${intake.urgencyLevel}
         - Address: ${intake.address}
         ${intake.accessNotes?.let { "- Access notes: $it" } ?: ""}
         """.trimIndent()
