@@ -22,7 +22,7 @@ class HomeServicesBookToolsTest {
         val (schedule, _, bookTools) = freshScheduleAndTools()
         val slotId = firstFreeSlotId(schedule, SpecialistType.SHK)
 
-        val result = bookTools.scheduleAppointment(
+        val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
             serviceType = ServiceType.PLUMBING,
             slotId = slotId,
@@ -42,7 +42,7 @@ class HomeServicesBookToolsTest {
         val (schedule, _, bookTools) = freshScheduleAndTools()
         val slotId = firstFreeSlotId(schedule, SpecialistType.SHK)
 
-        bookTools.scheduleAppointment(
+        bookTools.bookAppointment(
             customerName = "Jane Doe",
             serviceType = ServiceType.PLUMBING,
             slotId = slotId,
@@ -59,7 +59,7 @@ class HomeServicesBookToolsTest {
     @Test
     fun `returns error for unknown slot ID`() {
         val (_, _, bookTools) = freshScheduleAndTools()
-        val result = bookTools.scheduleAppointment(
+        val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
             serviceType = ServiceType.PLUMBING,
             slotId = "svc_fake_9999_1",
@@ -75,7 +75,7 @@ class HomeServicesBookToolsTest {
         val (schedule, _, bookTools) = freshScheduleAndTools()
         val bookedSlotId = schedule.slots.first { !schedule.isFree(it.id) }.id
 
-        val result = bookTools.scheduleAppointment(
+        val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
             serviceType = ServiceType.PLUMBING,
             slotId = bookedSlotId,
@@ -92,7 +92,7 @@ class HomeServicesBookToolsTest {
         // Try to book ELECTRICAL on a SHK slot (SHK supports PLUMBING and HVAC only)
         val shkSlotId = firstFreeSlotId(schedule, SpecialistType.SHK)
 
-        val result = bookTools.scheduleAppointment(
+        val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
             serviceType = ServiceType.ELECTRICAL,
             slotId = shkSlotId,
@@ -108,7 +108,7 @@ class HomeServicesBookToolsTest {
         val (schedule, _, bookTools) = freshScheduleAndTools()
         val slotId = firstFreeSlotId(schedule, SpecialistType.SHK)
 
-        val result = bookTools.scheduleAppointment(
+        val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
             serviceType = ServiceType.HVAC,
             slotId = slotId,
@@ -124,7 +124,7 @@ class HomeServicesBookToolsTest {
         val (schedule, _, bookTools) = freshScheduleAndTools()
         val slotId = firstFreeSlotId(schedule, SpecialistType.ELECTRICIAN)
 
-        val result = bookTools.scheduleAppointment(
+        val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
             serviceType = ServiceType.ELECTRICAL,
             slotId = slotId,
@@ -142,7 +142,7 @@ class HomeServicesBookToolsTest {
         val (schedule, _, bookTools) = freshScheduleAndTools()
         val slotId = firstFreeSlotId(schedule, SpecialistType.ELECTRICIAN)
 
-        bookTools.scheduleAppointment(
+        bookTools.bookAppointment(
             customerName = "Jane Doe",
             serviceType = ServiceType.ELECTRICAL,
             slotId = slotId,
@@ -159,7 +159,7 @@ class HomeServicesBookToolsTest {
         val (schedule, _, bookTools) = freshScheduleAndTools()
         val slotId = firstFreeSlotId(schedule, SpecialistType.ELECTRICIAN)
 
-        bookTools.scheduleAppointment(
+        bookTools.bookAppointment(
             customerName = "Jane Doe",
             serviceType = ServiceType.ELECTRICAL,
             slotId = slotId,
@@ -175,7 +175,7 @@ class HomeServicesBookToolsTest {
         val (schedule, _, bookTools) = freshScheduleAndTools()
         val slotId = firstFreeSlotId(schedule, SpecialistType.HANDYMAN_1)
 
-        bookTools.scheduleAppointment(
+        bookTools.bookAppointment(
             customerName = "First",
             serviceType = ServiceType.HANDYMAN,
             slotId = slotId,
@@ -183,7 +183,7 @@ class HomeServicesBookToolsTest {
             issueDescription = "Broken table",
         )
 
-        val result = bookTools.scheduleAppointment(
+        val result = bookTools.bookAppointment(
             customerName = "Second",
             serviceType = ServiceType.HANDYMAN,
             slotId = slotId,
@@ -199,7 +199,7 @@ class HomeServicesBookToolsTest {
         val (schedule, _, bookTools) = freshScheduleAndTools()
         val slotId = firstFreeSlotId(schedule, SpecialistType.SHK)
 
-        val result = bookTools.scheduleAppointment(
+        val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
             serviceType = ServiceType.PLUMBING,
             slotId = slotId,
@@ -219,7 +219,7 @@ class HomeServicesBookToolsTest {
         val (schedule, findTools, bookTools) = freshScheduleAndTools()
         val slotId = firstFreeSlotId(schedule, SpecialistType.SHK)
 
-        bookTools.scheduleAppointment(
+        bookTools.bookAppointment(
             customerName = "Jane Doe",
             serviceType = ServiceType.PLUMBING,
             slotId = slotId,

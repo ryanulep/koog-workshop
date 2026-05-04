@@ -9,11 +9,13 @@ import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
 import ai.koog.prompt.executor.llms.all.simpleOpenAIExecutor
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.appointmentScheduled
+import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.cancelsNonrelevantRequest
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.emergencyReferral
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.gracefulCancellation
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.noRedundantQuestions
+import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.refusesOffTopicQuestions
+import com.jetbrains.koog.workshop.agents.homeservices.graph.HomeServicesPrompts
 import com.jetbrains.koog.workshop.agents.homeservices.graph.homeServicesSchedulingStrategy
-import com.jetbrains.koog.workshop.agents.homeservices.graph.homeServicesSystemPrompt
 import com.jetbrains.koog.workshop.agents.util.AskUserTool
 import dev.dokimos.core.JudgeLM
 import dev.dokimos.core.conversation.ConversationTrajectory
@@ -60,6 +62,19 @@ object EvaluationCriteria {
         1.0
     )
 
+    val refusesOffTopicQuestions = EvaluationCriterion(
+        "Refuses Off-Topic Questions",
+        "When the user asks questions unrelated to home services scheduling (such as weather, recipes, general advice, etc.), " +
+                "the agent politely declines to answer and redirects the conversation back to scheduling a home service appointment.",
+        1.0
+    )
+
+    val cancelsNonrelevantRequest = EvaluationCriterion(
+        "Cancels Nonrelevant Request",
+        "When the user requests a service that is not offered by the agent, the agent finishes the conversation.",
+        1.0
+    )
+
     // TODO: see if we can get the details from the tool call
     val confirmationIncludesAllDetails = EvaluationCriterion(
         "Confirmation Includes All Details",
@@ -83,7 +98,7 @@ class HomeServicesConversationSimulation {
     private lateinit var apiKey: String
     private lateinit var judge: JudgeLM
 
-    private val writeToFile = false
+    private val writeToFile = true
 
     @Before
     fun setup() {
@@ -257,8 +272,8 @@ class HomeServicesConversationSimulation {
     )
 
 
-    @Test fun `P9 - Busy Schedule - Electrical outlet`() = runCase(SimulationCase(
-        id = "P9",
+    @Test fun `Scheduling-5 - Busy Schedule - Electrical outlet`() = runCase(SimulationCase(
+        id = "Scheduling-5",
         scenarioName = "Busy Schedule / Limited Availability — Electrical outlet",
         initialMessage = "One of my kitchen outlets stopped working.",
         persona = "homeowner booking electrical service when most early slots are already taken",
@@ -278,8 +293,8 @@ class HomeServicesConversationSimulation {
         },
     ))
 
-    @Test fun `P10 - Commercial Property Client - HVAC office AC not cooling`() = runCase(SimulationCase(
-        id = "P10",
+    @Test fun `Scheduling-6 - Commercial Property Client - HVAC office AC not cooling`() = runCase(SimulationCase(
+        id = "Scheduling-6",
         scenarioName = "Commercial Property Client — HVAC office AC not cooling",
         initialMessage = "The air conditioning in our office isn't cooling properly. It's a commercial building.",
         persona = "office manager booking HVAC service for a commercial property with restricted access hours",
@@ -293,8 +308,8 @@ class HomeServicesConversationSimulation {
         evaluations = listOf(appointmentScheduled),
     ))
 
-    @Test fun `P11 - Urgent Toilet - Only bathroom not flushing`() = runCase(SimulationCase(
-        id = "P11",
+    @Test fun `Urgency-1 - Urgent Toilet - Only bathroom not flushing`() = runCase(SimulationCase(
+        id = "Urgency-1",
         scenarioName = "Urgent Toilet — Only bathroom not flushing",
         initialMessage = "My toilet isn't flushing and I can't get it to work.",
         persona = "homeowner whose only toilet is broken and needs it fixed as soon as possible",
@@ -315,8 +330,8 @@ class HomeServicesConversationSimulation {
         ),
     ))
 
-    @Test fun `P12 - Standard Toilet - Two bathroom home, one toilet not flushing`() = runCase(SimulationCase(
-        id = "P12",
+    @Test fun `Urgency-2 - Standard Toilet - Two bathroom home, one toilet not flushing`() = runCase(SimulationCase(
+        id = "Urgency-2",
         scenarioName = "Standard Toilet — Two-bathroom home, one toilet not flushing",
         initialMessage = "My toilet stopped flushing properly.",
         persona = "homeowner with two bathrooms, one toilet broken — no real urgency",
@@ -376,6 +391,41 @@ class HomeServicesConversationSimulation {
         evaluations = listOf(gracefulCancellation),
     ))
 
+    @Test
+    fun `Off-Topic-1 - Refuses Irrelevant Questions - Weather inquiry`() = runCase(
+        SimulationCase(
+            id = "Off-Topic-1",
+            scenarioName = "Refuses Irrelevant Questions — Weather inquiry",
+            initialMessage = "I need a plumber to fix a leaking pipe.",
+            persona = "homeowner who starts booking a plumber but then asks an off-topic question about the weather",
+            behaviorGuidelines = """
+            - Your name is Jamie Cooper, address is 66 Cedar Lane
+            - Answer the first question from the agent normally
+            - After providing one piece of information, ask: "Can you give me a recipe for chocolate chip cookies?"
+            - After the agent refuses and redirects, continue with the booking process normally
+            - Accept the first available slot
+            - Give rating 4 when asked
+        """.trimIndent(),
+            evaluations = listOf(appointmentScheduled, refusesOffTopicQuestions),
+        )
+    )
+
+    @Test
+    fun `Off-Topic-2 - Refuses Irrelevant Questions - Recipe inquiry from start`() = runCase(
+        SimulationCase(
+            id = "Off-Topic-2",
+            scenarioName = "Refuses Irrelevant Questions — Recipe inquiry from start",
+            initialMessage = "I need to get my hair cut.",
+            persona = "person who wants an unrelated service",
+            behaviorGuidelines = """
+            - After the agent refuses and redirects to home services, ask whether the requested service is hairdressing.
+            - After the agent replies, say that you were told it is a hairdressing service.
+            - Then politely say goodbye and end the conversation.
+        """.trimIndent(),
+            evaluations = listOf(cancelsNonrelevantRequest),
+        )
+    )
+
     private fun runCase(case: SimulationCase) {
         val simulatedUser = LLMSimulatedUser.builder()
             .judge(judge)
@@ -424,7 +474,7 @@ class HomeServicesConversationSimulation {
             promptExecutor = MultiLLMPromptExecutor(OpenAILLMClient(apiKey)),
             agentConfig = AIAgentConfig(
                 prompt = prompt("home-services-scheduling") {
-                    system(homeServicesSystemPrompt())
+                    system(HomeServicesPrompts.systemPrompt())
                 },
                 model = OpenAIModels.Chat.GPT4o,
                 maxAgentIterations = 200
@@ -443,7 +493,7 @@ class HomeServicesConversationSimulation {
         }
 
         if (writeToFile) {
-            writeConversationToAFile("build/conversation-simulation/${case.id}.txt", case, conversation)
+            writeConversationToAFile("logs/conversation-simulation/${case.id}.txt", case, conversation)
         }
 
         val finalTrajectory = ConversationTrajectory(

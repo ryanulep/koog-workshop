@@ -98,22 +98,14 @@ fun homeServicesSchedulingStrategy(
     val checkEmergency by subgraphWithTask<String, EmergencyCheckResult>(
         tools = askUserTool.asTools()
     ) { input ->
-        """
-        $homeServicesEmergencyCheckInstructions
-
-        The user's initial message: $input
-        """.trimIndent()
+        HomeServicesPrompts.checkEmergencyInstructions(input)
     }
 
     // Phase 1: gather service details from the user (no search or booking tools)
     val assess by subgraphWithTask<EmergencyCheckResult, AssessResult>(
         tools = askUserTool.asTools()
     ) { _ ->
-        """
-        $homeServicesIntakeInstructions
-
-        The user's initial message: ${agentInput<String>()}
-        """.trimIndent()
+        HomeServicesPrompts.assessInstructions(agentInput<String>())
     }
     val storeIntake by node<IntakeResult, String> { intake ->
         storage.set(intakeResultKey, intake)
@@ -126,21 +118,8 @@ fun homeServicesSchedulingStrategy(
     val selectSlot by subgraphWithTask<String, SelectSlotResult>(
         tools = askUserTool.asTools() + findTools.asTools()
     ) { state ->
-
         val intake = storage.getValue(intakeResultKey)
-        """
-        $homeServicesSlotSelectionInstructions
-
-        Agent state: $state
-
-        Intake results:
-        - Customer: ${intake.customerName}
-        - Service type: ${intake.serviceType}
-        - Issue: ${intake.issueSummary}
-        - Urgency: ${intake.urgencyLevel}
-        - Address: ${intake.address}
-        ${intake.accessNotes?.let { "- Access notes: $it" } ?: ""}
-        """.trimIndent()
+        HomeServicesPrompts.selectSlotInstructions(intake, state)
     }
     val storeSlot by node<SelectedSlot, String> { slot ->
         storage.set(selectedSlotKey, slot)
@@ -151,31 +130,16 @@ fun homeServicesSchedulingStrategy(
     val confirmSlot by subgraphWithTask<String, ConfirmationStatus>(
         tools = askUserTool.asTools()
     ) { state ->
-
         val intake = storage.getValue(intakeResultKey)
         val slot = storage.getValue(selectedSlotKey)
-
-        """
-        $homeServicesConfirmationInstructions
-        
-        Agent state: $state
-
-        Selected slot:
-        - Date: ${slot.date}
-        - Time window: ${slot.timeWindow}
-        
-        - Service type: ${intake.serviceType}
-        - Customer: ${intake.customerName}
-        - Address: ${intake.address}
-        ${intake.accessNotes?.let { "- Notes: $it" } ?: ""}
-        """.trimIndent()
+        HomeServicesPrompts.confirmSlotInstructions(intake, slot, state)
     }
 
     // Phase 4: book the appointment programmatically — all data is already collected
     val book by node<String, String> { _ ->
         val intake = storage.getValue(intakeResultKey)
         val slot = storage.getValue(selectedSlotKey)
-        bookTools.scheduleAppointment(
+        bookTools.bookAppointment(
             customerName = intake.customerName,
             serviceType = intake.serviceType,
             slotId = slot.slotId,
@@ -189,26 +153,21 @@ fun homeServicesSchedulingStrategy(
     val finish by subgraphWithTask<String, String>(
         tools = askUserTool.asTools()
     ) { previousResult ->
-        """
-        $homeServicesFinishInstructions
-
-        Conversation outcome:
-        $previousResult
-        """.trimIndent()
+        HomeServicesPrompts.finishInstructions(previousResult)
     }
 
     // Cancellation path: single LLM call to thank and close the conversation
     val handleCancellation by node<String, String> { _ ->
         llm.writeSession {
-            appendPrompt { user(homeServicesCancellationInstructions) }
+            appendPrompt { user(HomeServicesPrompts.handleCancellationInstructions) }
             requestLLM().content
         }
     }
 
-    // Cancellation path: single LLM call to close the conversation
+    // Handling emergency path: single LLM call to close the conversation
     val handleEmergency by node<String, String> { _ ->
         llm.writeSession {
-            appendPrompt { user(homeServicesEmergencyInstructions) }
+            appendPrompt { user(HomeServicesPrompts.handleEmergencyInstructions) }
             requestLLM().content
         }
     }

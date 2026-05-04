@@ -43,7 +43,7 @@ internal class HomeServicesSchedulingAgentProvider(
 
         val agentConfig = AIAgentConfig(
             prompt = prompt("home-services-scheduling") {
-                system(homeServicesSystemPrompt())
+                system(HomeServicesPrompts.systemPrompt())
             },
             model = model,
             maxAgentIterations = 200

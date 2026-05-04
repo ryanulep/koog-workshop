@@ -329,7 +329,7 @@ class HomeServicesBookTools(private val schedule: HomeServicesSchedule) : ToolSe
 
     @Tool
     @LLMDescription("Book a home service appointment into a specific slot. Fails if the slot is already BOOKED or if the specialist cannot handle the requested service.")
-    fun scheduleAppointment(
+    fun bookAppointment(
         @LLMDescription("Customer's full name") customerName: String,
         @LLMDescription("Service type: PLUMBING, ELECTRICAL, HVAC, or HANDYMAN") serviceType: ServiceType,
         @LLMDescription("Slot ID from getAvailableSlots, e.g. svc_shk_0428_2") slotId: String,
