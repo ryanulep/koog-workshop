@@ -12,6 +12,7 @@ import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.appoin
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.cancelsNonrelevantRequest
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.emergencyReferral
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.gracefulCancellation
+import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.immediatelyCancelsOnWeekendOnly
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.noRedundantQuestions
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.refusesOffTopicQuestions
 import com.jetbrains.koog.workshop.agents.homeservices.graph.HomeServicesPrompts
@@ -75,6 +76,13 @@ object EvaluationCriteria {
         1.0
     )
 
+    val immediatelyCancelsOnWeekendOnly = EvaluationCriterion(
+        "Immediate Cancellation on Weekend-Only",
+        "When the user states they can only do weekends and will find another provider, the agent must immediately acknowledge the cancellation and close the conversation. " +
+                "The agent must NOT continue collecting information such as name, address, or access notes after the user has made clear they are not proceeding.",
+        1.0
+    )
+
     // TODO: see if we can get the details from the tool call
     val confirmationIncludesAllDetails = EvaluationCriterion(
         "Confirmation Includes All Details",
@@ -131,7 +139,7 @@ class HomeServicesConversationSimulation {
             - Confirm booking on first ask
             - Give rating 5 when asked
         """.trimIndent(),
-        evaluations = listOf(appointmentScheduled),
+        evaluations = listOf(appointmentScheduled, noRedundantQuestions),
     ))
 
     @Test fun `Scheduling-2 - Over-Informer - HVAC tune-up`() = runCase(SimulationCase(
@@ -266,7 +274,7 @@ class HomeServicesConversationSimulation {
             - Confirm once the agent clearly summarises the booking details
             - Give rating 4 when asked
         """.trimIndent(),
-        evaluations = listOf(appointmentScheduled),
+        evaluations = listOf(appointmentScheduled, noRedundantQuestions),
     ))
 
     @Test fun `Scheduling-Saturday - Weekend Requester - Handyman squeaky door`() = runCase(SimulationCase(
@@ -280,7 +288,7 @@ class HomeServicesConversationSimulation {
             - When told Saturday is unavailable, accept the first weekday morning slot offered
             - Give rating 3 when asked
         """.trimIndent(),
-        evaluations = listOf(appointmentScheduled),
+        evaluations = listOf(appointmentScheduled, noRedundantQuestions),
     ))
 
     @Test
@@ -295,7 +303,7 @@ class HomeServicesConversationSimulation {
         - Request Saturday specifically
         - When told Saturday is unavailable, cancel: say you can only do weekends and will find another provider
     """.trimIndent(),
-            evaluations = listOf(gracefulCancellation),
+            evaluations = listOf(gracefulCancellation, immediatelyCancelsOnWeekendOnly),
         )
     )
 
@@ -423,14 +431,16 @@ class HomeServicesConversationSimulation {
     fun `Off-Topic-1 - Refuses Irrelevant Questions - Weather inquiry`() = runCase(
         SimulationCase(
             id = "Off-Topic-1",
-            scenarioName = "Refuses Irrelevant Questions — Weather inquiry",
+            scenarioName = "Refuses Irrelevant Questions — Weather and recipe inquiry",
             initialMessage = "I need a plumber to fix a leaking pipe.",
-            persona = "homeowner who starts booking a plumber but then asks an off-topic question about the weather",
+            persona = "homeowner who starts booking a plumber but then asks an off-topic question about the weather and a recipe",
             behaviorGuidelines = """
             - Your name is Jamie Cooper, address is 66 Cedar Lane
+            - Share your name and address in one message when asked only about the name
             - Answer the first question from the agent normally
             - After providing one piece of information, ask: "Can you give me a recipe for chocolate chip cookies?"
             - After the agent refuses and redirects, continue with the booking process normally
+            - Then ask about the current weather
             - Accept the first available slot
             - Give rating 4 when asked
         """.trimIndent(),

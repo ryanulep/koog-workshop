@@ -48,6 +48,8 @@ data class IntakeResult(
     val urgencyLevel: UrgencyLevel,
     @LLMDescription("Optional access instructions such as gate code, pet, parking, or buzzer notes")
     val accessNotes: String? = null,
+    @LLMDescription("Optional time preference volunteered by the user (e.g. 'morning', 'after 3pm', 'Wednesday'). Never ask for this — only record if the user mentions it unprompted.")
+    val timePreferencesNote: String? = null,
 )
 
 @LLMDescription("Outcome of the intake assessment phase: either all details collected or user cancelled")
