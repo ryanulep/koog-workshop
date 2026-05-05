@@ -1,5 +1,7 @@
 package com.jetbrains.koog.workshop.agents.homeservices
 
+import ai.koog.agents.chatMemory.feature.ChatMemory
+import ai.koog.agents.chatMemory.feature.InMemoryChatHistoryProvider
 import ai.koog.agents.core.agent.AIAgent
 import ai.koog.agents.core.agent.config.AIAgentConfig
 import ai.koog.agents.core.tools.ToolRegistry
@@ -15,6 +17,8 @@ import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.gracef
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.immediatelyCancelsOnWeekendOnly
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.noRedundantQuestions
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.refusesOffTopicQuestions
+import com.jetbrains.koog.workshop.agents.homeservices.basic.CONVERSATION_END_MARKER
+import com.jetbrains.koog.workshop.agents.homeservices.basic.homeServicesBasicSystemPrompt
 import com.jetbrains.koog.workshop.agents.homeservices.graph.HomeServicesPrompts
 import com.jetbrains.koog.workshop.agents.homeservices.graph.homeServicesSchedulingStrategy
 import com.jetbrains.koog.workshop.agents.util.AskUserTool
@@ -30,6 +34,7 @@ import kotlinx.coroutines.withContext
 import org.junit.Assume
 import org.junit.Before
 import java.io.File
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import dev.dokimos.core.conversation.Message as DokimosMessage
@@ -101,12 +106,25 @@ data class SimulationCase(
     val setupSchedule: ((HomeServicesSchedule) -> Unit)? = null,
 )
 
-class HomeServicesConversationSimulation {
+abstract class HomeServicesConversationSimulationBase {
 
-    private lateinit var apiKey: String
-    private lateinit var judge: JudgeLM
+    protected lateinit var apiKey: String
+    protected lateinit var judge: JudgeLM
 
-    private val writeToFile = true
+    protected open val writeToFile = true
+    protected abstract val logSubDir: String
+
+    /**
+     * Drives the agent-user interaction for a simulation case.
+     * Implementations call [addMessage] to record messages and [simulateUserResponse]
+     * to obtain the next simulated user reply.
+     */
+    protected abstract suspend fun driveConversation(
+        case: SimulationCase,
+        schedule: HomeServicesSchedule,
+        addMessage: (role: String, content: String) -> Unit,
+        simulateUserResponse: suspend () -> String,
+    )
 
     @Before
     fun setup() {
@@ -307,7 +325,6 @@ class HomeServicesConversationSimulation {
         )
     )
 
-
     @Test fun `Scheduling-5 - Busy Schedule - Electrical outlet`() = runCase(SimulationCase(
         id = "Scheduling-5",
         scenarioName = "Busy Schedule / Limited Availability — Electrical outlet",
@@ -402,7 +419,6 @@ class HomeServicesConversationSimulation {
         evaluations = listOf(gracefulCancellation),
     ))
 
-
     @Test fun `Cancel-2 - Early Canceller - Cancels during intake`() = runCase(SimulationCase(
         id = "Cancel-2",
         scenarioName = "Early Canceller — Cancels during intake",
@@ -464,7 +480,7 @@ class HomeServicesConversationSimulation {
         )
     )
 
-    private fun runCase(case: SimulationCase) {
+    protected fun runCase(case: SimulationCase) {
         val simulatedUser = LLMSimulatedUser.builder()
             .judge(judge)
             .persona(case.persona)
@@ -484,12 +500,7 @@ class HomeServicesConversationSimulation {
         val schedule = HomeServicesSchedule()
         case.setupSchedule?.invoke(schedule)
 
-        val findTools = HomeServicesFindTools(schedule)
-        val bookTools = HomeServicesBookTools(schedule)
-
-        val askUserTool = AskUserTool { question ->
-            addMessage("Assistant", question)
-
+        val simulateUserResponse: suspend () -> String = {
             val trajectory = ConversationTrajectory(
                 conversation.map { (role, content) ->
                     if (role == "User") DokimosMessage.user(content) else DokimosMessage.assistant(content)
@@ -497,41 +508,15 @@ class HomeServicesConversationSimulation {
                 case.scenarioName,
                 emptyMap<String, Any>()
             )
-
-            val response = withContext(Dispatchers.IO) {
-                simulatedUser.generateMessage(trajectory)
-            }
-            val responseText = response.content()
-
-            addMessage("User", responseText)
-
-            responseText
+            withContext(Dispatchers.IO) { simulatedUser.generateMessage(trajectory).content() }
         }
 
-        val agent = AIAgent(
-            promptExecutor = MultiLLMPromptExecutor(OpenAILLMClient(apiKey)),
-            agentConfig = AIAgentConfig(
-                prompt = prompt("home-services-scheduling") {
-                    system(HomeServicesPrompts.systemPrompt())
-                },
-                model = OpenAIModels.Chat.GPT4o,
-                maxAgentIterations = 200
-            ),
-            strategy = homeServicesSchedulingStrategy(askUserTool, findTools, bookTools),
-            toolRegistry = ToolRegistry {
-                tools(askUserTool)
-                tools(findTools)
-                tools(bookTools)
-            }
-        )
-
         runBlocking {
-            val finalMessage = agent.run(case.initialMessage)
-            addMessage("Assistant", finalMessage)
+            driveConversation(case, schedule, ::addMessage, simulateUserResponse)
         }
 
         if (writeToFile) {
-            writeConversationToAFile("logs/conversation-simulation/${case.id}.txt", case, conversation)
+            writeConversationToAFile("logs/conversation-simulation/$logSubDir/${case.id}.txt", case, conversation)
         }
 
         val finalTrajectory = ConversationTrajectory(
@@ -585,5 +570,92 @@ class HomeServicesConversationSimulation {
         println("\n${case.id} score=${result.score()} passed=${result.success()} reason=${result.reason()}")
 
         assertTrue(result.success(), "${case.id} ${criterion.name} check failed: ${result.reason()}")
+    }
+}
+
+class HomeServicesGraphConversationSimulation : HomeServicesConversationSimulationBase() {
+    override val logSubDir = "graph"
+
+    override suspend fun driveConversation(
+        case: SimulationCase,
+        schedule: HomeServicesSchedule,
+        addMessage: (role: String, content: String) -> Unit,
+        simulateUserResponse: suspend () -> String,
+    ) {
+        val findTools = HomeServicesFindTools(schedule)
+        val bookTools = HomeServicesBookTools(schedule)
+        val askUserTool = AskUserTool { question ->
+            addMessage("Assistant", question)
+            val userResponse = simulateUserResponse()
+            addMessage("User", userResponse)
+            userResponse
+        }
+        val agent = AIAgent(
+            promptExecutor = MultiLLMPromptExecutor(OpenAILLMClient(apiKey)),
+            agentConfig = AIAgentConfig(
+                prompt = prompt("home-services-scheduling") {
+                    system(HomeServicesPrompts.systemPrompt())
+                },
+                model = OpenAIModels.Chat.GPT4o,
+                maxAgentIterations = 200
+            ),
+            strategy = homeServicesSchedulingStrategy(askUserTool, findTools, bookTools),
+            toolRegistry = ToolRegistry {
+                tools(askUserTool)
+                tools(findTools)
+                tools(bookTools)
+            }
+        )
+        val result = agent.run(case.initialMessage)
+        addMessage("Assistant", result)
+    }
+}
+
+class HomeServicesBasicConversationSimulation : HomeServicesConversationSimulationBase() {
+    override val logSubDir = "basic-mini"
+
+    override suspend fun driveConversation(
+        case: SimulationCase,
+        schedule: HomeServicesSchedule,
+        addMessage: (role: String, content: String) -> Unit,
+        simulateUserResponse: suspend () -> String,
+    ) {
+        val historyProvider = InMemoryChatHistoryProvider()
+        val sessionId = UUID.randomUUID().toString()
+        val findTools = HomeServicesFindTools(schedule)
+        val bookTools = HomeServicesBookTools(schedule)
+        val agent = AIAgent(
+            promptExecutor = MultiLLMPromptExecutor(OpenAILLMClient(apiKey)),
+            agentConfig = AIAgentConfig(
+                prompt = prompt("home-services-basic") {
+                    system(homeServicesBasicSystemPrompt())
+                },
+                model = OpenAIModels.Chat.GPT5Mini,
+                maxAgentIterations = 200
+            ),
+            toolRegistry = ToolRegistry {
+                tools(findTools)
+                tools(bookTools)
+            }
+        ) {
+            install(ChatMemory) {
+                chatHistoryProvider = historyProvider
+            }
+        }
+
+        var userMessage = case.initialMessage
+        repeat(MAX_TURNS) {
+            val rawResponse = agent.run(userMessage, sessionId)
+            val done = CONVERSATION_END_MARKER in rawResponse
+            val response = rawResponse.replace(CONVERSATION_END_MARKER, "").trim()
+            addMessage("Assistant", response)
+            if (done) return
+            userMessage = simulateUserResponse()
+            addMessage("User", userMessage)
+        }
+    }
+
+    companion object {
+        private const val MAX_TURNS = 30
     }
 }
