@@ -10,7 +10,9 @@
       "mcp__context7__query-docs",
       "Bash(mkdir -p /tmp2)",
       "Bash(cd /tmp2)",
-      "Bash(unzip:*)"
+      "Bash(unzip:*)",
+      "Bash(./gradlew :app:test --tests \"org.example.project.service.ChatServiceTest\" -q)",
+      "Bash(./gradlew :app:test --tests \"org.example.project.service.ChatServiceTest\")"
     ]
   }
 }
