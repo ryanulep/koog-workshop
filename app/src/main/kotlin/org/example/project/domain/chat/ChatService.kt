@@ -1,14 +1,14 @@
 package org.example.project.domain.chat
 
+import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import org.example.project.db.suspendTransaction
 import org.example.project.domain.shared.CharacterId
-import org.example.project.koog.JdbcChatHistoryProvider
 import org.jetbrains.exposed.v1.jdbc.Database
 
 class ChatService(
     private val database: Database,
-    private val chatRepository: ChatRepository,
-    private val chatHistoryProvider: JdbcChatHistoryProvider,
+    private val chatHistoryProvider: ChatHistoryProvider,
+    private val chatRepository: ChatRepository = ChatRepository(),
 ) {
     /**
      * Fetch all chats for the current user with the chat history

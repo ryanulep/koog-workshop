@@ -15,7 +15,7 @@ class ChatRepository {
     context(_: Transaction)
     fun getCharacterChats(characterId: CharacterId): List<Chat> {
         return Chats.selectAll()
-            .where { Characters.id eq characterId.value }
+            .where { Chats.character eq characterId.value }
             .orderBy(Chats.updatedAt to SortOrder.DESC)
             .map {
                 Chat(
