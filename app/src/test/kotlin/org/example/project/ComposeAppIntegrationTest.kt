@@ -2,7 +2,7 @@ package org.example.project
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import org.example.project.domain.admin.products.ProductActiveFilter
+import org.example.project.admin.products.ProductActiveFilter
 import org.example.project.domain.catalog.ProductCategory
 import org.example.project.domain.order.OrderStatus
 import org.junit.Rule

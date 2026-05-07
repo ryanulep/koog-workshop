@@ -1,9 +1,10 @@
 package org.example.project.domain.admin.dashboard
 
 import kotlinx.coroutines.runBlocking
+import org.example.project.admin.dashboard.AdminDashboardService
+import org.example.project.admin.orders.operations.AdminOrderService
 import org.example.project.db.connectSqlite
 import org.example.project.db.createTables
-import org.example.project.domain.admin.orders.AdminOrderService
 import org.example.project.domain.character.Characters
 import org.example.project.domain.currency.Currencies
 import org.example.project.domain.catalog.Merchants

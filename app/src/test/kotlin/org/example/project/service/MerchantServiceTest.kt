@@ -1,6 +1,7 @@
 package org.example.project.domain.admin.merchants
 
 import kotlinx.coroutines.runBlocking
+import org.example.project.admin.merchants.AdminMerchantService
 import org.example.project.db.connectSqlite
 import org.example.project.db.createTables
 import org.example.project.domain.catalog.Merchants

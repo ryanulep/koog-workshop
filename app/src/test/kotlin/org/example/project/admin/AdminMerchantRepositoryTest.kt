@@ -1,5 +1,6 @@
 package org.example.project.admin
 
+import org.example.project.admin.merchants.AdminMerchantRepository
 import org.example.project.db.connectSqlite
 import org.example.project.db.createTables
 import org.example.project.domain.catalog.Merchants
@@ -14,7 +15,6 @@ import org.example.project.domain.order.SubOrders
 import org.example.project.domain.shipping.MerchantShippingMethods
 import org.example.project.domain.shipping.ShippingMethods
 import org.example.project.domain.shipping.ShippingRepository
-import org.example.project.domain.admin.merchants.AdminMerchantRepository
 import org.example.project.domain.catalog.MerchantRepository
 import org.example.project.domain.shared.MerchantId
 import org.example.project.domain.shared.ShippingMethodId

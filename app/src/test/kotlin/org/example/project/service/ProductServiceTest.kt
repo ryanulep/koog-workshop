@@ -1,6 +1,9 @@
 package org.example.project.domain.admin.products
 
 import kotlinx.coroutines.runBlocking
+import org.example.project.admin.products.AdminProductService
+import org.example.project.admin.products.ProductActiveFilter
+import org.example.project.admin.products.ProductFilter
 import org.example.project.db.connectSqlite
 import org.example.project.db.createTables
 import org.example.project.domain.catalog.Merchants

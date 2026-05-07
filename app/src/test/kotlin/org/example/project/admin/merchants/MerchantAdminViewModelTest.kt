@@ -8,7 +8,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.example.project.db.connectSqlite
 import org.example.project.db.createTables
-import org.example.project.domain.admin.merchants.AdminMerchantService
 import org.example.project.domain.catalog.Merchants
 import org.example.project.domain.catalog.ProductCategory
 import org.example.project.domain.catalog.Products

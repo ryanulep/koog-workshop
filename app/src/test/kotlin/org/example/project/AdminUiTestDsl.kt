@@ -6,11 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import org.example.project.admin.app.AdminRoute
+import org.example.project.admin.merchants.AdminMerchantService
+import org.example.project.admin.orders.operations.AdminOrderService
+import org.example.project.admin.products.AdminProductService
+import org.example.project.admin.products.ProductActiveFilter
 import org.example.project.admin.shared.ui.AdminAccessibility
-import org.example.project.domain.admin.merchants.AdminMerchantService
-import org.example.project.domain.admin.orders.AdminOrderService
-import org.example.project.domain.admin.products.AdminProductService
-import org.example.project.domain.admin.products.ProductActiveFilter
 import org.example.project.domain.catalog.ProductCategory
 import org.example.project.domain.order.OrderStatus
 import org.jetbrains.exposed.v1.jdbc.Database

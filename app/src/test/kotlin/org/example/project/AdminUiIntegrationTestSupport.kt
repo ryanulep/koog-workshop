@@ -203,7 +203,7 @@ internal data class AdminAppScenario(
 
     fun refreshProductFromDatabase() {
         transaction(database) {
-            Products.storeUpdate({ Products.id eq primaryProduct.id.value }) {
+            Products.storeUpdate(primaryProduct.id.value) {
                 it[name] = refreshedProductName
                 it[description] = refreshedProductDescription
                 it[stock] = refreshedProductStock
@@ -213,10 +213,10 @@ internal data class AdminAppScenario(
 
     fun refreshOrderFromDatabase() {
         transaction(database) {
-            Orders.storeUpdate({ Orders.id eq newestOrder.orderId.value }) {
+            Orders.storeUpdate(newestOrder.orderId.value) {
                 it[status] = refreshedOrderStatus.name
             }
-            SubOrders.storeUpdate({ SubOrders.id eq mutableSubOrder.id.value }) {
+            SubOrders.storeUpdate(mutableSubOrder.id.value) {
                 it[status] = refreshedSubOrderStatus.name
             }
             Transactions.insert {
