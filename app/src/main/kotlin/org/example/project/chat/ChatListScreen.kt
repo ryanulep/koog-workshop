@@ -3,6 +3,7 @@ package org.example.project.chat
 import ai.koog.prompt.message.Message
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -45,6 +46,11 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun ChatListScreen(viewModel: ChatListViewModel) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadChats()
+    }
+
     ChatListContent(
         characterName = uiState.character.name,
         chats = uiState.chats,

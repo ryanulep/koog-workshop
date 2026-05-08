@@ -2,6 +2,7 @@ package org.example.project
 
 import ai.koog.prompt.message.Message
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,8 +24,13 @@ import org.example.project.domain.character.Character
 import org.example.project.login.LoginScreen
 
 private sealed interface Screen {
+    @Immutable
     data object Login : Screen
+
+    @Immutable
     data class ChatList(val character: Character) : Screen
+
+    @Immutable
     data class Chat(
         val character: Character,
         val conversationId: String,

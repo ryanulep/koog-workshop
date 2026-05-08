@@ -32,10 +32,6 @@ class ChatListViewModel(
     private val _uiState = MutableStateFlow(ChatListUiState(character = character))
     val uiState: StateFlow<ChatListUiState> = _uiState.asStateFlow()
 
-    init {
-        loadChats()
-    }
-
     fun loadChats() = viewModelScope.launch {
         _uiState.update { it.copy(isLoading = true) }
         val chats = chatService.getCharacterChatDetails(character.id)
