@@ -1,4 +1,4 @@
-package org.example.project.chat
+package org.example.project.screens.chatlist
 
 import ai.koog.prompt.message.Message
 import androidx.compose.foundation.clickable
@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.example.project.AppDimension
 import org.example.project.domain.chat.ChatDetails
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -131,7 +132,7 @@ private fun ChatItem(chat: ChatDetails, onClick: () -> Unit) {
         else -> "No messages"
     }
     val timeText = lastVisibleMessage?.metaInfo?.timestamp?.let { timestamp ->
-        val javaInstant = java.time.Instant.ofEpochMilli(timestamp.toEpochMilliseconds())
+        val javaInstant = Instant.ofEpochMilli(timestamp.toEpochMilliseconds())
         val zone = ZoneId.systemDefault()
         val dateTime = LocalDateTime.ofInstant(javaInstant, zone)
         val today = LocalDate.now(zone)

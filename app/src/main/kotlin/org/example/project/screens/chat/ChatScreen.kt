@@ -1,4 +1,4 @@
-package org.example.project.chat
+package org.example.project.screens.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

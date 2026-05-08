@@ -1,4 +1,4 @@
-package org.example.project.chat
+package org.example.project.screens.chat
 
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.agents.core.agent.AIAgent
@@ -22,7 +22,8 @@ import kotlinx.serialization.json.Json
 import org.example.project.domain.character.Character
 import org.example.project.domain.chat.ChatService
 import org.example.project.domain.chat.ChatUpdate
-import org.example.project.koog.AgentExecutionTraceEvent
+import org.example.project.koog.ChatAgentProvider
+import org.example.project.koog.tracking.AgentExecutionTraceEvent
 import kotlin.reflect.KClass
 import kotlin.uuid.Uuid
 

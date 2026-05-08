@@ -1,4 +1,4 @@
-package org.example.project.chat
+package org.example.project.screens.chat
 
 sealed interface ChatUiEvents {
     data class UpdateInputText(val text: String) : ChatUiEvents

@@ -16,12 +16,12 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.example.project.admin.app.AdminRoute
-import org.example.project.chat.ChatListScreen
-import org.example.project.chat.ChatListViewModel
-import org.example.project.chat.ChatScreen
-import org.example.project.chat.ChatViewModel
+import org.example.project.screens.chatlist.ChatListScreen
+import org.example.project.screens.chatlist.ChatListViewModel
+import org.example.project.screens.chat.ChatScreen
+import org.example.project.screens.chat.ChatViewModel
 import org.example.project.domain.character.Character
-import org.example.project.login.LoginScreen
+import org.example.project.screens.login.LoginScreen
 
 private sealed interface Screen {
     @Immutable

@@ -1,4 +1,4 @@
-package org.example.project.login
+package org.example.project.screens.login
 
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.Arrangement

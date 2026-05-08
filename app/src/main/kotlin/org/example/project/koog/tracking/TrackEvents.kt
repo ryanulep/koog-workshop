@@ -1,4 +1,4 @@
-package org.example.project.koog
+package org.example.project.koog.tracking
 
 import ai.koog.agents.core.agent.GraphAIAgent
 import ai.koog.agents.core.tools.ToolDescriptor

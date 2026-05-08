@@ -1,4 +1,4 @@
-package org.example.project.chat
+package org.example.project.screens.chatlist
 
 import ai.koog.prompt.message.Message
 import androidx.lifecycle.ViewModel

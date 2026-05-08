@@ -1,4 +1,4 @@
-package org.example.project.chat
+package org.example.project.screens.chat
 
 import ai.koog.agents.core.tools.ToolDescriptor
 import ai.koog.prompt.message.Message

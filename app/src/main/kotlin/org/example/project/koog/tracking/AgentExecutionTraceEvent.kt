@@ -1,4 +1,4 @@
-package org.example.project.koog
+package org.example.project.koog.tracking
 
 sealed interface AgentExecutionTraceEvent {
     val name: String

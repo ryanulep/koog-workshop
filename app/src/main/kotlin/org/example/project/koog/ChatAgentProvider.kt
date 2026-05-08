@@ -1,4 +1,4 @@
-package org.example.project.chat
+package org.example.project.koog
 
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.agents.chatMemory.feature.ChatMemory
@@ -13,13 +13,12 @@ import ai.koog.prompt.message.Message
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.example.project.domain.order.OrderService
 import org.example.project.domain.shared.CharacterId
-import org.example.project.koog.AgentExecutionTraceEvent
-import org.example.project.koog.orderCustomerSupportStrategy
 import org.example.project.koog.tools.AskQuestionTool
 import org.example.project.koog.tools.CustomerSupportTools
 import org.example.project.koog.tools.ReadOrderTools
 import org.example.project.koog.tools.UpdateOrderTools
-import org.example.project.koog.trackEvents
+import org.example.project.koog.tracking.AgentExecutionTraceEvent
+import org.example.project.koog.tracking.trackEvents
 
 class ChatAgentProvider(
     private val executor: PromptExecutor,
@@ -39,7 +38,7 @@ class ChatAgentProvider(
         val updateOrderTools = UpdateOrderTools(characterId, orderService)
         val tools = CustomerSupportTools(askQuestionTool, readOrderTools, updateOrderTools)
 
-        return AIAgent(
+        return AIAgent.Companion(
             promptExecutor = executor,
             strategy = orderCustomerSupportStrategy(tools),
             systemPrompt = """
@@ -47,17 +46,17 @@ class ChatAgentProvider(
                 | Use the askQuestion in case you're unsure or there is any missing data for solve the issue.
             """.trimMargin(),
             llmModel = OpenAIModels.Chat.GPT5_4,
-            toolRegistry = ToolRegistry {
+            toolRegistry = ToolRegistry.Companion {
                 tools(askQuestionTool)
                 tools(readOrderTools)
                 tools(updateOrderTools)
             },
         ) {
-            install(ChatMemory) {
+            install(ChatMemory.Feature) {
                 chatHistoryProvider = historyProvider
                 windowSize(50)
             }
-            install(Tracing) {
+            install(Tracing.Feature) {
                 addMessageProcessor(TraceFeatureMessageLogWriter(KotlinLogging.logger {}))
             }
             trackEvents(onToolCallEvent, onErrorEvent, onLLMCallEvent, onExecutionTraceEvent)
