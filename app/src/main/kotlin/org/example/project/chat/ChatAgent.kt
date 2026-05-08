@@ -39,34 +39,11 @@ class ChatAgent(
     //     val agent = if (characterId == null) createSimpleAgent(...) else createCharacterAwareAgent(...)
     //     return ChatUi.Message.CustomerSupport(agent.run(...))
     suspend fun sendMessage(
-        characterId: CharacterId?,
+        characterId: CharacterId,
         sessionId: Uuid,
         userMessage: String,
         askQuestion: suspend (message: String) -> String
-    ): ChatUi.Message.CustomerSupport = if (characterId == null) {
-        val agent = AIAgent(
-            promptExecutor = executor,
-            systemPrompt = """
-                | You are a helpful Fantasy Store assistant. Help customers with products, orders, and general inquiries.
-                | Use the askQuestion in case you're unsure or there is any missing data for solve the issue.
-            """.trimMargin(),
-            llmModel = OpenAIModels.Chat.GPT5_4,
-            toolRegistry = ToolRegistry {
-                tools(AskQuestionTool(askQuestion))
-
-            }
-        ) {
-            install(ChatMemory) {
-                this.chatHistoryProvider = this@ChatAgent.chatHistoryProvider
-                windowSize(50)
-            }
-            install(Tracing) {
-                addMessageProcessor(TraceFeatureMessageLogWriter(KotlinLogging.logger { }))
-            }
-        }
-
-        ChatUi.Message.CustomerSupport(agent.run(userMessage, sessionId.toString()))
-    } else {
+    ): ChatUi.Message.CustomerSupport {
         val tools = CustomerSupportTools(
             askQuestionTool = AskQuestionTool(askQuestion),
             readOrderTools = ReadOrderTools(characterId, orderService),
@@ -95,6 +72,6 @@ class ChatAgent(
             }
         }
 
-        ChatUi.Message.CustomerSupport(agent.run(userMessage, sessionId.toString()))
+        return ChatUi.Message.CustomerSupport(agent.run(userMessage, sessionId.toString()))
     }
 }

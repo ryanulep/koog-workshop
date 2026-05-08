@@ -1,16 +1,9 @@
 package org.example.project
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,7 +23,13 @@ import org.example.project.chat.ChatScreen
 import org.example.project.chat.ChatTopBar
 import org.example.project.chat.ChatViewModel
 import org.example.project.domain.character.Character
+import org.example.project.login.LoginScreen
 import kotlin.uuid.Uuid
+
+private sealed interface Screen {
+    data object Login : Screen
+    data class Chat(val character: Character) : Screen
+}
 
 fun main() {
     val session = Uuid.random()
@@ -40,8 +39,7 @@ fun main() {
 
     application {
         var adminWindowOpen by remember { mutableStateOf(false) }
-        var loginDialogOpen by remember { mutableStateOf(false) }
-        var loggedInCharacter by remember { mutableStateOf<Character?>(null) }
+        var screen by remember { mutableStateOf<Screen>(Screen.Login) }
         var characters by remember { mutableStateOf<List<Character>>(emptyList()) }
 
         LaunchedEffect(Unit) {
@@ -62,56 +60,33 @@ fun main() {
 
                 LaunchedEffect(Unit) { chatViewModel.loadHistory() }
 
-                Scaffold(
-                    topBar = {
-                        ChatTopBar(
+                when (val current = screen) {
+                    is Screen.Login -> {
+                        LoginScreen(
+                            characters = characters,
                             onAdminClick = { adminWindowOpen = true },
-                            onLoginClick = { loginDialogOpen = true },
-                            loggedInCharacterName = loggedInCharacter?.name
+                            onCharacterSelected = { screen = Screen.Chat(it) }
                         )
                     }
-                ) { paddingValues ->
-                    Box(modifier = Modifier.padding(paddingValues)) {
-                        ChatScreen(
-                            uiState = chatUiState,
-                            onInputChange = chatViewModel::updateInputText,
-                            onSendMessage = { chatViewModel.sendMessage(loggedInCharacter?.id) }
-                        )
-                    }
-                }
 
-                if (loginDialogOpen) {
-                    AlertDialog(
-                        onDismissRequest = { loginDialogOpen = false },
-                        title = { Text("Select Character") },
-                        text = {
-                            Column {
-                                if (characters.isEmpty()) {
-                                    Text("No characters found.")
-                                } else {
-                                    LazyColumn {
-                                        items(characters) { character ->
-                                            TextButton(
-                                                onClick = {
-                                                    loggedInCharacter = character
-                                                    loginDialogOpen = false
-                                                },
-                                                modifier = Modifier.fillMaxWidth()
-                                            ) {
-                                                Text(character.name)
-                                            }
-                                        }
-                                    }
-                                }
+                    is Screen.Chat -> {
+                        Scaffold(
+                            topBar = {
+                                ChatTopBar(
+                                    characterName = current.character.name,
+                                    onBackClick = { screen = Screen.Login }
+                                )
                             }
-                        },
-                        confirmButton = {},
-                        dismissButton = {
-                            TextButton(onClick = { loginDialogOpen = false }) {
-                                Text("Cancel")
+                        ) { paddingValues ->
+                            Box(modifier = Modifier.padding(paddingValues)) {
+                                ChatScreen(
+                                    uiState = chatUiState,
+                                    onInputChange = chatViewModel::updateInputText,
+                                    onSendMessage = { chatViewModel.sendMessage(current.character.id) }
+                                )
                             }
                         }
-                    )
+                    }
                 }
 
                 if (adminWindowOpen) {

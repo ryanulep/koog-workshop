@@ -76,7 +76,7 @@ fun orderCustomerSupportStrategy(tools: CustomerSupportTools) = strategy<String,
     edge(
         moderate forwardTo nodeFinish
                 onCondition { it.moderationResult.isHarmful }
-                transformed { "We cannot help you with this kind-of requests." }
+                transformed { "We cannot help you with this kind of requests." }
     )
     summarize then resolve then verify
     edge(verify forwardTo describe onCondition { it.successful } transformed { it.input })

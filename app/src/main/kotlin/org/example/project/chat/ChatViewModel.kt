@@ -102,7 +102,7 @@ class ChatViewModel(
         uiState.value = uiState.value.copy(inputText = text)
     }
 
-    fun sendMessage(characterId: CharacterId?) = viewModelScope.launch {
+    fun sendMessage(characterId: CharacterId) = viewModelScope.launch {
         val message = uiState.value.inputText.trim()
         if (message.isEmpty()) return@launch
 
