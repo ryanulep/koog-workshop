@@ -5,6 +5,7 @@ import ai.koog.agents.chatMemory.feature.ChatMemory
 import ai.koog.agents.core.agent.AIAgent
 import ai.koog.agents.core.tools.ToolDescriptor
 import ai.koog.agents.core.tools.ToolRegistry
+import ai.koog.agents.features.opentelemetry.feature.OpenTelemetry
 import ai.koog.agents.features.tracing.feature.Tracing
 import ai.koog.agents.features.tracing.writer.TraceFeatureMessageLogWriter
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
@@ -19,12 +20,16 @@ import org.example.project.koog.tools.ReadOrderTools
 import org.example.project.koog.tools.UpdateOrderTools
 import org.example.project.koog.tracking.AgentExecutionTraceEvent
 import org.example.project.koog.tracking.trackEvents
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
 class ChatAgentProvider(
     private val executor: PromptExecutor,
     private val orderService: OrderService,
+    @Value($$"${langfuse.secretkey}") private val langfuseSecretKey: String,
+    @Value($$"${langfuse.publickey}") private val langfusePublicKey: String,
+    @Value($$"${langfuse.url}") private val langfuseUrl: String,
 ) {
     fun provideAgent(
         characterId: CharacterId,
@@ -54,11 +59,15 @@ class ChatAgentProvider(
                 tools(updateOrderTools)
             },
         ) {
-            install(ChatMemory.Feature) {
+            install(ChatMemory) {
                 chatHistoryProvider = historyProvider
                 windowSize(50)
             }
-            install(Tracing.Feature) {
+            install(OpenTelemetry) {
+                setServiceInfo("customer-support", "0.0.1")
+                addLangfuseExporter(langfuseUrl, langfusePublicKey, langfuseSecretKey)
+            }
+            install(Tracing) {
                 addMessageProcessor(TraceFeatureMessageLogWriter(KotlinLogging.logger {}))
             }
             trackEvents(onToolCallEvent, onErrorEvent, onLLMCallEvent, onExecutionTraceEvent)

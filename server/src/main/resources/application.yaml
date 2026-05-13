@@ -14,4 +14,8 @@ spring:
         repository:
           jdbc:
             initialize-schema: always
+langfuse:
+  url: ${LANGFUSE_BASE_URL:}
+  publickey: ${LANGFUSE_PUBLIC_KEY:}
+  secretkey: ${LANGFUSE_SECRET_KEY:}
 
