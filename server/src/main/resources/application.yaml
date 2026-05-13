@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: devoxxuk-26-koog
+  datasource:
+    url: jdbc:sqlite:server/.agent-fantasy-store/agent-fantasy-store.db
+    driver-class-name: org.sqlite.JDBC
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:sk-test}
+    model:
+      chat: openai
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+

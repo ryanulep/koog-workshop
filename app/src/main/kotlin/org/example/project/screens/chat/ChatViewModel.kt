@@ -39,16 +39,16 @@ class ChatViewModel(
     private val historyProvider: ChatHistoryProvider,
     private val onNavigateBack: () -> Unit,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(
-        ChatUiState(
-            title = character.name,
-            chatMessages = buildList {
-                add(ChatMessage.SystemMessage("Hi ${character.name}! I'm the Fantasy Store assistant. How can I help?"))
-                initialMessages?.mapNotNull(::toChatMessage)?.let { addAll(it) }
-            }
+    val uiState: StateFlow<ChatUiState>
+        field = MutableStateFlow(
+            ChatUiState(
+                title = character.name,
+                chatMessages = buildList {
+                    add(ChatMessage.SystemMessage("Hi ${character.name}! I'm the Fantasy Store assistant. How can I help?"))
+                    initialMessages?.mapNotNull(::toChatMessage)?.let { addAll(it) }
+                }
+            )
         )
-    )
-    val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
     private var sessionId: String = initialConversationId
     private var agent: AIAgent<String, String>? = null
@@ -89,17 +89,17 @@ class ChatViewModel(
     }
 
     private fun updateInputText(text: String) {
-        _uiState.update { it.copy(inputText = text) }
+        uiState.update { it.copy(inputText = text) }
     }
 
     private fun toggleDebugEnabled() {
-        _uiState.update {
+        uiState.update {
             it.copy(debugView = it.debugView.copy(enabled = !it.debugView.enabled))
         }
     }
 
     private fun toggleDebugOption(option: DebugOption) {
-        _uiState.update {
+        uiState.update {
             val current = it.debugView
             val newOptions = if (option in current.options) current.options - option else current.options + option
             it.copy(debugView = current.copy(options = newOptions))
@@ -107,12 +107,12 @@ class ChatViewModel(
     }
 
     private fun sendMessage() {
-        val userInput = _uiState.value.inputText.trim()
+        val userInput = uiState.value.inputText.trim()
         if (userInput.isEmpty()) return
 
 
-        if (_uiState.value.userResponseRequested) {
-            _uiState.update {
+        if (uiState.value.userResponseRequested) {
+            uiState.update {
                 it.copy(
                     chatMessages = it.chatMessages + ChatMessage.UserMessage(userInput),
                     inputText = "",
@@ -123,7 +123,7 @@ class ChatViewModel(
                 )
             }
         } else {
-            _uiState.update {
+            uiState.update {
                 it.copy(
                     chatMessages = it.chatMessages + ChatMessage.UserMessage(userInput),
                     inputText = "",
@@ -146,7 +146,7 @@ class ChatViewModel(
                 // Write that a new chat was created
                 chatService.updateChat(ChatUpdate(character.id, sessionId))
 
-                _uiState.update {
+                uiState.update {
                     it.copy(
                         chatMessages = it.chatMessages + ChatMessage.AgentMessage(result),
                         isInputEnabled = true,
@@ -154,7 +154,7 @@ class ChatViewModel(
                     )
                 }
             } catch (e: Exception) {
-                _uiState.update {
+                uiState.update {
                     it.copy(
                         chatMessages = it.chatMessages + ChatMessage.ErrorMessage("Error: ${e.message}"),
                         isInputEnabled = true,
@@ -165,14 +165,14 @@ class ChatViewModel(
         }
     }
 
-    private suspend fun createAgent(): AIAgent<String, String> {
+    private fun createAgent(): AIAgent<String, String> {
         val onToolCallEvent: suspend (String, Map<String, String>) -> Unit = { toolName, args ->
-            _uiState.update {
+            uiState.update {
                 it.copy(chatMessages = it.chatMessages + ChatMessage.ToolCallMessage(toolName, args))
             }
         }
         val onErrorEvent: suspend (String) -> Unit = { errorMessage ->
-            _uiState.update {
+            uiState.update {
                 it.copy(
                     chatMessages = it.chatMessages + ChatMessage.ErrorMessage(errorMessage),
                     isInputEnabled = true,
@@ -182,7 +182,7 @@ class ChatViewModel(
         }
         val onLLMCallEvent: suspend (List<Message>, List<ToolDescriptor>) -> Unit =
             { messages, tools ->
-                _uiState.update {
+                uiState.update {
                     it.copy(
                         chatMessages = it.chatMessages + ChatMessage.LLMCallMessage(
                             LlmCallData(
@@ -198,12 +198,12 @@ class ChatViewModel(
                 is AgentExecutionTraceEvent.Node -> ExecutionTraceItem.Node(event.name)
                 is AgentExecutionTraceEvent.Subgraph -> ExecutionTraceItem.Subgraph(event.name)
             }
-            _uiState.update {
+            uiState.update {
                 it.copy(chatMessages = it.chatMessages + ChatMessage.ExecutionTraceMessage(item))
             }
         }
         val onAssistantMessage: suspend (String) -> String = { message ->
-            _uiState.update {
+            uiState.update {
                 it.copy(
                     chatMessages = it.chatMessages + ChatMessage.AgentMessage(message),
                     isInputEnabled = true,
@@ -212,12 +212,12 @@ class ChatViewModel(
                 )
             }
 
-            val userResponse = _uiState
+            val userResponse = uiState
                 .first { it.currentUserResponse != null }
                 .currentUserResponse
                 ?: error("User response is null")
 
-            _uiState.update { it.copy(currentUserResponse = null) }
+            uiState.update { it.copy(currentUserResponse = null) }
 
             userResponse
         }
@@ -236,7 +236,7 @@ class ChatViewModel(
     private fun restartChat() {
         sessionId = Uuid.random().toString()
         agent = null
-        _uiState.update {
+        uiState.update {
             ChatUiState(
                 title = character.name,
                 chatMessages = listOf(

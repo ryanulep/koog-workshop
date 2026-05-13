@@ -1,70 +1,29 @@
-package org.example.project.screens.chat
+package org.example.project
 
+import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.agents.core.tools.ToolDescriptor
 import ai.koog.prompt.message.Message
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-
-data class ChatUiState(
-    val title: String = "Chat",
-    val chatMessages: List<ChatMessage> = emptyList(),
-    val debugView: DebugView = DebugView(),
-    val inputText: String = "",
-    val isInputEnabled: Boolean = true,
-    val isLoading: Boolean = false,
-    val userResponseRequested: Boolean = false,
-    val currentUserResponse: String? = null,
-)
-
-enum class DebugOption(val title: String) {
-    Tools("Tools"),
-    LlmCalls("LLM Calls"),
-    Nodes("Nodes"),
-    Tasks("Tasks"),
-}
-
-data class DebugView(
-    val enabled: Boolean = false,
-    val options: Set<DebugOption> = DebugOption.entries.toSet(),
-) {
-    fun shows(message: ChatMessage): Boolean = shows(message.type)
-
-    fun shows(type: ChatMessageType): Boolean {
-        if (type in alwaysVisible) return true
-        if (!enabled) return false
-        return when (type) {
-            ChatMessageType.Error -> true
-            ChatMessageType.ToolCall -> DebugOption.Tools in options
-            ChatMessageType.LlmCall -> DebugOption.LlmCalls in options
-            ChatMessageType.Node -> DebugOption.Nodes in options
-            ChatMessageType.Task -> DebugOption.Tasks in options
-            else -> true
-        }
-    }
-
-    companion object {
-        private val alwaysVisible = setOf(
-            ChatMessageType.User,
-            ChatMessageType.Agent,
-            ChatMessageType.System,
-        )
-    }
-}
-
-enum class ChatMessageType {
-    User,
-    Agent,
-    System,
-    Error,
-    ToolCall,
-    LlmCall,
-    Node,
-    Task,
-}
+import org.example.project.domain.shared.CharacterId
+import org.example.project.koog.ChatAgentProvider
+import org.example.project.koog.tracking.AgentExecutionTraceEvent
+import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
+import kotlin.uuid.Uuid
 
 @Serializable
 sealed class ChatMessage {
     @Serializable
     data class UserMessage(val text: String) : ChatMessage()
+
+    @Serializable
+    data class AskQuestion(val text: String) : ChatMessage()
 
     @Serializable
     data class AgentMessage(val text: String) : ChatMessage()
@@ -85,20 +44,6 @@ sealed class ChatMessage {
     data class ExecutionTraceMessage(val item: ExecutionTraceItem) : ChatMessage()
 }
 
-val ChatMessage.type: ChatMessageType
-    get() =
-        when (this) {
-            is ChatMessage.UserMessage -> ChatMessageType.User
-            is ChatMessage.AgentMessage -> ChatMessageType.Agent
-            is ChatMessage.SystemMessage -> ChatMessageType.System
-            is ChatMessage.ErrorMessage -> ChatMessageType.Error
-            is ChatMessage.ToolCallMessage -> ChatMessageType.ToolCall
-            is ChatMessage.LLMCallMessage -> ChatMessageType.LlmCall
-            is ChatMessage.ExecutionTraceMessage -> when (item) {
-                is ExecutionTraceItem.Node -> ChatMessageType.Node
-                is ExecutionTraceItem.Subgraph -> ChatMessageType.Task
-            }
-        }
 
 @Serializable
 sealed interface ExecutionTraceItem {
@@ -120,10 +65,13 @@ sealed interface LlmCallHistoryItem {
 
     @Serializable
     data class System(override val text: String) : LlmCallHistoryItem
+
     @Serializable
     data class User(override val text: String) : LlmCallHistoryItem
+
     @Serializable
     data class Assistant(override val text: String) : LlmCallHistoryItem
+
     @Serializable
     data class Reasoning(override val text: String) : LlmCallHistoryItem
 
@@ -140,6 +88,56 @@ data class LlmCallToolData(
     val requiredParameters: List<String>,
     val optionalParameters: List<String>,
 )
+
+@Controller
+class AgentController(
+    private val provider: ChatAgentProvider,
+    private val chat: ChatHistoryProvider,
+) {
+    private val sseScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    @PostMapping("chat")
+    fun chat(
+        @RequestParam characterId: String,
+        @RequestParam input: String,
+        @RequestParam sessionId: String,
+    ): SseEmitter {
+        val emitter = SseEmitter()
+        val agent = provider.provideAgent(
+            characterId = CharacterId(Uuid.parse(characterId)),
+            historyProvider = chat,
+            onToolCallEvent = { toolName, args -> emitter.send(ChatMessage.ToolCallMessage(toolName, args)) },
+            onLLMCallEvent = { messages, tools ->
+                ChatMessage.LLMCallMessage(
+                    LlmCallData(
+                        messageHistory = messages.toHistoryItems(),
+                        availableTools = tools.toToolData()
+                    )
+                )
+            },
+            onErrorEvent = { error -> emitter.send(ChatMessage.ErrorMessage(error)) },
+            onExecutionTraceEvent = { trace ->
+                val item = when (trace) {
+                    is AgentExecutionTraceEvent.Node -> ExecutionTraceItem.Node(trace.name)
+                    is AgentExecutionTraceEvent.Subgraph -> ExecutionTraceItem.Subgraph(trace.name)
+                }
+                ChatMessage.ExecutionTraceMessage(item)
+            },
+            onAskMessage = { message -> emitter.send(ChatMessage.AskQuestion(message)) }
+        )
+        sseScope.launch {
+            try {
+                val response = agent.run(input, sessionId)
+                emitter.send(ChatMessage.AgentMessage(response))
+                emitter.complete()
+            } catch (e: Exception) {
+                emitter.send(ChatMessage.ErrorMessage(e.message ?: "Unknown error occurred"))
+                emitter.complete()
+            }
+        }
+        return emitter
+    }
+}
 
 fun List<Message>.toHistoryItems(): List<LlmCallHistoryItem> =
     map { message ->
