@@ -1,6 +1,11 @@
 package org.example.project
 
 import ai.koog.prompt.executor.llms.all.simpleOpenAIExecutor
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.sse.SSE
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import org.example.project.koog.ChatAgentProvider
 import org.example.project.db.createDataSource
 import org.example.project.db.createDatabase
@@ -26,11 +31,22 @@ fun dependencies(): Dependencies {
 
     val chatAgentProvider = ChatAgentProvider(executor = executor, orderService = OrderService(database))
 
+    val httpClient = HttpClient {
+        install(SSE)
+        install(ContentNegotiation) {
+            json(Json {
+                ignoreUnknownKeys = true
+                coerceInputValues = true
+            })
+        }
+    }
+
     return Dependencies(
         storeServices = Dependencies.StoreServices(productService, merchantService, orderService),
         characterServices = Dependencies.CharacterServices(characterService, chatService),
         chatAgentProvider = chatAgentProvider,
         chatHistoryProvider = chatHistoryProvider,
+        httpClient = httpClient,
     )
 }
 
@@ -39,6 +55,7 @@ class Dependencies(
     val characterServices: CharacterServices,
     val chatAgentProvider: ChatAgentProvider,
     val chatHistoryProvider: JdbcChatHistoryProvider,
+    val httpClient: HttpClient,
 ) {
     class StoreServices(
         val productService: AdminProductService,

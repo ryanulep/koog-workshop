@@ -46,6 +46,7 @@ if (enableMetrics) {
 }
 
 dependencies {
+    implementation(project(":shared"))
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)
     implementation(libs.compose.material3)
@@ -68,6 +69,11 @@ dependencies {
     implementation(libs.koog.memory)
     implementation(libs.markdown.renderer)
     implementation(libs.logback.classic)
+    implementation(ktorLibs.client.okhttp)
+    implementation(ktorLibs.client.contentNegotiation)
+    implementation(ktorLibs.serialization.kotlinx.json)
+    implementation(ktorLibs.client.logging)
+//    implementation(ktorLibs.client.sse)
     testImplementation(libs.kotlin.test)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

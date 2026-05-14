@@ -34,13 +34,12 @@ dependencies {
 
     implementation(libs.koog.agents)
     implementation(libs.koog.memory)
-    implementation(libs.ktor.client.okhttp)
+    implementation(ktorLibs.client.okhttp)
     implementation(libs.logback.classic)
     implementation(libs.koin.compose)
     implementation(compose.desktop.currentOs)
     implementation(libs.markdown.renderer)
     implementation(project.dependencies.platform(libs.koin.bom))
-    implementation(project.dependencies.platform(libs.ktor.bom))
 
     testImplementation(libs.kotlin.test)
     testImplementation(libs.junit)

@@ -66,6 +66,8 @@ import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import org.example.project.AppDimension
+import org.example.project.shared.ChatMessage
+import org.example.project.shared.ExecutionTraceItem
 
 internal const val MAX_BUBBLE_WIDTH_FRACTION = 0.85f
 
@@ -155,6 +157,7 @@ private fun ChatScreenContent(
                 items(visibleMessages) { message ->
                     when (message) {
                         is ChatMessage.UserMessage -> UserMessageBubble(message.text)
+                        is ChatMessage.AskQuestion -> AgentMessageBubble(message.text)
                         is ChatMessage.AgentMessage -> AgentMessageBubble(message.text)
                         is ChatMessage.SystemMessage -> SystemMessageItem(message.text)
                         is ChatMessage.ErrorMessage -> ErrorMessageItem(message.text)

@@ -1,5 +1,8 @@
 package org.example.project.koog.tracking
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 sealed interface AgentExecutionTraceEvent {
     val name: String
 

@@ -6,7 +6,7 @@ androidx-datastore = "1.2.0"
 dokimos = "0.14.2"
 composeHotReload = "1.0.0"
 composeMultiplatform = "1.10.3"
-exposed = "1.1.1"
+exposed = "1.2.0"
 sqlite = "3.45.1.0"
 junit = "4.13.2"
 koin-bom = "4.2.1"
@@ -16,7 +16,6 @@ kotlinx-coroutines = "1.10.2"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-collections-immutable = "0.4.0"
 kotlinx-serialization = "1.11.0"
-ktor = "3.4.2"
 lifecycle = "2.10.0-alpha07"
 material3 = "1.10.0-alpha05"
 material-icons = "1.7.3"
@@ -53,8 +52,6 @@ koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-compose = { module = "io.insert-koin:koin-compose" }
 koog-agents = { module = "ai.koog:koog-agents", version.ref = "koog" }
 koog-memory = { module = "ai.koog:agents-features-memory", version.ref = "koog" }
-ktor-bom = { module = "io.ktor:ktor-bom", version.ref = "ktor" }
-ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp" }
 lifecycle-viewmodel-navigation3 = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle" }
 navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }

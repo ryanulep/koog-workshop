@@ -1,0 +1,10 @@
+### GET request to example server
+#POST http://localhost:8080/chat?characterId=019d4f2b-6f93-75e5-942a-6896c08741c4
+#    &input=My%20Question
+#    &sessionId=1500
+
+POST http://localhost:8080/chat?characterId=019d4f2b-6f93-75e5-942a-6896c08741c4
+    &input=How%20are%20you%20?
+    &sessionId=1500
+
+###

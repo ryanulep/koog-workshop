@@ -92,9 +92,8 @@ fun main() {
                                 character = current.character,
                                 conversationId = current.conversationId,
                                 initialMessages = current.initialMessages,
-                                chatAgentProvider = dependencies.chatAgentProvider,
                                 chatService = dependencies.characterServices.chatService,
-                                historyProvider = dependencies.chatHistoryProvider,
+                                httpClient = dependencies.httpClient,
                                 onNavigateBack = { screen = Screen.ChatList(current.character) },
                             )
                         )
