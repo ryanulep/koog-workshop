@@ -10,9 +10,12 @@ import org.example.project.domain.shared.MerchantId
 import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
-@Repository
+@Component
+@Transactional
 class AdminMerchantRepository(
     private val merchantRepository: MerchantRepository,
     private val shippingRepository: ShippingRepository,

@@ -1,10 +1,12 @@
 package org.example.project.admin.merchants
 
+import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 import org.example.project.domain.catalog.Merchant
 import org.example.project.domain.shared.MerchantId
 import org.example.project.domain.shared.ShippingMethodId
 
+@Serializable
 data class MerchantListItem(
     val id: MerchantId,
     val name: String,
@@ -14,6 +16,7 @@ data class MerchantListItem(
     val recentOrderCount: Int
 )
 
+@Serializable
 data class ShippingMethodAssignmentItem(
     val id: ShippingMethodId,
     val name: String,
@@ -27,6 +30,7 @@ data class ShippingMethodAssignmentItem(
     val updatedAt: Instant
 )
 
+@Serializable
 data class MerchantDetail(
     val merchant: Merchant,
     val productCount: Int,

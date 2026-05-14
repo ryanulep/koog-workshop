@@ -1,6 +1,7 @@
 package org.example.project.admin.products
 
 
+import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 import org.example.project.domain.catalog.ProductCategory
 import org.example.project.domain.catalog.Rarity
@@ -22,18 +23,21 @@ data class ProductFilter(
 )
 
 
+@Serializable
 data class ProductMerchantOption(
     val id: MerchantId,
     val name: String
 )
 
 
+@Serializable
 data class ProductReviewSummary(
     val averageRating: Double? = null,
     val reviewCount: Int = 0
 )
 
 
+@Serializable
 data class ProductListItem(
     val id: ProductId,
     val name: String,
@@ -47,12 +51,14 @@ data class ProductListItem(
 )
 
 
+@Serializable
 data class ProductDetailAttribute(
     val label: String,
     val value: String
 )
 
 
+@Serializable
 data class ProductDetail(
     val id: ProductId,
     val name: String,
