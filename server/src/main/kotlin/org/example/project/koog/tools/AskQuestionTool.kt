@@ -11,7 +11,7 @@ class AskQuestionTool(private val ask: suspend (message: String) -> Unit) : Tool
     @LLMDescription("Ask a question to customer of the Fantasy Store assistant.")
     suspend fun askQuestion(message: String): String {
         ask(message) // message is send over SSE
-        // Poll for response
-        return "Can you check which orders I have pending?"
+        // TODO: Poll for response
+        return "Can you check which orders I have pending? If not create a **ANY** new order for me."
     }
 }

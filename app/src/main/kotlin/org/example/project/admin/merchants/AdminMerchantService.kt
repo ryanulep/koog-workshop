@@ -1,47 +1,41 @@
 package org.example.project.admin.merchants
 
-import org.example.project.db.suspendTransaction
-import org.example.project.domain.catalog.MerchantRepository
-import org.example.project.domain.shipping.ShippingRepository
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import org.example.project.domain.shared.MerchantId
 import org.example.project.domain.shared.ShippingMethodId
-import org.jetbrains.exposed.v1.jdbc.Database
 
 class AdminMerchantService(
-    private val database: Database,
-    private val adminMerchantRepository: AdminMerchantRepository = AdminMerchantRepository(),
-    private val merchantRepository: MerchantRepository = MerchantRepository(),
-    private val shippingRepository: ShippingRepository = ShippingRepository()
+    private val httpClient: HttpClient,
+    private val baseUrl: String = "http://localhost:8080"
 ) {
     suspend fun loadMerchants(): List<MerchantListItem> =
-        database.suspendTransaction {
-            adminMerchantRepository.getMerchants()
-        }
+        httpClient.get("$baseUrl/admin/merchants").body()
 
     suspend fun loadMerchantDetailOrNull(merchantId: MerchantId): MerchantDetail? =
-        database.suspendTransaction {
-            adminMerchantRepository.getMerchantDetailOrNull(merchantId)
-        }
+        httpClient.get("$baseUrl/admin/merchants/${merchantId.value}").body()
 
     suspend fun setMerchantActive(merchantId: MerchantId, isActive: Boolean): Boolean =
-        database.suspendTransaction {
-            merchantRepository.setMerchantActive(merchantId, isActive)
-        }
+        httpClient.post("$baseUrl/admin/merchants/${merchantId.value}/active") {
+            parameter("isActive", isActive)
+        }.body()
 
     suspend fun setShippingMethodActive(shippingMethodId: ShippingMethodId, isActive: Boolean): Boolean =
-        database.suspendTransaction {
-            shippingRepository.setShippingMethodActive(shippingMethodId, isActive)
-        }
+        httpClient.post("$baseUrl/admin/merchants/shipping-methods/${shippingMethodId.value}/active") {
+            parameter("isActive", isActive)
+        }.body()
 
     suspend fun replaceMerchantShippingMethods(
         merchantId: MerchantId,
         shippingMethodIds: Set<ShippingMethodId>
-    ): Boolean = database.suspendTransaction {
-        if (merchantRepository.getMerchantOrNull(merchantId) == null) {
-            return@suspendTransaction false
-        }
-
-        shippingRepository.replaceMerchantShippingMethods(merchantId, shippingMethodIds)
-        true
-    }
+    ): Boolean = httpClient.post("$baseUrl/admin/merchants/${merchantId.value}/shipping-methods") {
+        contentType(ContentType.Application.Json)
+        setBody(shippingMethodIds.map { it.value }.toSet())
+    }.body()
 }

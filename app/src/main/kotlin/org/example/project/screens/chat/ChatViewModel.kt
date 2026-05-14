@@ -1,8 +1,5 @@
 package org.example.project.screens.chat
 
-import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
-import ai.koog.agents.core.agent.AIAgent
-import ai.koog.agents.core.tools.ToolDescriptor
 import ai.koog.prompt.message.Message
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -10,14 +7,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.sse.sse
-import io.ktor.client.request.forms.submitForm
-import io.ktor.http.Parameters
 import io.ktor.http.parameters
-import io.ktor.sse.ServerSentEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,10 +18,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.example.project.domain.character.Character
-import org.example.project.domain.chat.ChatService
 import org.example.project.domain.chat.ChatUpdate
-import org.example.project.koog.ChatAgentProvider
-import org.example.project.koog.tracking.AgentExecutionTraceEvent
 import org.example.project.shared.ChatMessage
 import kotlin.reflect.KClass
 import kotlin.uuid.Uuid

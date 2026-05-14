@@ -50,21 +50,26 @@ class AdminOrderRepository {
     fun getOrders(filter: OrderFilter): List<OrderListItem> {
         // Push merchantId / subOrderStatus filters to SQL to avoid a full SubOrders scan.
         val qualifyingOrderIds: Set<OrderId>? =
-            if (filter.merchantId != null || filter.subOrderStatus != null) {
-                val subOrderConditions = buildList {
-                    if (filter.merchantId != null) add(SubOrders.merchant eq filter.merchantId.value)
-                    if (filter.subOrderStatus != null) add(SubOrders.status eq filter.subOrderStatus.name)
-                }
-                SubOrders.selectAll()
-                    .where { subOrderConditions.reduce { a, b -> a and b } }
-                    .map { row -> OrderId(row[SubOrders.order].value) }
-                    .toSet()
-            } else null
+            run {
+                val merchantId = filter.merchantId
+                val subOrderStatus = filter.subOrderStatus
+                if (merchantId != null || subOrderStatus != null) {
+                    val subOrderConditions = buildList {
+                        if (merchantId != null) add(SubOrders.merchant eq merchantId.value)
+                        if (subOrderStatus != null) add(SubOrders.status eq subOrderStatus.name)
+                    }
+                    SubOrders.selectAll()
+                        .where { subOrderConditions.reduce { a, b -> a and b } }
+                        .map { row -> OrderId(row[SubOrders.order].value) }
+                        .toSet()
+                } else null
+            }
 
         if (qualifyingOrderIds != null && qualifyingOrderIds.isEmpty()) return emptyList()
 
         val orderConditions = buildList {
-            if (filter.orderStatus != null) add(Orders.status eq filter.orderStatus.name)
+            val orderStatus = filter.orderStatus
+            if (orderStatus != null) add(Orders.status eq orderStatus.name)
             if (qualifyingOrderIds != null) add(Orders.id inList qualifyingOrderIds.map { it.value })
         }
 

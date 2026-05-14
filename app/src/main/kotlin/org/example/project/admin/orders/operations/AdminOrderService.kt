@@ -1,39 +1,42 @@
 package org.example.project.admin.orders.operations
 
-import org.example.project.db.suspendTransaction
-import org.example.project.domain.order.OrderRepository
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.patch
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import org.example.project.domain.order.OrderStatus
 import org.example.project.domain.shared.OrderId
 import org.example.project.domain.shared.SubOrderId
-import org.jetbrains.exposed.v1.jdbc.Database
 
 class AdminOrderService(
-    private val database: Database,
-    private val adminOrderRepository: AdminOrderRepository = AdminOrderRepository(),
-    private val orderRepository: OrderRepository = OrderRepository()
+    private val httpClient: HttpClient,
+    private val baseUrl: String = "http://localhost:8080"
 ) {
     suspend fun loadMerchantOptions(): List<OrderMerchantOption> =
-        database.suspendTransaction {
-            adminOrderRepository.getMerchantOptions()
-        }
+        httpClient.get("$baseUrl/admin/orders/merchants").body()
 
     suspend fun loadOrders(filter: OrderFilter): List<OrderListItem> =
-        database.suspendTransaction {
-            adminOrderRepository.getOrders(filter)
-        }
+        httpClient.post("$baseUrl/admin/orders/list") {
+            contentType(ContentType.Application.Json)
+            setBody(filter)
+        }.body()
 
     suspend fun loadOrderDetailOrNull(orderId: OrderId): AdminOrderDetail? =
-        database.suspendTransaction {
-            adminOrderRepository.getOrderDetailOrNull(orderId)
-        }
+        httpClient.get("$baseUrl/admin/orders/${orderId.value}").body()
 
     suspend fun updateSubOrderStatus(subOrderId: SubOrderId, status: OrderStatus): Boolean =
-        database.suspendTransaction {
-            orderRepository.updateSubOrderStatus(subOrderId, status)
-        }
+        httpClient.patch("$baseUrl/admin/orders/sub-orders/${subOrderId.value}/status") {
+            contentType(ContentType.Application.Json)
+            setBody(UpdateOrderStatusRequest(status))
+        }.body()
 
     suspend fun updateOrderStatus(orderId: OrderId, status: OrderStatus): Boolean =
-        database.suspendTransaction {
-            orderRepository.updateOrderStatus(orderId, status)
-        }
+        httpClient.patch("$baseUrl/admin/orders/${orderId.value}/status") {
+            contentType(ContentType.Application.Json)
+            setBody(UpdateOrderStatusRequest(status))
+        }.body()
 }

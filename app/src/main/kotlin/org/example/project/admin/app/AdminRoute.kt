@@ -63,7 +63,7 @@ fun AdminRoute(storeServices: Dependencies.StoreServices) {
     val merchantViewModel: MerchantAdminViewModel =
         viewModel(factory = MerchantAdminViewModel.factory(storeServices.merchantService))
     val orderViewModel: OrderAdminViewModel =
-        viewModel(factory = OrderAdminViewModel.factory(storeServices.orderService))
+        viewModel(factory = OrderAdminViewModel.factory(storeServices.adminOrderService))
     val productState by productViewModel.uiState.collectAsState()
     val merchantState by merchantViewModel.uiState.collectAsState()
     val orderState by orderViewModel.uiState.collectAsState()

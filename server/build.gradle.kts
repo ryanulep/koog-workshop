@@ -29,7 +29,6 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation(libs.kotlinx.serialization.json)
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.ai:spring-ai-starter-model-chat-memory-repository-jdbc:2.0.0-M5")
     implementation("org.springframework.ai:spring-ai-starter-model-openai:2.0.0-M5")

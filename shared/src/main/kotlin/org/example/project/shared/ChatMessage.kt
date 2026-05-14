@@ -2,6 +2,7 @@ package org.example.project.shared
 
 import kotlinx.serialization.Serializable
 
+
 @Serializable
 sealed class ChatMessage {
     @Serializable

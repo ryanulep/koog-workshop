@@ -56,13 +56,13 @@ class ChatAgentProvider(
             toolRegistry = ToolRegistry.Companion {
                 tools(askQuestionTool)
                 tools(readOrderTools)
-//                tools(updateOrderTools)
+                tools(updateOrderTools)
             },
         ) {
-//            install(ChatMemory) {
-//                chatHistoryProvider = historyProvider
-//                windowSize(50)
-//            }
+            install(ChatMemory) {
+                chatHistoryProvider = historyProvider
+                windowSize(50)
+            }
             install(OpenTelemetry) {
                 setServiceInfo("customer-support", "0.0.1")
                 addLangfuseExporter(langfuseUrl, langfusePublicKey, langfuseSecretKey)
