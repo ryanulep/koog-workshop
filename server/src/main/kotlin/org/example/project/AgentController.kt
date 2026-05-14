@@ -48,6 +48,7 @@ class AgentController(
         val emitter = SseEmitter()
         val agent = provider.provideAgent(
             characterId = CharacterId(Uuid.parse(characterId)),
+            sessionId = sessionId,
             historyProvider = chat,
             onToolCallEvent = { toolName, args ->
                 emitter.sendChatMessage(ChatMessage.ToolCallMessage(toolName, args))

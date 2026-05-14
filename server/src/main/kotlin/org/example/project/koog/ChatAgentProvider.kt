@@ -12,10 +12,10 @@ import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.executor.model.PromptExecutor
 import ai.koog.prompt.message.Message
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.example.project.domain.chat.AskQuestionRepository
 import org.example.project.domain.order.OrderService
 import org.example.project.domain.shared.CharacterId
 import org.example.project.koog.tools.AskQuestionTool
-import org.example.project.koog.tools.CustomerSupportTools
 import org.example.project.koog.tools.ReadOrderTools
 import org.example.project.koog.tools.UpdateOrderTools
 import org.example.project.koog.tracking.AgentExecutionTraceEvent
@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service
 class ChatAgentProvider(
     private val executor: PromptExecutor,
     private val orderService: OrderService,
+    private val askQuestionRepository: AskQuestionRepository,
     @Value($$"${langfuse.secretkey}") private val langfuseSecretKey: String,
     @Value($$"${langfuse.publickey}") private val langfusePublicKey: String,
     @Value($$"${langfuse.url}") private val langfuseUrl: String,
@@ -39,11 +40,12 @@ class ChatAgentProvider(
         onErrorEvent: (String) -> Unit,
         onExecutionTraceEvent: (AgentExecutionTraceEvent) -> Unit,
         onAskMessage: (String) -> Unit,
+        sessionId: String,
     ): AIAgent<String, String> {
-        val askQuestionTool = AskQuestionTool(onAskMessage)
+        val askQuestionTool = AskQuestionTool(characterId, sessionId, askQuestionRepository, onAskMessage)
         val readOrderTools = ReadOrderTools(characterId, orderService)
         val updateOrderTools = UpdateOrderTools(characterId, orderService)
-        val tools = CustomerSupportTools(askQuestionTool, readOrderTools, updateOrderTools)
+//        val tools = CustomerSupportTools(askQuestionTool, readOrderTools, updateOrderTools)
 
         return AIAgent(
             promptExecutor = executor,

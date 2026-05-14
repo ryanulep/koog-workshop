@@ -116,6 +116,19 @@ class ChatViewModel(
                     currentUserResponse = userInput,
                 )
             }
+            viewModelScope.launch {
+                try {
+                    chatService.answerQuestion(character.id, sessionId, userInput)
+                } catch (e: Exception) {
+                    uiState.update {
+                        it.copy(
+                            chatMessages = it.chatMessages + ChatMessage.ErrorMessage("Error sending answer: ${e.message}"),
+                            isInputEnabled = true,
+                            isLoading = false,
+                        )
+                    }
+                }
+            }
         } else {
             uiState.update {
                 it.copy(
@@ -164,11 +177,13 @@ class ChatViewModel(
                         } ?: return@collect
                         println("Decoded ChatMessage: $chatMessage")
                         uiState.update {
+                            val isAgentMessage = chatMessage is ChatMessage.AgentMessage || chatMessage is ChatMessage.ErrorMessage
+                            val isAskQuestion = chatMessage is ChatMessage.AskQuestion
                             it.copy(
                                 chatMessages = it.chatMessages + chatMessage,
-                                isInputEnabled = chatMessage is ChatMessage.AgentMessage || chatMessage is ChatMessage.ErrorMessage || chatMessage is ChatMessage.AskQuestion,
-                                isLoading = chatMessage !is ChatMessage.AgentMessage && chatMessage !is ChatMessage.ErrorMessage && chatMessage !is ChatMessage.AskQuestion,
-                                userResponseRequested = chatMessage is ChatMessage.AskQuestion
+                                isInputEnabled = isAgentMessage || isAskQuestion,
+                                isLoading = !isAgentMessage && !isAskQuestion,
+                                userResponseRequested = isAskQuestion
                             )
                         }
                     }

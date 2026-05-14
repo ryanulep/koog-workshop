@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ChatRepository {
 
-    suspend fun getCharacterChats(characterId: CharacterId): List<Chat> = withContext(Dispatchers.IO) {
+    suspend fun getCharacterChats(characterId: CharacterId): List<Chat> =
         Chats.selectAll()
             .where { Chats.character eq characterId.value }
             .orderBy(Chats.updatedAt to SortOrder.DESC)
@@ -31,7 +31,6 @@ class ChatRepository {
                     updatedAt = it[Chats.updatedAt],
                 )
             }
-    }
 
 
     fun updateChat(update: ChatUpdate): Boolean {
