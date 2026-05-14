@@ -1,24 +1,17 @@
 package org.example.project
 
-import ai.koog.prompt.executor.llms.all.simpleOpenAIExecutor
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.sse.SSE
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import org.example.project.db.createDataSource
-import org.example.project.db.createDatabase
-import org.example.project.admin.dashboard.AdminDashboardService
 import org.example.project.admin.merchants.AdminMerchantService
 import org.example.project.admin.orders.operations.AdminOrderService
 import org.example.project.admin.products.AdminProductService
-import org.example.project.domain.character.CharacterService
-import org.example.project.domain.chat.ChatService
-import org.example.project.domain.order.OrderService
+import org.example.project.screens.chat.ChatService
+import org.example.project.screens.chatlist.CharacterService
 
 fun dependencies(): Dependencies {
-    val dataSource = createDataSource()
-    val database = createDatabase(dataSource)
     val httpClient = HttpClient {
         install(SSE)
         install(ContentNegotiation) {
@@ -32,13 +25,11 @@ fun dependencies(): Dependencies {
     val productService = AdminProductService(httpClient)
     val merchantService = AdminMerchantService(httpClient)
     val adminOrderService = AdminOrderService(httpClient)
-    val orderService = OrderService(httpClient)
-    val dashboardService = AdminDashboardService(httpClient)
     val characterService = CharacterService(httpClient)
     val chatService = ChatService(httpClient)
 
     return Dependencies(
-        storeServices = Dependencies.StoreServices(productService, merchantService, adminOrderService, orderService, dashboardService),
+        storeServices = Dependencies.StoreServices(productService, merchantService, adminOrderService),
         characterServices = Dependencies.CharacterServices(characterService, chatService),
         httpClient = httpClient,
     )
@@ -53,8 +44,6 @@ class Dependencies(
         val productService: AdminProductService,
         val merchantService: AdminMerchantService,
         val adminOrderService: AdminOrderService,
-        val orderService: OrderService,
-        val dashboardService: AdminDashboardService,
     )
 
     class CharacterServices(

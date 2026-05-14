@@ -18,7 +18,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.example.project.domain.character.Character
-import org.example.project.domain.chat.ChatService
 import org.example.project.domain.chat.ChatUpdate
 import org.example.project.shared.ChatMessage
 import kotlin.reflect.KClass

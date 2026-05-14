@@ -1,4 +1,4 @@
-package org.example.project.domain.chat
+package org.example.project.screens.chat
 
 import ai.koog.prompt.message.Message
 import io.ktor.client.HttpClient
@@ -8,6 +8,8 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import org.example.project.domain.chat.ChatDetails
+import org.example.project.domain.chat.ChatUpdate
 import org.example.project.domain.shared.CharacterId
 
 class ChatService(

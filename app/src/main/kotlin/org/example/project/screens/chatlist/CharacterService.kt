@@ -1,11 +1,20 @@
-package org.example.project.domain.character
+package org.example.project.screens.chatlist
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.*
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import kotlinx.serialization.Serializable
+import org.example.project.domain.character.Character
+import org.example.project.domain.character.CreateCharacterRequest
+import org.example.project.domain.character.DepositRequest
+import org.example.project.domain.character.Transaction
+import org.example.project.domain.character.UpdateCharacterRequest
 import org.example.project.domain.shared.CharacterId
 import org.example.project.domain.shared.CurrencyId
 import org.example.project.domain.shared.Page

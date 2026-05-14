@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.example.project.domain.character.Character
 import org.example.project.domain.chat.ChatDetails
-import org.example.project.domain.chat.ChatService
+import org.example.project.screens.chat.ChatService
 import kotlin.reflect.KClass
 import kotlin.uuid.Uuid
 
