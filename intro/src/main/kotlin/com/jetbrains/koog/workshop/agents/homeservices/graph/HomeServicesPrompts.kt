@@ -27,9 +27,9 @@ object HomeServicesPrompts {
     }
 
     /**
-     * Instructions for the emergency check phase.
+     * Instructions for the emergency triage phase.
      */
-    fun checkEmergencyInstructions(initialMessage: String) = """
+    fun triageEmergencyInstructions(initialMessage: String) = """
         Your task is to assess whether the user's request is an emergency before scheduling.
 
         ## What counts as an emergency
@@ -53,9 +53,9 @@ object HomeServicesPrompts {
         """.trimIndent()
 
     /**
-     * Instructions for the assess phase.
+     * Instructions for the issue details collection phase.
      */
-    fun assessInstructions(initialMessage: String) = """
+    fun collectIssueDetailsInstructions(initialMessage: String) = """
         Your task is to gather the details required to schedule a home service visit, including assessing urgency.
 
         ## Required details
@@ -108,9 +108,9 @@ object HomeServicesPrompts {
         """.trimIndent()
 
     /**
-     * Instructions for the slot selection phase.
+     * Instructions for the slot selection phase (selectSlot).
      */
-    fun selectSlotInstructions(intake: IntakeResult, state: String) = """
+    fun selectSlotInstructions(issueDetails: IssueDetails, state: String) = """
         Your task is to find available slots and help the customer pick one.
 
         ## Appointment Windows
@@ -133,19 +133,19 @@ object HomeServicesPrompts {
         Agent state: $state
 
         Customer details:
-        - Customer: ${intake.customerName}
-        - Service type: ${intake.serviceType}
-        - Issue: ${intake.issueSummary}
-        - Urgency: ${intake.urgencyLevel}
-        - Address: ${intake.address}
-        ${intake.accessNotes?.let { "- Access notes: $it" } ?: ""}
-        ${intake.timePreferencesNote?.let { "- Time preference: $it" } ?: ""}
+        - Customer: ${issueDetails.customerName}
+        - Service type: ${issueDetails.serviceType}
+        - Issue: ${issueDetails.issueSummary}
+        - Urgency: ${issueDetails.urgencyLevel}
+        - Address: ${issueDetails.address}
+        ${issueDetails.accessNotes?.let { "- Access notes: $it" } ?: ""}
+        ${issueDetails.timePreferencesNote?.let { "- Time preference: $it" } ?: ""}
         """.trimIndent()
 
     /**
-     * Instructions for the confirmation phase.
+     * Instructions for the appointment confirmation phase.
      */
-    fun confirmSlotInstructions(intake: IntakeResult, slot: SelectedSlot, state: String) = """
+    fun confirmAppointmentInstructions(issueDetails: IssueDetails, slot: SelectedSlot, state: String) = """
         Your task is to try to confirm the chosen appointment with the customer before booking.
 
         Repeat the exact date, time window, service type, and address back to the customer.
@@ -160,10 +160,10 @@ object HomeServicesPrompts {
         - Time window: ${slot.timeWindow}
 
         Customer details:
-        - Service type: ${intake.serviceType}
-        - Customer: ${intake.customerName}
-        - Address: ${intake.address}
-        ${intake.accessNotes?.let { "- Notes: $it" } ?: ""}
+        - Service type: ${issueDetails.serviceType}
+        - Customer: ${issueDetails.customerName}
+        - Address: ${issueDetails.address}
+        ${issueDetails.accessNotes?.let { "- Notes: $it" } ?: ""}
         """.trimIndent()
 
     /**
@@ -176,9 +176,9 @@ object HomeServicesPrompts {
         """.trimIndent()
 
     /**
-     * Instructions for wrapping up an emergency conversation.
+     * Instructions for responding to an emergency.
      */
-    fun handleEmergencyInstructions(justification: String) = """
+    fun respondToEmergencyInstructions(justification: String) = """
         Your task is to provide a short final reply to conclude a conversation about an emergency.
         Your response must be very concise and must not distract the user from contacting emergency services.
         Emergency situation: $justification
@@ -187,9 +187,9 @@ object HomeServicesPrompts {
         """.trimIndent()
 
     /**
-     * Instructions for the finish phase.
+     * Instructions for the feedback collection phase.
      */
-    fun finishInstructions(previousResult: String) = """
+    fun collectFeedbackInstructions(previousResult: String) = """
         Your task is to wrap up a successful conversation.
 
         ## Steps

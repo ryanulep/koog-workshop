@@ -15,7 +15,7 @@ import com.jetbrains.koog.workshop.agents.util.AgentExecutionTraceEvent
 import com.jetbrains.koog.workshop.agents.util.ChatAgentProvider
 import com.jetbrains.koog.workshop.agents.util.trackEvents
 import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesBookTools
-import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesFindTools
+import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesFindSlotTools
 import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesSchedule
 
 internal class HomeServicesBasicAgentProvider(
@@ -35,7 +35,7 @@ internal class HomeServicesBasicAgentProvider(
         val (llmClient, model) = provideLLMClient.invoke()
         val executor = MultiLLMPromptExecutor(llmClient)
         val schedule = HomeServicesSchedule()
-        val findTools = HomeServicesFindTools(schedule)
+        val findTools = HomeServicesFindSlotTools(schedule)
         val bookTools = HomeServicesBookTools(schedule)
 
         val agentConfig = AIAgentConfig(

@@ -9,9 +9,9 @@ import kotlin.test.assertTrue
 
 class HomeServicesBookToolsTest {
 
-    private fun freshScheduleAndTools(): Triple<HomeServicesSchedule, HomeServicesFindTools, HomeServicesBookTools> {
+    private fun freshScheduleAndTools(): Triple<HomeServicesSchedule, HomeServicesFindSlotTools, HomeServicesBookTools> {
         val schedule = HomeServicesSchedule()
-        return Triple(schedule, HomeServicesFindTools(schedule), HomeServicesBookTools(schedule))
+        return Triple(schedule, HomeServicesFindSlotTools(schedule), HomeServicesBookTools(schedule))
     }
 
     private fun firstFreeSlotId(schedule: HomeServicesSchedule, specialist: SpecialistType): String =

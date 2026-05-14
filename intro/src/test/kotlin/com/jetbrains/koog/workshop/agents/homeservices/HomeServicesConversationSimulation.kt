@@ -582,7 +582,7 @@ class HomeServicesGraphConversationSimulation : HomeServicesConversationSimulati
         addMessage: (role: String, content: String) -> Unit,
         simulateUserResponse: suspend () -> String,
     ) {
-        val findTools = HomeServicesFindTools(schedule)
+        val findTools = HomeServicesFindSlotTools(schedule)
         val bookTools = HomeServicesBookTools(schedule)
         val askUserTool = AskUserTool { question ->
             addMessage("Assistant", question)
@@ -622,7 +622,7 @@ class HomeServicesBasicConversationSimulation : HomeServicesConversationSimulati
     ) {
         val historyProvider = InMemoryChatHistoryProvider()
         val sessionId = UUID.randomUUID().toString()
-        val findTools = HomeServicesFindTools(schedule)
+        val findTools = HomeServicesFindSlotTools(schedule)
         val bookTools = HomeServicesBookTools(schedule)
         val agent = AIAgent(
             promptExecutor = MultiLLMPromptExecutor(OpenAILLMClient(apiKey)),

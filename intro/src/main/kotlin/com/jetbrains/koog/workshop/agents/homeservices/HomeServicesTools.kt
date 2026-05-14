@@ -56,7 +56,7 @@ data class Booking(
 )
 
 /**
- * Shared schedule data used by both [HomeServicesFindTools] and [HomeServicesBookTools].
+ * Shared schedule data used by both [HomeServicesFindSlotTools] and [HomeServicesBookTools].
  *
  * [slots] is immutable — it describes every time slot in the schedule.
  * [bookings] tracks which slots have been booked and their customer details.
@@ -238,7 +238,7 @@ private fun addBusinessDays(date: LocalDate, days: Int): LocalDate {
 /**
  * Tool set for searching available slots. Does NOT include booking.
  */
-class HomeServicesFindTools(private val schedule: HomeServicesSchedule) : ToolSet {
+class HomeServicesFindSlotTools(private val schedule: HomeServicesSchedule) : ToolSet {
 
     @Tool
     @LLMDescription(
@@ -322,7 +322,7 @@ class HomeServicesFindTools(private val schedule: HomeServicesSchedule) : ToolSe
 }
 
 /**
- * Tool set for booking an appointment. Separated from [HomeServicesFindTools]
+ * Tool set for booking an appointment. Separated from [HomeServicesFindSlotTools]
  * so the strategy can gate access: the LLM can only book after confirmation.
  */
 class HomeServicesBookTools(private val schedule: HomeServicesSchedule) : ToolSet {

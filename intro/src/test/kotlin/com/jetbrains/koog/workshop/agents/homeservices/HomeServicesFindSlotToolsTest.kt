@@ -6,10 +6,10 @@ import kotlin.test.assertContains
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class HomeServicesFindToolsTest {
+class HomeServicesFindSlotToolsTest {
 
     private val schedule = HomeServicesSchedule()
-    private val findTools = HomeServicesFindTools(schedule)
+    private val findTools = HomeServicesFindSlotTools(schedule)
 
     // Grab future dates that definitely have free slots (later days are emptier)
     private val futureDates: List<LocalDate> =
@@ -91,7 +91,7 @@ class HomeServicesFindToolsTest {
                 schedule.bookAnAppointment(slot.id, Booking(customerName = "Test", address = "Test address"))
             }
         }
-        val findTools = HomeServicesFindTools(schedule)
+        val findTools = HomeServicesFindSlotTools(schedule)
         val result = findTools.getAvailableSlots(ServiceType.HVAC)
         assertContains(result, "No available slots found for HVAC")
     }

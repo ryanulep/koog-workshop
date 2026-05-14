@@ -9,22 +9,22 @@ import ai.koog.agents.core.tools.annotations.LLMDescription
 import ai.koog.agents.ext.agent.subgraphWithTask
 import com.jetbrains.koog.workshop.agents.util.AskUserTool
 import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesBookTools
-import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesFindTools
+import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesFindSlotTools
 import com.jetbrains.koog.workshop.agents.homeservices.ServiceType
 import com.jetbrains.koog.workshop.agents.homeservices.UrgencyLevel
 import kotlinx.serialization.Serializable
 
-@LLMDescription("Result of the emergency check phase")
+@LLMDescription("Result of the emergency triage phase")
 @Serializable
-data class EmergencyCheckResult(
-    @LLMDescription("The outcome status of the emergency check")
-    val status: EmergencyStatus,
+data class TriageResult(
+    @LLMDescription("The outcome of the emergency triage")
+    val status: TriageOutcome,
     @LLMDescription("Brief justification of why this is an emergency. Required when status is EMERGENCY_DETECTED, null otherwise.")
     val justification: String? = null,
 )
 
 @Serializable
-enum class EmergencyStatus {
+enum class TriageOutcome {
     @LLMDescription("Emergency detected; justification must be provided")
     EMERGENCY_DETECTED,
     @LLMDescription("No emergency detected; proceed with regular appointment scheduling")
@@ -35,7 +35,7 @@ enum class EmergencyStatus {
 
 @LLMDescription("Collected details required to schedule a home service visit")
 @Serializable
-data class IntakeResult(
+data class IssueDetails(
     @LLMDescription("Type of home service needed: PLUMBING, ELECTRICAL, HVAC, or HANDYMAN")
     val serviceType: ServiceType,
     @LLMDescription("One-sentence description of the issue to be resolved")
@@ -52,11 +52,11 @@ data class IntakeResult(
     val timePreferencesNote: String? = null,
 )
 
-@LLMDescription("Outcome of the intake assessment phase: either all details collected or user cancelled")
+@LLMDescription("Outcome of the issue details collection phase: either all details collected or user cancelled")
 @Serializable
-data class AssessResult(
-    @LLMDescription("Intake details collected by the agent, if any")
-    val collected: IntakeResult?,
+data class IssueDetailsOutcome(
+    @LLMDescription("Issue details collected by the agent, if any")
+    val collected: IssueDetails?,
     @LLMDescription("Whether the user chose to cancel the scheduling process")
     val cancelled: Boolean,
 ) {
@@ -65,7 +65,7 @@ data class AssessResult(
 
 @LLMDescription("Outcome of the slot selection phase: either a slot was chosen or user cancelled")
 @Serializable
-data class SelectSlotResult(
+data class SlotSelectionOutcome(
     @LLMDescription("The slot selected by the customer, if any")
     val selected: SelectedSlot?,
     @LLMDescription("Whether the user chose to cancel the scheduling process")
@@ -85,9 +85,9 @@ data class SelectedSlot(
     val timeWindow: String
 )
 
-@LLMDescription("Customer's confirmation decision for the proposed appointment slot")
+@LLMDescription("Customer's confirmation decision for the proposed appointment")
 @Serializable
-enum class ConfirmationStatus {
+enum class ConfirmationOutcome {
     @LLMDescription("Customer confirmed the slot and wants to proceed with booking")
     CONFIRMED,
     @LLMDescription("Customer wants to pick a different slot")
@@ -98,72 +98,72 @@ enum class ConfirmationStatus {
 
 fun homeServicesSchedulingStrategy(
     askUserTool: AskUserTool,
-    findTools: HomeServicesFindTools,
+    findAvailableSlotTools: HomeServicesFindSlotTools,
     bookTools: HomeServicesBookTools,
 ) = strategy<String, String>("home-services-scheduling") {
+    val issueDetailsKey = createStorageKey<IssueDetails>("issue-details")
     val selectedSlotKey = createStorageKey<SelectedSlot>("selected-slot")
-    val intakeResultKey = createStorageKey<IntakeResult>("intake-results")
 
-    // Phase 0: check whether the request is an emergency before any scheduling
-    val checkEmergency by subgraphWithTask<String, EmergencyCheckResult>(
+    // Phase 0: triage — detect emergencies before any scheduling
+    val triageEmergency by subgraphWithTask<String, TriageResult>(
         tools = askUserTool.asTools()
     ) { input ->
-        HomeServicesPrompts.checkEmergencyInstructions(input)
+        HomeServicesPrompts.triageEmergencyInstructions(input)
     }
 
-    // Phase 1: gather service details from the user (no search or booking tools)
-    val assess by subgraphWithTask<EmergencyCheckResult, AssessResult>(
+    // Phase 1: collect issue details from the user (no search or booking tools)
+    val collectIssueDetails by subgraphWithTask<TriageResult, IssueDetailsOutcome>(
         tools = askUserTool.asTools()
     ) { _ ->
-        HomeServicesPrompts.assessInstructions(agentInput<String>())
+        HomeServicesPrompts.collectIssueDetailsInstructions(agentInput<String>())
     }
-    val storeIntake by node<IntakeResult, String> { intake ->
-        storage.set(intakeResultKey, intake)
-        "Intake details stored; proceeding to slot selection."
+    val storeIssueDetails by node<IssueDetails, String> { details ->
+        storage.set(issueDetailsKey, details)
+        "Issue details stored; proceeding to slot selection."
     }
 
     val compressHistory by nodeLLMCompressHistory<String>()
 
-    // Phase 2: find slots and let the user pick one (no booking tool available)
-    val selectSlot by subgraphWithTask<String, SelectSlotResult>(
-        tools = askUserTool.asTools() + findTools.asTools()
+    // Phase 2: select a slot — find availability and let the user pick
+    val selectSlot by subgraphWithTask<String, SlotSelectionOutcome>(
+        tools = askUserTool.asTools() + findAvailableSlotTools.asTools()
     ) { state ->
-        val intake = storage.getValue(intakeResultKey)
-        HomeServicesPrompts.selectSlotInstructions(intake, state)
+        val issueDetails = storage.getValue(issueDetailsKey)
+        HomeServicesPrompts.selectSlotInstructions(issueDetails, state)
     }
-    val storeSlot by node<SelectedSlot, String> { slot ->
+    val storeSelectedSlot by node<SelectedSlot, String> { slot ->
         storage.set(selectedSlotKey, slot)
         "Slot selected and stored for booking."
     }
 
-    // Phase 3: confirm the chosen date and time
-    val confirmSlot by subgraphWithTask<String, ConfirmationStatus>(
+    // Phase 3: confirm appointment — review details with the customer before booking
+    val confirmAppointment by subgraphWithTask<String, ConfirmationOutcome>(
         tools = askUserTool.asTools()
     ) { state ->
-        val intake = storage.getValue(intakeResultKey)
+        val issueDetails = storage.getValue(issueDetailsKey)
         val slot = storage.getValue(selectedSlotKey)
-        HomeServicesPrompts.confirmSlotInstructions(intake, slot, state)
+        HomeServicesPrompts.confirmAppointmentInstructions(issueDetails, slot, state)
     }
 
-    // Phase 4: book the appointment programmatically — all data is already collected
-    val book by node<String, String> { _ ->
-        val intake = storage.getValue(intakeResultKey)
+    // Phase 4: book appointment — all data is already collected, no LLM needed
+    val bookAppointment by node<String, String> { _ ->
+        val issueDetails = storage.getValue(issueDetailsKey)
         val slot = storage.getValue(selectedSlotKey)
         bookTools.bookAppointment(
-            customerName = intake.customerName,
-            serviceType = intake.serviceType,
+            customerName = issueDetails.customerName,
+            serviceType = issueDetails.serviceType,
             slotId = slot.slotId,
-            address = intake.address,
-            issueDescription = intake.issueSummary,
-            notes = intake.accessNotes ?: "",
+            address = issueDetails.address,
+            issueDescription = issueDetails.issueSummary,
+            notes = issueDetails.accessNotes ?: "",
         )
     }
 
-    // Phase 5: thank the user and ask for a satisfaction rating
-    val finish by subgraphWithTask<String, String>(
+    // Phase 5: collect feedback — thank the user and ask for a satisfaction rating
+    val collectFeedback by subgraphWithTask<String, String>(
         tools = askUserTool.asTools()
     ) { previousResult ->
-        HomeServicesPrompts.finishInstructions(previousResult)
+        HomeServicesPrompts.collectFeedbackInstructions(previousResult)
     }
 
     // Cancellation path: single LLM call to thank and close the conversation
@@ -174,35 +174,35 @@ fun homeServicesSchedulingStrategy(
         }
     }
 
-    // Handling emergency path: single LLM call to close the conversation
+    // Emergency path: direct the user to emergency services and close
     val handleEmergency by node<String, String> { justification ->
         llm.writeSession {
-            appendPrompt { user(HomeServicesPrompts.handleEmergencyInstructions(justification)) }
+            appendPrompt { user(HomeServicesPrompts.respondToEmergencyInstructions(justification)) }
             requestLLM().content
         }
     }
 
-    nodeStart then checkEmergency
-    edge(checkEmergency forwardTo assess onCondition { it.status == EmergencyStatus.PROCEED_WITH_SCHEDULING })
-    edge(checkEmergency forwardTo handleCancellation onCondition { it.status == EmergencyStatus.CANCELLED } transformed { "Cancelled" })
-    edge(checkEmergency forwardTo handleEmergency onCondition { it.status == EmergencyStatus.EMERGENCY_DETECTED } transformed { it.justification ?: "Emergency situation detected" })
+    nodeStart then triageEmergency
+    edge(triageEmergency forwardTo collectIssueDetails onCondition { it.status == TriageOutcome.PROCEED_WITH_SCHEDULING })
+    edge(triageEmergency forwardTo handleCancellation onCondition { it.status == TriageOutcome.CANCELLED } transformed { "Cancelled" })
+    edge(triageEmergency forwardTo handleEmergency onCondition { it.status == TriageOutcome.EMERGENCY_DETECTED } transformed { it.justification ?: "Emergency situation detected" })
 
-    edge(assess forwardTo storeIntake onCondition { it.success() } transformed { it.collected!! })
-    edge(assess forwardTo handleCancellation onCondition { !it.success() } transformed { "Cancelled" })
+    edge(collectIssueDetails forwardTo storeIssueDetails onCondition { it.success() } transformed { it.collected!! })
+    edge(collectIssueDetails forwardTo handleCancellation onCondition { !it.success() } transformed { "Cancelled" })
 
-    storeIntake then compressHistory
+    storeIssueDetails then compressHistory
     compressHistory then selectSlot
 
-    edge(selectSlot forwardTo storeSlot onCondition { it.success() } transformed { it.selected!! })
+    edge(selectSlot forwardTo storeSelectedSlot onCondition { it.success() } transformed { it.selected!! })
     edge(selectSlot forwardTo handleCancellation onCondition { !it.success() } transformed { "Cancelled" })
 
-    storeSlot then confirmSlot
+    storeSelectedSlot then confirmAppointment
 
-    edge(confirmSlot forwardTo selectSlot onCondition { it == ConfirmationStatus.CHANGE_REQUESTED } transformed { "Slot was selected, but the change was requested." })
-    edge(confirmSlot forwardTo handleCancellation onCondition { it == ConfirmationStatus.CANCELLED } transformed { "Cancelled" })
-    edge(confirmSlot forwardTo book onCondition { it == ConfirmationStatus.CONFIRMED } transformed { "Slot confirmed, proceeding to booking." })
+    edge(confirmAppointment forwardTo selectSlot onCondition { it == ConfirmationOutcome.CHANGE_REQUESTED } transformed { "Slot was selected, but the change was requested." })
+    edge(confirmAppointment forwardTo handleCancellation onCondition { it == ConfirmationOutcome.CANCELLED } transformed { "Cancelled" })
+    edge(confirmAppointment forwardTo bookAppointment onCondition { it == ConfirmationOutcome.CONFIRMED } transformed { "Slot confirmed, proceeding to booking." })
 
-    book then finish then nodeFinish
+    bookAppointment then collectFeedback then nodeFinish
     handleCancellation then nodeFinish
     handleEmergency then nodeFinish
 }

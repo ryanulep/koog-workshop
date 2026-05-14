@@ -54,7 +54,7 @@ internal class WeatherAgentProvider(
 
                     ALWAYS USE current_datetime and add_datetime tools to perform date operations, do not try to guess.
 
-                    When providing weather forecasts, be helpful and informative, explaining the weather conditions in a clear way.
+                    When providing weather forecasts, be concise and helpful, explaining the weather conditions in a clear way.
                     """.trimIndent()
                 )
             },
