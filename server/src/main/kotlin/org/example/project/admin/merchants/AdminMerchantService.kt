@@ -5,13 +5,9 @@ import org.example.project.domain.catalog.MerchantRepository
 import org.example.project.domain.shipping.ShippingRepository
 import org.example.project.domain.shared.MerchantId
 import org.example.project.domain.shared.ShippingMethodId
-import org.jetbrains.exposed.v1.jdbc.Database
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
-@Component
-@Transactional
+@Service
 class AdminMerchantService(
     private val adminMerchantRepository: AdminMerchantRepository,
     private val merchantRepository: MerchantRepository,

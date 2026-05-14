@@ -1,12 +1,10 @@
 package org.example.project.admin.merchants
 
-import androidx.compose.runtime.Immutable
 import kotlin.time.Instant
 import org.example.project.domain.catalog.Merchant
 import org.example.project.domain.shared.MerchantId
 import org.example.project.domain.shared.ShippingMethodId
 
-@Immutable
 data class MerchantListItem(
     val id: MerchantId,
     val name: String,
@@ -16,7 +14,6 @@ data class MerchantListItem(
     val recentOrderCount: Int
 )
 
-@Immutable
 data class ShippingMethodAssignmentItem(
     val id: ShippingMethodId,
     val name: String,
@@ -30,7 +27,6 @@ data class ShippingMethodAssignmentItem(
     val updatedAt: Instant
 )
 
-@Immutable
 data class MerchantDetail(
     val merchant: Merchant,
     val productCount: Int,
