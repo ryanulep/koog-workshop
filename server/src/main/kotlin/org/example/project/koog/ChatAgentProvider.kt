@@ -6,8 +6,10 @@ import ai.koog.agents.core.agent.AIAgent
 import ai.koog.agents.core.tools.ToolDescriptor
 import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.agents.features.opentelemetry.feature.OpenTelemetry
+import ai.koog.agents.features.persistence.jdbc.JdbcPersistenceStorageProvider
 import ai.koog.agents.features.tracing.feature.Tracing
 import ai.koog.agents.features.tracing.writer.TraceFeatureMessageLogWriter
+import ai.koog.agents.snapshot.feature.Persistence
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.executor.model.PromptExecutor
 import ai.koog.prompt.message.Message
@@ -41,6 +43,7 @@ class ChatAgentProvider(
         onExecutionTraceEvent: (AgentExecutionTraceEvent) -> Unit,
         onAskMessage: (String) -> Unit,
         sessionId: String,
+        persistence: JdbcPersistenceStorageProvider
     ): AIAgent<String, String> {
         val askQuestionTool = AskQuestionTool(characterId, sessionId, askQuestionRepository, onAskMessage)
         val readOrderTools = ReadOrderTools(characterId, orderService)
@@ -64,6 +67,10 @@ class ChatAgentProvider(
             install(ChatMemory) {
                 chatHistoryProvider = historyProvider
                 windowSize(50)
+            }
+            install(Persistence) {
+                enableAutomaticPersistence = true
+                storage = persistence
             }
 //            install(OpenTelemetry) {
 //                setServiceInfo("customer-support", "0.0.1")

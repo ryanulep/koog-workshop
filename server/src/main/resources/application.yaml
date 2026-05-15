@@ -14,9 +14,8 @@ spring:
         repository:
           jdbc:
             initialize-schema: always
-
-exposed:
-  generate-ddl=true
+  exposed:
+    generate-ddl: true
 
 langfuse:
   url: ${LANGFUSE_BASE_URL:}

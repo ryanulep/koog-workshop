@@ -2,6 +2,7 @@ package org.example.project
 
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
 import ai.koog.agents.core.tools.ToolDescriptor
+import ai.koog.agents.features.persistence.jdbc.JdbcPersistenceStorageProvider
 import ai.koog.prompt.message.Message
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +33,7 @@ import kotlin.uuid.Uuid
 class AgentController(
     private val provider: ChatAgentProvider,
     private val chat: ChatHistoryProvider,
+    private val persistence: JdbcPersistenceStorageProvider
 ) {
     private val logger = KotlinLogging.logger {}
     private val sseScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -97,7 +99,8 @@ class AgentController(
             },
             onAskMessage = { message ->
                 emitter.sendChatMessage(ChatMessage.AskQuestion(message))
-            }
+            },
+            persistence = persistence
         )
 
         val heartbeatJob = sseScope.launch {
