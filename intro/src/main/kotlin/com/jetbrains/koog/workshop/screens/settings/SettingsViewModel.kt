@@ -31,6 +31,10 @@ class SettingsViewModel(
             when (event) {
                 is SettingsUiEvents.UpdateOption -> updateSelectedOption(selectedOption = event.selectedOption)
                 is SettingsUiEvents.UpdateCredential -> updateCredential(credential = event.credential)
+                is SettingsUiEvents.UpdateAppearance -> {
+                    _uiState.value = _uiState.value.copy(appearanceMode = event.appearanceMode)
+                    appSettings.updateAppearanceMode(event.appearanceMode)
+                }
                 SettingsUiEvents.NavigateBack -> navigationCallback.goBack()
                 SettingsUiEvents.SaveSettings -> {
                     saveSettings()
@@ -52,7 +56,8 @@ class SettingsViewModel(
                 anthropicToken = settings.anthropicToken,
                 geminiToken = settings.geminiToken,
                 selectedOption = settings.selectedOption,
-                isLoading = false
+                appearanceMode = settings.appearanceMode,
+                isLoading = false,
             )
         }
     }
@@ -88,7 +93,8 @@ class SettingsViewModel(
                     openAiToken = currentSettingsState.openAiToken,
                     anthropicToken = currentSettingsState.anthropicToken,
                     geminiToken = currentSettingsState.geminiToken,
-                    selectedOption = currentSettingsState.selectedOption
+                    selectedOption = currentSettingsState.selectedOption,
+                    appearanceMode = currentSettingsState.appearanceMode,
                 )
             )
         }

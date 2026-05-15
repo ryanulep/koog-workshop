@@ -11,6 +11,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.jetbrains.koog.workshop.settings.AppearanceMode
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -92,10 +93,19 @@ internal val LocalThemeIsDark = compositionLocalOf { mutableStateOf(true) }
 
 @Composable
 internal fun AppTheme(
-    content: @Composable () -> Unit
+    appearanceMode: AppearanceMode = AppearanceMode.Auto,
+    content: @Composable () -> Unit,
 ) {
     val systemIsDark = isSystemInDarkTheme()
-    val isDarkState = remember(systemIsDark) { mutableStateOf(systemIsDark) }
+    val isDarkState = remember(appearanceMode, systemIsDark) {
+        mutableStateOf(
+            when (appearanceMode) {
+                AppearanceMode.Auto -> systemIsDark
+                AppearanceMode.Light -> false
+                AppearanceMode.Dark -> true
+            }
+        )
+    }
     CompositionLocalProvider(
         LocalThemeIsDark provides isDarkState
     ) {

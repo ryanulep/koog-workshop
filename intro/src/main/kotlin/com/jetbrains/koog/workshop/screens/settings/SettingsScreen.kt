@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
+import com.jetbrains.koog.workshop.settings.AppearanceMode
 import com.jetbrains.koog.workshop.settings.SelectedOption
 import com.jetbrains.koog.workshop.theme.AppDimension
 import com.jetbrains.koog.workshop.theme.AppTheme
@@ -144,6 +145,41 @@ private fun SettingsScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
+
+            Spacer(modifier = Modifier.height(AppDimension.spacingLarge))
+
+            Text(
+                text = "Appearance",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = AppDimension.spacingMedium)
+            )
+
+            Column {
+                AppearanceMode.entries.forEach { mode ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = (mode == uiState.appearanceMode),
+                                onClick = { onEvent(SettingsUiEvents.UpdateAppearance(mode)) },
+                                role = Role.RadioButton
+                            )
+                            .padding(vertical = AppDimension.spacingSmall),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (mode == uiState.appearanceMode),
+                            onClick = null
+                        )
+                        Text(
+                            text = mode.label,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = AppDimension.spacingMedium)
+                        )
+                    }
+                }
+            }
         }
     }
 }
