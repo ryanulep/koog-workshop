@@ -9,7 +9,6 @@ import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.llm.LLModel
 import androidx.compose.runtime.Composable
-import com.jetbrains.koog.workshop.agents.chat.SimpleChatAgentProvider
 import com.jetbrains.koog.workshop.agents.util.AgentProvider
 import com.jetbrains.koog.workshop.agents.homeservices.graph.HomeServicesSchedulingAgentProvider
 import com.jetbrains.koog.workshop.agents.homeservices.basic.HomeServicesBasicAgentProvider
@@ -63,7 +62,6 @@ fun KoinApp() = KoinMultiplatformApplication(
                     }
                 }
                 single<AgentProvider>(named("weather")) { WeatherAgentProvider(provideLLMClient = get()) }
-                single<AgentProvider>(named("basic")) { SimpleChatAgentProvider(provideLLMClient = get()) }
                 single<AgentProvider>(named("home-services")) { HomeServicesSchedulingAgentProvider(provideLLMClient = get()) }
                 single<AgentProvider>(named("home-services-basic")) { HomeServicesBasicAgentProvider(provideLLMClient = get()) }
                 factory { params ->

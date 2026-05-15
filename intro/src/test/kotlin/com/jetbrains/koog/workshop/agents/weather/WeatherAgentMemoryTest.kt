@@ -1,4 +1,4 @@
-package com.jetbrains.koog.workshop.agents.chat
+package com.jetbrains.koog.workshop.agents.weather
 
 import ai.koog.agents.chatMemory.feature.InMemoryChatHistoryProvider
 import ai.koog.agents.core.agent.AIAgent
@@ -18,7 +18,7 @@ import org.junit.Before
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-class SimpleChatAgentMemoryTest {
+class WeatherAgentMemoryTest {
 
     private lateinit var apiKey: String
     private lateinit var judge: JudgeLM
@@ -41,9 +41,8 @@ class SimpleChatAgentMemoryTest {
     }
 
     @Test
-    fun `memory enabled - agent remembers favorite color`() {
-        InMemoryChatHistoryProvider()
-        val provider = SimpleChatAgentProvider { OpenAILLMClient(apiKey) to OpenAIModels.Chat.GPT4o }
+    fun `agent remembers location from previous message`() {
+        val provider = WeatherAgentProvider { OpenAILLMClient(apiKey) to OpenAIModels.Chat.GPT4o }
         val agent = runBlocking {
             provider.provideAgent(
                 historyProvider = InMemoryChatHistoryProvider(),
@@ -53,41 +52,41 @@ class SimpleChatAgentMemoryTest {
                 onExecutionTraceEvent = { },
             )
         }
-        val sessionId = "test-memory-${"memory-enabled"}"
+        val sessionId = "test-weather-memory"
         val conversation = mutableListOf<Pair<String, String>>()
-        val message1 = "My favorite color is green."
+
+        val message1 = "What's the weather in Munich today?"
         val response1 = runBlocking { agent.run(message1, sessionId) }
         conversation.add("User" to message1)
         conversation.add("Assistant" to response1)
-        System.out.println("[User] $message1")
-        System.out.println("[Assistant] $response1")
-        System.out.flush()
-        val message2 = "What's my favorite color?"
+        println("[User] $message1")
+        println("[Assistant] $response1")
+
+        val message2 = "What about tomorrow?"
         val response2 = runBlocking { agent.run(message2, sessionId) }
         conversation.add("User" to message2)
         conversation.add("Assistant" to response2)
-        System.out.println("[User] $message2")
-        System.out.println("[Assistant] $response2")
-        System.out.flush()
+        println("[User] $message2")
+        println("[Assistant] $response2")
+
         val trajectory = ConversationTrajectory(
             conversation.map { (role, content) ->
                 if (role == "User") user(content) else assistant(content)
             },
-            "Simple Chat Agent - Memory Test",
+            "Weather Agent - Memory Test",
             emptyMap()
         )
-        val colorRemembered = EvaluationCriterion(
-            "Favorite Color Remembered",
-            "The assistant correctly identifies 'green' as the user's favorite color when asked in the second message.",
+        val locationRemembered = EvaluationCriterion(
+            "Location Remembered",
+            "The assistant provides a weather forecast for Munich in the second response, even though the user only said 'What about tomorrow?' without mentioning Munich again.",
             1.0
         )
         val result = trajectoryEvaluator(judge) {
-            name = "Memory - Favorite Color (${"memory-enabled"})"
+            name = "Weather Memory - Location Context"
             threshold = 0.9
-            criteria(listOf(colorRemembered))
+            criteria(listOf(locationRemembered))
         }.evaluate(EvalTestCase(actualOutputs = mapOf("trajectory" to trajectory)))
-        println("memory-enabled score=${result.score()} passed=${result.success()} reason=${result.reason()}")
-        assertTrue(result.success(), "Agent should remember the favorite color with memory enabled: ${result.reason()}")
+        println("score=${result.score()} passed=${result.success()} reason=${result.reason()}")
+        assertTrue(result.success(), "Agent should remember Munich from the first message: ${result.reason()}")
     }
-
 }
