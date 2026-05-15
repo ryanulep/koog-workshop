@@ -10,14 +10,9 @@ data class StartUiState(
             agentDemoRoute = NavRoute.AgentDemoRoute.WeatherScreen
         ),
         CardItem(
-            title = "Home Services (Graph)",
+            title = "Home Services",
             description = "Schedule plumbing, electrical, HVAC, or handyman service using a multi-phase graph strategy with gated tools.",
             agentDemoRoute = NavRoute.AgentDemoRoute.HomeServicesScreen
-        ),
-        CardItem(
-            title = "Home Services (Basic)",
-            description = "Schedule plumbing, electrical, HVAC, or handyman service using a basic loop strategy with all tools available at once.",
-            agentDemoRoute = NavRoute.AgentDemoRoute.HomeServicesBasicScreen
         ),
     )
 )
