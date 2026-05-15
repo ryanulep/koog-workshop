@@ -40,6 +40,7 @@ fun StartScreen(viewModel: StartViewModel) {
 
     StartScreenContent(
         cards = uiState.demoCards,
+        isApiKeyConfigured = uiState.isApiKeyConfigured,
         onEvent = viewModel::onEvent,
     )
 }
@@ -47,6 +48,7 @@ fun StartScreen(viewModel: StartViewModel) {
 @Composable
 private fun StartScreenContent(
     cards: List<CardItem>,
+    isApiKeyConfigured: Boolean,
     onEvent: (StartUiEvents) -> Unit,
 ) {
     Box(
@@ -82,15 +84,7 @@ private fun StartScreenContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(AppDimension.spacingExtraSmall)
-                ) {
-                    Text(
-                        text = "Insert your API key",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                if (isApiKeyConfigured) {
                     IconButton(
                         onClick = { onEvent.invoke(StartUiEvents.Settings) },
                         modifier = Modifier
@@ -102,6 +96,32 @@ private fun StartScreenContent(
                             contentDescription = "Settings",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
+                } else {
+                    Surface(
+                        onClick = { onEvent.invoke(StartUiEvents.Settings) },
+                        shape = RoundedCornerShape(AppDimension.radiusMedium),
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(
+                                horizontal = AppDimension.spacingMedium,
+                                vertical = AppDimension.spacingSmall,
+                            ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(AppDimension.spacingSmall),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Text(
+                                text = "No API key configured — tap to set up",
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                        }
                     }
                 }
             }

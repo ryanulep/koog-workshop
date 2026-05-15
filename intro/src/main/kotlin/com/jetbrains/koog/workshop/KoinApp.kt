@@ -66,6 +66,7 @@ fun KoinApp() = KoinMultiplatformApplication(
                 single<AgentProvider>(named("home-services-basic")) { HomeServicesBasicAgentProvider(provideLLMClient = get()) }
                 factory { params ->
                     StartViewModel(
+                        appSettings = get(),
                         navigationCallback = params[0],
                     )
                 }

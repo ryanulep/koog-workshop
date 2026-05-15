@@ -7,6 +7,7 @@ import koog_workshop.intro.generated.resources.weatherAgent
 import org.jetbrains.compose.resources.DrawableResource
 
 data class StartUiState(
+    val isApiKeyConfigured: Boolean = false,
     val demoCards: List<CardItem> = listOf(
         CardItem(
             title = "Weather Forecast",
