@@ -89,7 +89,8 @@ val ChatMessage.type: ChatMessageType
             is ChatMessage.LLMCallMessage -> ChatMessageType.LlmCall
             is ChatMessage.ExecutionTraceMessage -> when (item) {
                 is ExecutionTraceItem.Node -> ChatMessageType.Node
-                is ExecutionTraceItem.Subgraph -> ChatMessageType.Task
+                is ExecutionTraceItem.SubgraphStarted -> ChatMessageType.Task
+                is ExecutionTraceItem.SubgraphCompleted -> ChatMessageType.Task
             }
         }
 
@@ -97,7 +98,8 @@ sealed interface ExecutionTraceItem {
     val name: String
 
     data class Node(override val name: String) : ExecutionTraceItem
-    data class Subgraph(override val name: String) : ExecutionTraceItem
+    data class SubgraphStarted(override val name: String) : ExecutionTraceItem
+    data class SubgraphCompleted(override val name: String, val result: String? = null) : ExecutionTraceItem
 }
 
 data class LlmCallData(

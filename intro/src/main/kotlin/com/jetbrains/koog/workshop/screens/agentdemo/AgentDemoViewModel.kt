@@ -169,7 +169,8 @@ class AgentDemoViewModel(
         val onExecutionTraceEvent: suspend (AgentExecutionTraceEvent) -> Unit = { event ->
             val item = when (event) {
                 is AgentExecutionTraceEvent.Node -> ExecutionTraceItem.Node(event.name)
-                is AgentExecutionTraceEvent.Subgraph -> ExecutionTraceItem.Subgraph(event.name)
+                is AgentExecutionTraceEvent.SubgraphStarted -> ExecutionTraceItem.SubgraphStarted(event.name)
+                is AgentExecutionTraceEvent.SubgraphCompleted -> ExecutionTraceItem.SubgraphCompleted(event.name, event.result)
             }
             _uiState.update {
                 it.copy(chatMessages = it.chatMessages + ChatMessage.ExecutionTraceMessage(item))

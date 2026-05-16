@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -436,7 +437,8 @@ private fun ToolCallMessageItem(toolName: String, args: Map<String, String>) {
 private fun ExecutionTraceMessageItem(item: ExecutionTraceItem) {
     when (item) {
         is ExecutionTraceItem.Node -> NodeExecutionTraceItem(item.name)
-        is ExecutionTraceItem.Subgraph -> SubgraphExecutionTraceItem(item.name)
+        is ExecutionTraceItem.SubgraphStarted -> SubgraphStartedTraceItem(item.name)
+        is ExecutionTraceItem.SubgraphCompleted -> SubgraphCompletedTraceItem(item.name, item.result)
     }
 }
 
@@ -473,43 +475,94 @@ private fun NodeExecutionTraceItem(name: String) {
 }
 
 @Composable
-private fun SubgraphExecutionTraceItem(name: String) {
+private fun SubgraphStartedTraceItem(name: String) {
+    val borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
         Box(
-            modifier = Modifier.width(AppDimension.messageTitleColumnWidth),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.size(AppDimension.messageTitleColumnWidth),
+            contentAlignment = Alignment.TopCenter
         ) {
             Text(
-                text = "Task",
+                text = "Task\nStart",
                 color = MaterialTheme.colorScheme.outline,
                 style = MaterialTheme.typography.labelSmall.copy(
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = Modifier.padding(top = AppDimension.spacingExtraSmall)
+            )
+        }
+        Spacer(modifier = Modifier.width(AppDimension.spacingSmall))
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .border(1.dp, borderColor, RoundedCornerShape(6.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(AppDimension.spacingSmall)
+        ) {
+            Text(
+                text = name,
+                color = MaterialTheme.colorScheme.secondary,
+                style = MaterialTheme.typography.bodySmall.copy(
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold
                 )
             )
         }
+    }
+}
+
+@Composable
+private fun SubgraphCompletedTraceItem(name: String, result: String?) {
+    val borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.Top
+    ) {
+        Box(
+            modifier = Modifier.size(AppDimension.messageTitleColumnWidth),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            Text(
+                text = "Task\nResult",
+                color = MaterialTheme.colorScheme.outline,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = Modifier.padding(top = AppDimension.spacingExtraSmall)
+            )
+        }
         Spacer(modifier = Modifier.width(AppDimension.spacingSmall))
-        Text(
-            text = name,
-            color = MaterialTheme.colorScheme.secondary,
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.ExtraBold
-            ),
+        Column(
             modifier = Modifier
-                .clip(RoundedCornerShape(4.dp))
-                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f))
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                    shape = RoundedCornerShape(4.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .border(1.dp, borderColor, RoundedCornerShape(6.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(AppDimension.spacingSmall),
+            verticalArrangement = Arrangement.spacedBy(AppDimension.spacingExtraSmall)
+        ) {
+            Text(
+                text = name,
+                color = MaterialTheme.colorScheme.secondary,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
                 )
-                .padding(horizontal = AppDimension.spacingSmall, vertical = 2.dp)
-        )
+            )
+            if (!result.isNullOrBlank()) {
+                Text(
+                    text = result,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace)
+                )
+            }
+        }
     }
 }
 
@@ -619,7 +672,8 @@ fun AgentDemoScreenPreview() {
                 ),
                 ChatMessage.ToolCallMessage("get_weather", mapOf("location" to "Paris", "date" to "2024-01-15")),
                 ChatMessage.ExecutionTraceMessage(ExecutionTraceItem.Node("nodeCallLLM")),
-                ChatMessage.ExecutionTraceMessage(ExecutionTraceItem.Subgraph("assess")),
+                ChatMessage.ExecutionTraceMessage(ExecutionTraceItem.SubgraphStarted("assess")),
+                ChatMessage.ExecutionTraceMessage(ExecutionTraceItem.SubgraphCompleted("assess", "done")),
                 ChatMessage.AgentMessage("Hello! How can I help you today?"),
                 ChatMessage.ErrorMessage("Error: Something went wrong")
             ),

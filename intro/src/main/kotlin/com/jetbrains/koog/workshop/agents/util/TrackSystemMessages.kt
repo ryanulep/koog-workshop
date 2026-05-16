@@ -17,7 +17,11 @@ fun GraphAIAgent.FeatureContext.trackEvents(
         }
 
         onSubgraphExecutionStarting { ctx ->
-            onExecutionTraceEvent(AgentExecutionTraceEvent.Subgraph(ctx.subgraph.name))
+            onExecutionTraceEvent(AgentExecutionTraceEvent.SubgraphStarted(ctx.subgraph.name))
+        }
+
+        onSubgraphExecutionCompleted { ctx ->
+            onExecutionTraceEvent(AgentExecutionTraceEvent.SubgraphCompleted(ctx.subgraph.name, result = ctx.output?.toString()))
         }
 
         onToolCallStarting { ctx ->

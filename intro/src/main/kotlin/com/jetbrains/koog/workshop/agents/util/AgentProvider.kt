@@ -16,7 +16,8 @@ sealed interface AgentExecutionTraceEvent {
     val name: String
 
     data class Node(override val name: String) : AgentExecutionTraceEvent
-    data class Subgraph(override val name: String) : AgentExecutionTraceEvent
+    data class SubgraphStarted(override val name: String) : AgentExecutionTraceEvent
+    data class SubgraphCompleted(override val name: String, val result: String? = null) : AgentExecutionTraceEvent
 }
 
 interface ChatAgentProvider : AgentProvider {
