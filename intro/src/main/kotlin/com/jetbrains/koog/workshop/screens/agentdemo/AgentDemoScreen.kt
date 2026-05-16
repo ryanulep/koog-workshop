@@ -480,11 +480,11 @@ private fun SubgraphStartedTraceItem(name: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier.size(AppDimension.messageTitleColumnWidth),
-            contentAlignment = Alignment.TopCenter
+            modifier = Modifier.width(AppDimension.messageTitleColumnWidth),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "Task\nStart",
@@ -492,8 +492,7 @@ private fun SubgraphStartedTraceItem(name: String) {
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold
-                ),
-                modifier = Modifier.padding(top = AppDimension.spacingExtraSmall)
+                )
             )
         }
         Spacer(modifier = Modifier.width(AppDimension.spacingSmall))
@@ -522,11 +521,11 @@ private fun SubgraphCompletedTraceItem(name: String, result: String?) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier.size(AppDimension.messageTitleColumnWidth),
-            contentAlignment = Alignment.TopCenter
+            modifier = Modifier.width(AppDimension.messageTitleColumnWidth),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "Task\nResult",
@@ -534,8 +533,7 @@ private fun SubgraphCompletedTraceItem(name: String, result: String?) {
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold
-                ),
-                modifier = Modifier.padding(top = AppDimension.spacingExtraSmall)
+                )
             )
         }
         Spacer(modifier = Modifier.width(AppDimension.spacingSmall))
