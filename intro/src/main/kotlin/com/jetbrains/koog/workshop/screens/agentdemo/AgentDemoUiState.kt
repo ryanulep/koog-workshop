@@ -26,7 +26,7 @@ enum class DebugOption(val title: String) {
 
 data class DebugView(
     val enabled: Boolean = false,
-    val options: Set<DebugOption> = DebugOption.entries.toSet(),
+    val options: Set<DebugOption> = DebugOption.entries.toSet() - DebugOption.Nodes,
 ) {
     fun shows(message: ChatMessage): Boolean = shows(message.type)
 
