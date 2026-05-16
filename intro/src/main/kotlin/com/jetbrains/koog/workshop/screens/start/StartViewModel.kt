@@ -21,7 +21,7 @@ class StartViewModel(
 
     fun refreshApiKeyStatus() {
         val hasKey = try {
-            ApiKeyService.anthropicApiKey
+            ApiKeyService.apiKey
             true
         } catch (_: IllegalArgumentException) {
             false

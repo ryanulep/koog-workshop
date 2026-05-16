@@ -6,10 +6,15 @@ import ai.koog.agents.core.agent.AIAgent
 import ai.koog.agents.core.agent.config.AIAgentConfig
 import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.prompt.dsl.prompt
+import ai.koog.prompt.executor.clients.LLMClient
+import ai.koog.prompt.executor.clients.anthropic.AnthropicLLMClient
+import ai.koog.prompt.executor.clients.anthropic.AnthropicModels
+import ai.koog.prompt.executor.clients.google.GoogleLLMClient
+import ai.koog.prompt.executor.clients.google.GoogleModels
 import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
-import ai.koog.prompt.executor.llms.all.simpleOpenAIExecutor
+import ai.koog.prompt.llm.LLModel
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.appointmentScheduled
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.cancelsNonrelevantRequest
 import com.jetbrains.koog.workshop.agents.homeservices.EvaluationCriteria.emergencyReferral
@@ -22,6 +27,8 @@ import com.jetbrains.koog.workshop.agents.homeservices.basic.homeServicesBasicSy
 import com.jetbrains.koog.workshop.agents.homeservices.graph.HomeServicesPrompts
 import com.jetbrains.koog.workshop.agents.homeservices.graph.homeServicesStrategy
 import com.jetbrains.koog.workshop.agents.util.AskUserTool
+import com.jetbrains.koog.workshop.settings.ApiKeyService
+import com.jetbrains.koog.workshop.settings.ApiKeyService.ServiceProvider
 import dev.dokimos.core.JudgeLM
 import dev.dokimos.core.conversation.ConversationTrajectory
 import dev.dokimos.core.conversation.EvaluationCriterion
@@ -31,10 +38,9 @@ import dev.dokimos.kotlin.dsl.conversation.trajectoryEvaluator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import org.junit.Assume
 import org.junit.Before
 import java.io.File
-import java.util.UUID
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import dev.dokimos.core.conversation.Message as DokimosMessage
@@ -108,7 +114,8 @@ data class SimulationCase(
 
 abstract class HomeServicesConversationSimulationBase {
 
-    protected lateinit var apiKey: String
+    protected lateinit var llmClient: LLMClient
+    protected lateinit var model: LLModel
     protected lateinit var judge: JudgeLM
 
     protected open val writeToFile = true
@@ -128,15 +135,26 @@ abstract class HomeServicesConversationSimulationBase {
 
     @Before
     fun setup() {
-        val key = System.getenv("OPENAI_API_KEY") ?: ""
-        Assume.assumeTrue("OPENAI_API_KEY is not set", key.isNotEmpty())
-        apiKey = key
-        val executor = simpleOpenAIExecutor(key)
+        when (ApiKeyService.serviceProvider) {
+            ServiceProvider.OPENAI -> {
+                llmClient = OpenAILLMClient(ApiKeyService.openAIApiKey)
+                model = OpenAIModels.Chat.GPT4o
+            }
+            ServiceProvider.ANTHROPIC -> {
+                llmClient = AnthropicLLMClient(ApiKeyService.anthropicApiKey)
+                model = AnthropicModels.Sonnet_4
+            }
+            ServiceProvider.GOOGLE -> {
+                llmClient = GoogleLLMClient(ApiKeyService.geminiKey)
+                model = GoogleModels.Gemini2_5FlashLite
+            }
+        }
+        val executor = MultiLLMPromptExecutor(llmClient)
         judge = JudgeLM { prompt ->
             runBlocking {
                 AIAgent(
                     promptExecutor = executor,
-                    llmModel = OpenAIModels.Chat.GPT4o,
+                    llmModel = model,
                     maxIterations = 30
                 ).run(prompt)
             }
@@ -591,12 +609,12 @@ class HomeServicesGraphConversationSimulation : HomeServicesConversationSimulati
             userResponse
         }
         val agent = AIAgent(
-            promptExecutor = MultiLLMPromptExecutor(OpenAILLMClient(apiKey)),
+            promptExecutor = MultiLLMPromptExecutor(llmClient),
             agentConfig = AIAgentConfig(
                 prompt = prompt("home-services-scheduling") {
                     system(HomeServicesPrompts.systemPrompt())
                 },
-                model = OpenAIModels.Chat.GPT4o,
+                model = model,
                 maxAgentIterations = 200
             ),
             strategy = homeServicesStrategy(askUserTool, findTools, bookTools),
@@ -612,7 +630,7 @@ class HomeServicesGraphConversationSimulation : HomeServicesConversationSimulati
 }
 
 class HomeServicesBasicConversationSimulation : HomeServicesConversationSimulationBase() {
-    override val logSubDir = "basic-mini"
+    override val logSubDir = "basic"
 
     override suspend fun driveConversation(
         case: SimulationCase,
@@ -625,12 +643,12 @@ class HomeServicesBasicConversationSimulation : HomeServicesConversationSimulati
         val findTools = HomeServicesFindSlotTools(schedule)
         val bookTools = HomeServicesBookTools(schedule)
         val agent = AIAgent(
-            promptExecutor = MultiLLMPromptExecutor(OpenAILLMClient(apiKey)),
+            promptExecutor = MultiLLMPromptExecutor(llmClient),
             agentConfig = AIAgentConfig(
                 prompt = prompt("home-services-basic") {
                     system(homeServicesBasicSystemPrompt())
                 },
-                model = OpenAIModels.Chat.GPT5Mini,
+                model = model,
                 maxAgentIterations = 200
             ),
             toolRegistry = ToolRegistry {
