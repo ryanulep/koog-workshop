@@ -180,6 +180,11 @@ private fun DebugViewSelector(
         Switch(
             checked = debugView.enabled,
             onCheckedChange = { onToggleEnabled() },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.onSecondary,
+                checkedTrackColor = MaterialTheme.colorScheme.secondary,
+                checkedBorderColor = MaterialTheme.colorScheme.secondary,
+            ),
         )
         Box {
             TextButton(
@@ -345,7 +350,7 @@ private fun ErrorMessageItem(text: String) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ToolCallMessageItem(toolName: String, args: Map<String, String>) {
-    val borderColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
+    val borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val maxContentWidth = maxWidth - AppDimension.messageTitleColumnWidth - AppDimension.spacingSmall
         Row(
@@ -359,7 +364,7 @@ private fun ToolCallMessageItem(toolName: String, args: Map<String, String>) {
             ) {
                 Text(
                     text = "Tool\nCall",
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = MaterialTheme.colorScheme.outline,
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold
@@ -381,13 +386,13 @@ private fun ToolCallMessageItem(toolName: String, args: Map<String, String>) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))
-                        .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f))
+                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f))
                         .border(1.dp, borderColor, RoundedCornerShape(4.dp))
                         .padding(horizontal = AppDimension.spacingSmall, vertical = 2.dp)
                 ) {
                     Text(
                         text = toolName,
-                        color = MaterialTheme.colorScheme.tertiary,
+                        color = MaterialTheme.colorScheme.secondary,
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold
@@ -417,7 +422,7 @@ private fun ToolCallMessageItem(toolName: String, args: Map<String, String>) {
                         )
                         Text(
                             text = value,
-                            color = MaterialTheme.colorScheme.tertiary,
+                            color = MaterialTheme.colorScheme.secondary,
                             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace)
                         )
                     }
@@ -480,7 +485,7 @@ private fun SubgraphExecutionTraceItem(name: String) {
         ) {
             Text(
                 text = "Task",
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.outline,
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold
@@ -497,10 +502,10 @@ private fun SubgraphExecutionTraceItem(name: String) {
             ),
             modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
-                .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.45f))
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f))
                 .border(
                     width = 1.dp,
-                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f),
+                    color = MaterialTheme.colorScheme.outlineVariant,
                     shape = RoundedCornerShape(4.dp)
                 )
                 .padding(horizontal = AppDimension.spacingSmall, vertical = 2.dp)

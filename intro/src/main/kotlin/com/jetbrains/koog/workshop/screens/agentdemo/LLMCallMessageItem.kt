@@ -39,8 +39,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.jetbrains.koog.workshop.theme.AppDimension
 
-private val LLM_CALL_ROW_BACKGROUND = Color(0xFFEAF2F8)
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun LLMCallMessageItem(data: LlmCallData) {
@@ -179,7 +177,7 @@ private fun LlmCallMessageRow(
             .height(IntrinsicSize.Min)
             .clip(RoundedCornerShape(AppDimension.radiusSmall))
             .border(1.dp, borderColor, RoundedCornerShape(AppDimension.radiusSmall))
-            .background(MaterialTheme.colorScheme.primaryContainer),
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         verticalAlignment = Alignment.CenterVertically
     ) {
         LlmCallCell(
