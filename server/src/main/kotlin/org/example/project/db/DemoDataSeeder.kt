@@ -1,27 +1,13 @@
 package org.example.project.db
 
-import org.example.project.domain.catalog.Armors
-import org.example.project.domain.catalog.Potions
-import org.example.project.domain.catalog.Products
-import org.example.project.domain.catalog.Scrolls
-import org.example.project.domain.character.Transactions
-import org.example.project.domain.catalog.Weapons
-import org.example.project.domain.catalog.ArmorSlot
-import org.example.project.domain.catalog.DamageType
-import org.example.project.domain.catalog.Merchants
-import org.example.project.domain.order.OrderStatus
-import org.example.project.domain.catalog.ProductCategory
-import org.example.project.domain.catalog.Rarity
-import org.example.project.domain.catalog.WeaponSlot
+import org.example.project.domain.catalog.*
 import org.example.project.domain.character.Characters
+import org.example.project.domain.character.Transactions
 import org.example.project.domain.currency.Currencies
+import org.example.project.domain.order.OrderStatus
 import org.example.project.domain.order.Orders
-import org.example.project.domain.shared.CurrencyId
-import org.example.project.domain.shared.MerchantId
-import org.example.project.domain.shared.ProductId
-import org.example.project.domain.shared.ShippingMethodId
+import org.example.project.domain.shared.*
 import org.example.project.domain.shipping.ShippingMethods
-import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
@@ -519,8 +505,8 @@ private class AdminDemoDataSeeder(
     }
 
     
-    private fun insertCharacter(name: String): org.example.project.domain.shared.CharacterId =
-        _root_ide_package_.org.example.project.domain.shared.CharacterId(
+    private fun insertCharacter(name: String): CharacterId =
+        CharacterId(
             Characters.insertAndGetId {
                 it[Characters.name] = name
             }.value
@@ -528,13 +514,13 @@ private class AdminDemoDataSeeder(
 
     
     private fun insertOrder(
-        characterId: org.example.project.domain.shared.CharacterId,
+        characterId: CharacterId,
         status: OrderStatus,
         totalPrice: Long,
         currencyId: CurrencyId,
         createdAt: Instant,
         updatedAt: Instant
-    ): org.example.project.domain.shared.OrderId = _root_ide_package_.org.example.project.domain.shared.OrderId(
+    ): OrderId = OrderId(
         Orders.insertAndGetId {
             it[character] = characterId.value
             it[Orders.status] = status.name
@@ -547,14 +533,14 @@ private class AdminDemoDataSeeder(
 
     
     private fun addTransaction(
-        characterId: org.example.project.domain.shared.CharacterId,
+        characterId: CharacterId,
         currencyId: CurrencyId,
         amount: Long,
         type: org.example.project.domain.character.TransactionType,
         description: String,
         createdAt: Instant,
         updatedAt: Instant = createdAt,
-        referenceId: org.example.project.domain.shared.OrderId? = null
+        referenceId: OrderId? = null
     ) {
         Transactions.insert {
             it[character] = characterId.value
