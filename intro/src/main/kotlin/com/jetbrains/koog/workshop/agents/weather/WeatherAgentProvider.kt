@@ -14,6 +14,7 @@ import ai.koog.prompt.message.Message
 import com.jetbrains.koog.workshop.agents.util.AgentExecutionTraceEvent
 import com.jetbrains.koog.workshop.agents.util.ChatAgentProvider
 import com.jetbrains.koog.workshop.agents.util.trackEvents
+import com.jetbrains.koog.workshop.agents.weather.WeatherPrompts.systemPrompt
 import koog_workshop.intro.generated.resources.Res
 import koog_workshop.intro.generated.resources.weatherAgent
 import org.jetbrains.compose.resources.DrawableResource
@@ -46,21 +47,7 @@ internal class WeatherAgentProvider(
 
         val agentConfig = AIAgentConfig(
             prompt = prompt("test") {
-                system(
-                    """
-                    You are a helpful weather assistant.
-                    You can provide weather forecasts for any location in the world and help the user plan their activities.
-
-                    Use the tools at your disposal to:
-                    1. Get the current date and time
-                    2. Add days, hours, or minutes to a date
-                    3. Get weather forecasts for specific locations and dates
-
-                    ALWAYS USE current_datetime and add_datetime tools to perform date operations, do not try to guess.
-
-                    When providing weather forecasts, be concise and helpful, explaining the weather conditions in a clear way.
-                    """.trimIndent()
-                )
+                system(systemPrompt)
             },
             model = model,
             maxAgentIterations = 50

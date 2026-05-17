@@ -19,10 +19,10 @@ fun basicSingleRunStrategyByHand() = strategy("single-run-strategy-by-hand") {
     val nodeSendToolResult: AIAgentNodeBase<ReceivedToolResult, Message.Response> by nodeLLMSendToolResult()
 
     edge(nodeStart forwardTo nodeCallLLM)
+    edge(nodeCallLLM forwardTo nodeExecuteTool onToolCall { true })
     edge(nodeCallLLM forwardTo nodeFinish onAssistantMessage { true })
 
     // Task: Complete the strategy implementation.
-    edge(nodeCallLLM forwardTo nodeExecuteTool onToolCall { true })
     edge(nodeExecuteTool forwardTo nodeSendToolResult)
     edge(nodeSendToolResult forwardTo nodeFinish onAssistantMessage { true })
     edge(nodeSendToolResult forwardTo nodeExecuteTool onToolCall { true })
