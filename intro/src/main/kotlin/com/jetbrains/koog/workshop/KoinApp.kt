@@ -1,12 +1,6 @@
 package com.jetbrains.koog.workshop
 
 import ai.koog.prompt.executor.clients.LLMClient
-import ai.koog.prompt.executor.clients.anthropic.AnthropicLLMClient
-import ai.koog.prompt.executor.clients.anthropic.AnthropicModels
-import ai.koog.prompt.executor.clients.google.GoogleLLMClient
-import ai.koog.prompt.executor.clients.google.GoogleModels
-import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
-import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.llm.LLModel
 import androidx.compose.runtime.Composable
 import com.jetbrains.koog.workshop.agents.homeservices.basic.HomeServicesBasicAgentProvider
@@ -17,7 +11,6 @@ import com.jetbrains.koog.workshop.screens.agentdemo.AgentDemoViewModel
 import com.jetbrains.koog.workshop.screens.settings.SettingsViewModel
 import com.jetbrains.koog.workshop.screens.start.StartViewModel
 import com.jetbrains.koog.workshop.settings.ApiKeyService
-import com.jetbrains.koog.workshop.settings.ApiKeyService.ServiceProvider
 import com.jetbrains.koog.workshop.settings.AppSettings
 import com.jetbrains.koog.workshop.settings.DataStoreAppSettings
 import com.jetbrains.koog.workshop.settings.PrefPathProvider
@@ -41,11 +34,7 @@ fun KoinApp() = KoinMultiplatformApplication(
             module {
                 factory<suspend () -> Pair<LLMClient, LLModel>> {
                     {
-                        when (ApiKeyService.serviceProvider) {
-                            ServiceProvider.OPENAI -> Pair(OpenAILLMClient(ApiKeyService.openAIApiKey), OpenAIModels.Chat.GPT4o)
-                            ServiceProvider.ANTHROPIC -> Pair(AnthropicLLMClient(ApiKeyService.anthropicApiKey), AnthropicModels.Sonnet_4)
-                            ServiceProvider.GOOGLE -> Pair(GoogleLLMClient(ApiKeyService.geminiKey), GoogleModels.Gemini2_5FlashLite)
-                        }
+                        ApiKeyService.getClientAndModel()
                     }
                 }
                 single<AgentProvider>(named("weather")) { WeatherAgentProvider(provideLLMClient = get()) }

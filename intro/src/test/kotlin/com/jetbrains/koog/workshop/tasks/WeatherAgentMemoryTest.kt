@@ -1,34 +1,35 @@
-package com.jetbrains.koog.workshop.agents.weather
+package com.jetbrains.koog.workshop.tasks
 
 import ai.koog.agents.chatMemory.feature.InMemoryChatHistoryProvider
 import ai.koog.agents.core.agent.AIAgent
-import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
+import ai.koog.prompt.executor.clients.LLMClient
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
-import ai.koog.prompt.executor.llms.all.simpleOpenAIExecutor
+import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
+import ai.koog.prompt.llm.LLModel
+import com.jetbrains.koog.workshop.agents.weather.WeatherAgentProvider
+import com.jetbrains.koog.workshop.settings.ApiKeyService
 import dev.dokimos.core.JudgeLM
 import dev.dokimos.core.conversation.ConversationTrajectory
 import dev.dokimos.core.conversation.EvaluationCriterion
-import dev.dokimos.core.conversation.Message.assistant
-import dev.dokimos.core.conversation.Message.user
+import dev.dokimos.core.conversation.Message
 import dev.dokimos.kotlin.core.EvalTestCase
 import dev.dokimos.kotlin.dsl.conversation.trajectoryEvaluator
 import kotlinx.coroutines.runBlocking
-import org.junit.Assume
 import org.junit.Before
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class WeatherAgentMemoryTest {
-
-    private lateinit var apiKey: String
+    private lateinit var llmClient: LLMClient
+    private lateinit var model: LLModel
     private lateinit var judge: JudgeLM
 
     @Before
     fun setup() {
-        val key = System.getenv("OPENAI_API_KEY") ?: ""
-        Assume.assumeTrue("OPENAI_API_KEY is not set", key.isNotEmpty())
-        apiKey = key
-        val executor = simpleOpenAIExecutor(key)
+        val clientAndModel = ApiKeyService.getClientAndModel()
+        llmClient = clientAndModel.first
+        model = clientAndModel.second
+        val executor = MultiLLMPromptExecutor(llmClient)
         judge = JudgeLM { prompt ->
             runBlocking {
                 AIAgent(
@@ -42,7 +43,7 @@ class WeatherAgentMemoryTest {
 
     @Test
     fun `agent remembers location from previous message`() {
-        val provider = WeatherAgentProvider { OpenAILLMClient(apiKey) to OpenAIModels.Chat.GPT4o }
+        val provider = WeatherAgentProvider { ApiKeyService.getClientAndModel() }
         val agent = runBlocking {
             provider.provideAgent(
                 historyProvider = InMemoryChatHistoryProvider(),
@@ -71,7 +72,7 @@ class WeatherAgentMemoryTest {
 
         val trajectory = ConversationTrajectory(
             conversation.map { (role, content) ->
-                if (role == "User") user(content) else assistant(content)
+                if (role == "User") Message.user(content) else Message.assistant(content)
             },
             "Weather Agent - Memory Test",
             emptyMap()

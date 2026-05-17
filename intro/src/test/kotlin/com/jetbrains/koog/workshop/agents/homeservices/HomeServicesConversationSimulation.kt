@@ -135,20 +135,9 @@ abstract class HomeServicesConversationSimulationBase {
 
     @Before
     fun setup() {
-        when (ApiKeyService.serviceProvider) {
-            ServiceProvider.OPENAI -> {
-                llmClient = OpenAILLMClient(ApiKeyService.openAIApiKey)
-                model = OpenAIModels.Chat.GPT4o
-            }
-            ServiceProvider.ANTHROPIC -> {
-                llmClient = AnthropicLLMClient(ApiKeyService.anthropicApiKey)
-                model = AnthropicModels.Sonnet_4
-            }
-            ServiceProvider.GOOGLE -> {
-                llmClient = GoogleLLMClient(ApiKeyService.geminiKey)
-                model = GoogleModels.Gemini2_5FlashLite
-            }
-        }
+        val clientAndModel = ApiKeyService.getClientAndModel()
+        llmClient = clientAndModel.first
+        model = clientAndModel.second
         val executor = MultiLLMPromptExecutor(llmClient)
         judge = JudgeLM { prompt ->
             runBlocking {

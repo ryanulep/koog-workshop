@@ -1,5 +1,14 @@
 package com.jetbrains.koog.workshop.settings
 
+import ai.koog.prompt.executor.clients.LLMClient
+import ai.koog.prompt.executor.clients.anthropic.AnthropicLLMClient
+import ai.koog.prompt.executor.clients.anthropic.AnthropicModels
+import ai.koog.prompt.executor.clients.google.GoogleLLMClient
+import ai.koog.prompt.executor.clients.google.GoogleModels
+import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
+import ai.koog.prompt.executor.clients.openai.OpenAIModels
+import ai.koog.prompt.llm.LLModel
+
 object ApiKeyService {
     private const val KOOG_WORKSHOP_ANTHROPIC_API_KEY = "ANTHROPIC_API_KEY"
 
@@ -26,4 +35,10 @@ object ApiKeyService {
     val geminiKey: String
         get() = System.getenv("GEMINI_API_KEY")
             ?: throw IllegalArgumentException("GEMINI_API_KEY env is not set")
+
+    fun getClientAndModel(): Pair<LLMClient, LLModel> = when (serviceProvider) {
+        ServiceProvider.OPENAI -> Pair(OpenAILLMClient(openAIApiKey), OpenAIModels.Chat.GPT4o)
+        ServiceProvider.ANTHROPIC -> Pair(AnthropicLLMClient(anthropicApiKey), AnthropicModels.Sonnet_4)
+        ServiceProvider.GOOGLE -> Pair(GoogleLLMClient(geminiKey), GoogleModels.Gemini2_5FlashLite)
+    }
 }
