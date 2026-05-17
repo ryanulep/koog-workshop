@@ -10,13 +10,11 @@ import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.llm.LLModel
 
 object ApiKeyService {
-    private const val KOOG_WORKSHOP_ANTHROPIC_API_KEY = "ANTHROPIC_API_KEY"
-
     enum class ServiceProvider {
         ANTHROPIC, OPENAI, GOOGLE
     }
 
-    val serviceProvider = ServiceProvider.OPENAI
+    val serviceProvider = ServiceProvider.ANTHROPIC
 
     val apiKey = when (serviceProvider) {
         ServiceProvider.ANTHROPIC -> anthropicApiKey
@@ -25,8 +23,8 @@ object ApiKeyService {
     }
 
     val anthropicApiKey: String
-        get() = System.getenv(KOOG_WORKSHOP_ANTHROPIC_API_KEY)
-            ?: throw IllegalArgumentException("$KOOG_WORKSHOP_ANTHROPIC_API_KEY env is not set")
+        get() = System.getenv("ANTHROPIC_API_KEY")
+            ?: throw IllegalArgumentException("ANTHROPIC_API_KEY env is not set")
 
     val openAIApiKey: String
         get() = System.getenv("OPENAI_API_KEY")

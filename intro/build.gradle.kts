@@ -34,6 +34,8 @@ dependencies {
 
     implementation(libs.koog.agents)
     implementation(libs.koog.agents.additions)
+    // FIXME agents additions should already include Google, need to take a look
+    implementation(libs.koog.llm.google)
     implementation(libs.koog.memory)
     implementation(ktorLibs.client.okhttp)
     implementation(libs.logback.classic)

@@ -53,6 +53,7 @@ koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-compose = { module = "io.insert-koin:koin-compose" }
 koog-agents = { module = "ai.koog:koog-agents", version.ref = "koog" }
 koog-agents-additions = { module = "ai.koog:koog-agents", version.ref = "koog-beta" }
+koog-llm-google = { module = "ai.koog:prompt-executor-google-client", version.ref = "koog-beta" }
 koog-memory = { module = "ai.koog:agents-features-memory", version.ref = "koog" }
 koog-spring-ai-starter-chat = { module = "ai.koog:koog-spring-ai-starter-model-chat", version.ref = "koog-beta" }
 koog-spring-ai-starter-memory = { module = "ai.koog:koog-spring-ai-starter-chat-memory", version.ref = "koog-beta" }

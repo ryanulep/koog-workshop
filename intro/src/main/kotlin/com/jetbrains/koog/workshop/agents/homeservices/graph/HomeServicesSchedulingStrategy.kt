@@ -7,6 +7,7 @@ import ai.koog.agents.core.dsl.builder.strategy
 import ai.koog.agents.core.dsl.extension.nodeLLMCompressHistory
 import ai.koog.agents.core.tools.annotations.LLMDescription
 import ai.koog.agents.ext.agent.subgraphWithTask
+import ai.koog.prompt.message.MessagePart
 import com.jetbrains.koog.workshop.agents.util.AskUserTool
 import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesBookTools
 import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesFindSlotTools
@@ -170,7 +171,8 @@ fun homeServicesStrategy(
     val handleCancellation by node<String, String> { _ ->
         llm.writeSession {
             appendPrompt { user(HomeServicesPrompts.handleCancellationInstructions) }
-            requestLLM().content
+            // FIXME replace with textContent()
+            requestLLM().parts.filterIsInstance<MessagePart.Text>().joinToString(separator = "\n") { it.text }
         }
     }
 
@@ -178,7 +180,8 @@ fun homeServicesStrategy(
     val handleEmergency by node<String, String> { justification ->
         llm.writeSession {
             appendPrompt { user(HomeServicesPrompts.respondToEmergencyInstructions(justification)) }
-            requestLLM().content
+            // FIXME replace with textContent()
+            requestLLM().parts.filterIsInstance<MessagePart.Text>().joinToString(separator = "\n") { it.text }
         }
     }
 
