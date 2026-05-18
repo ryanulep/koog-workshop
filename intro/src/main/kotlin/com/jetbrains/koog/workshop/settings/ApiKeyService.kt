@@ -13,12 +13,12 @@ object ApiKeyService {
     }
 
     val anthropicApiKey: String
-        get() = System.getenv("ANTHROPIC_API_KEY")
-            ?: throw IllegalArgumentException("ANTHROPIC_API_KEY env is not set")
+        get() = System.getenv("KOOG_WORKSHOP_ANTHROPIC_API_KEY")
+            ?: throw IllegalArgumentException("KOOG_WORKSHOP_OPENAI_API_KEY env is not set")
 
     val openAIApiKey: String
-        get() = System.getenv("OPENAI_API_KEY")
-            ?: throw IllegalArgumentException("OPENAI_API_KEY env is not set")
+        get() = System.getenv("KOOG_WORKSHOP_OPENAI_API_KEY")
+            ?: throw IllegalArgumentException("KOOG_WORKSHOP_OPENAI_API_KEY env is not set")
 
     val serviceProvider = ServiceProvider.ANTHROPIC
 
