@@ -22,6 +22,7 @@ material3 = "1.10.0-alpha05"
 material-icons = "1.7.3"
 markdown-renderer = "0.39.0"
 navigation3 = "1.0.0-alpha06"
+spring-ai = "1.1.6"
 
 [libraries]
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx-datastore" }
@@ -56,6 +57,9 @@ koog-agents-additions = { module = "ai.koog:koog-agents-additions", version.ref 
 koog-memory = { module = "ai.koog:agents-features-memory", version.ref = "koog" }
 koog-spring-ai-starter-chat = { module = "ai.koog:koog-spring-ai-starter-model-chat", version.ref = "koog-beta" }
 koog-spring-ai-starter-memory = { module = "ai.koog:koog-spring-ai-starter-chat-memory", version.ref = "koog-beta" }
+koog-spring-ai-starter-vectorStore = { module = "ai.koog:koog-spring-ai-starter-vector-store", version.ref = "koog-beta" }
+spring-ai-starter-vectorStore-pgvector = { module = "org.springframework.ai:spring-ai-starter-vector-store-pgvector", version.ref = "spring-ai" }
+spring-ai-openai = { module = "org.springframework.ai:spring-ai-openai", version.ref = "spring-ai" }
 koog-persistence-jdbc = { module = "ai.koog:agents-features-persistence-jdbc", version.ref = "koog" }
 koog-spring-boot-starter = { module = "ai.koog:koog-spring-boot-starter", version.ref = "koog-beta" }
 koog-chathistory-jdbc = { module = "ai.koog:agents-features-chat-history-jdbc", version.ref = "koog" }
