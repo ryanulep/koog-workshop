@@ -1,7 +1,7 @@
 package org.example.project.koog.tools
 
 class CustomerSupportTools(
-    val askQuestionTool: AskQuestionTool,
+    val communicationTools: CommunicationTools,
     val readOrderTools: ReadOrderTools,
     val updateOrderTools: UpdateOrderTools
 )

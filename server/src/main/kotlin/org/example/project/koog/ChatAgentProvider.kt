@@ -12,11 +12,9 @@ import ai.koog.agents.snapshot.feature.Persistence
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.executor.model.PromptExecutor
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.example.project.domain.chat.AskQuestionRepository
 import org.example.project.domain.order.OrderService
 import org.example.project.domain.shared.CharacterId
-import org.example.project.koog.tools.AskQuestionTool
-import org.example.project.koog.tools.CustomerSupportTools
+import org.example.project.koog.tools.CommunicationTools
 import org.example.project.koog.tools.ReadOrderTools
 import org.example.project.koog.tools.UpdateOrderTools
 import org.example.project.koog.tracking.SseEmitterEventHandler
@@ -36,7 +34,7 @@ class ChatAgentProvider(
     fun provideAgent(
         characterId: CharacterId,
         sseEventHandler: SseEmitterEventHandler,
-        askQuestionTool: AskQuestionTool,
+        communicationTools: CommunicationTools,
     ): AIAgent<String, String> {
         val readOrderTools = ReadOrderTools(characterId, orderService)
         val updateOrderTools = UpdateOrderTools(characterId, orderService)
@@ -51,7 +49,7 @@ class ChatAgentProvider(
             """.trimMargin(),
             llmModel = OpenAIModels.Chat.GPT5_4,
             toolRegistry = ToolRegistry {
-                tools(askQuestionTool)
+                tools(communicationTools)
                 tools(readOrderTools)
                 tools(updateOrderTools)
             },

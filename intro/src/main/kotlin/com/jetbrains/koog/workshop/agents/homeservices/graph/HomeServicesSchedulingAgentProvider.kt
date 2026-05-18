@@ -12,7 +12,7 @@ import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
 import ai.koog.prompt.llm.LLModel
 import ai.koog.prompt.message.Message
 import com.jetbrains.koog.workshop.agents.util.AgentExecutionTraceEvent
-import com.jetbrains.koog.workshop.agents.util.AskUserTool
+import com.jetbrains.koog.workshop.agents.util.CommunicationTools
 import com.jetbrains.koog.workshop.agents.util.TaskAgentProvider
 import com.jetbrains.koog.workshop.agents.util.trackEvents
 import koog_workshop.intro.generated.resources.Res
@@ -40,7 +40,7 @@ internal class HomeServicesSchedulingAgentProvider(
     ): AIAgent<String, String> {
         val (llmClient, model) = provideLLMClient.invoke()
         val executor = MultiLLMPromptExecutor(llmClient)
-        val askUserTool = AskUserTool(onAssistantMessage)
+        val communicationTools = CommunicationTools(onAssistantMessage)
         val schedule = HomeServicesSchedule()
         val findTools = HomeServicesFindSlotTools(schedule)
         val bookTools = HomeServicesBookTools(schedule)
@@ -56,9 +56,9 @@ internal class HomeServicesSchedulingAgentProvider(
         return AIAgent(
             promptExecutor = executor,
             agentConfig = agentConfig,
-            strategy = homeServicesStrategy(askUserTool, findTools, bookTools),
+            strategy = homeServicesStrategy(communicationTools, findTools, bookTools),
             toolRegistry = ToolRegistry {
-                tools(askUserTool)
+                tools(communicationTools)
                 tools(findTools)
                 tools(bookTools)
             },

@@ -12,7 +12,7 @@ import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesFindSlotTools
 import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesSchedule
 import com.jetbrains.koog.workshop.agents.homeservices.graph.HomeServicesPrompts
 import com.jetbrains.koog.workshop.agents.homeservices.graph.homeServicesStrategy
-import com.jetbrains.koog.workshop.agents.util.AskUserTool
+import com.jetbrains.koog.workshop.agents.util.CommunicationTools
 import com.jetbrains.koog.workshop.settings.ApiKeyService
 import dev.dokimos.core.JudgeLM
 import dev.dokimos.core.conversation.ConversationTrajectory
@@ -119,7 +119,7 @@ class HomeServicesTest {
         val schedule = HomeServicesSchedule()
         val findTools = HomeServicesFindSlotTools(schedule)
         val bookTools = HomeServicesBookTools(schedule)
-        val askUserTool = AskUserTool { question ->
+        val communicationTools = CommunicationTools { question ->
             addMessage("Assistant", question)
             val trajectory = ConversationTrajectory(
                 conversation.map { (role, content) ->
@@ -144,9 +144,9 @@ class HomeServicesTest {
                 model = model,
                 maxAgentIterations = 200
             ),
-            strategy = homeServicesStrategy(askUserTool, findTools, bookTools),
+            strategy = homeServicesStrategy(communicationTools, findTools, bookTools),
             toolRegistry = ToolRegistry {
-                tools(askUserTool)
+                tools(communicationTools)
                 tools(findTools)
                 tools(bookTools)
             }

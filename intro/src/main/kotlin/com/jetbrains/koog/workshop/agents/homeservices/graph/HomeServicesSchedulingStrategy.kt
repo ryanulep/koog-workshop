@@ -10,7 +10,7 @@ import ai.koog.agents.core.dsl.extension.nodeLLMCompressHistory
 import ai.koog.agents.core.tools.annotations.LLMDescription
 import ai.koog.agents.ext.agent.subgraphWithTask
 import ai.koog.prompt.message.MessagePart
-import com.jetbrains.koog.workshop.agents.util.AskUserTool
+import com.jetbrains.koog.workshop.agents.util.CommunicationTools
 import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesBookTools
 import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesFindSlotTools
 import com.jetbrains.koog.workshop.agents.homeservices.ServiceType
@@ -100,7 +100,7 @@ enum class ConfirmationOutcome {
 }
 
 fun homeServicesStrategy(
-    askUserTool: AskUserTool,
+    communicationTools: CommunicationTools,
     findAvailableSlotTools: HomeServicesFindSlotTools,
     bookTools: HomeServicesBookTools,
 ) = strategy<String, String>("home-services-scheduling") {
@@ -109,14 +109,14 @@ fun homeServicesStrategy(
 
     // Phase 0: triage — detect emergencies before any scheduling
     val triageEmergency by subgraphWithTask<String, TriageResult>(
-        tools = askUserTool.asTools()
+        tools = communicationTools.asTools()
     ) { input ->
         HomeServicesPrompts.triageEmergencyInstructions(input)
     }
 
     // Phase 1: collect issue details from the user (no search or booking tools)
     val collectIssueDetails by subgraphWithTask<TriageResult, IssueDetailsOutcome>(
-        tools = askUserTool.asTools()
+        tools = communicationTools.asTools()
     ) { _ ->
         HomeServicesPrompts.collectIssueDetailsInstructions(agentInput<String>())
     }
@@ -129,7 +129,7 @@ fun homeServicesStrategy(
 
     // Phase 2: select a slot — find availability and let the user pick
     val selectSlot by subgraphWithTask<String, SlotSelectionOutcome>(
-        tools = askUserTool.asTools() + findAvailableSlotTools.asTools()
+        tools = communicationTools.asTools() + findAvailableSlotTools.asTools()
     ) { state ->
         val issueDetails = storage.getValue(issueDetailsKey)
         HomeServicesPrompts.selectSlotInstructions(issueDetails, state)
@@ -141,7 +141,7 @@ fun homeServicesStrategy(
 
     // Phase 3: confirm appointment — review details with the customer before booking
     val confirmAppointment by subgraphWithTask<String, ConfirmationOutcome>(
-        tools = askUserTool.asTools()
+        tools = communicationTools.asTools()
     ) { state ->
         val issueDetails = storage.getValue(issueDetailsKey)
         val slot = storage.getValue(selectedSlotKey)
@@ -164,7 +164,7 @@ fun homeServicesStrategy(
 
     // Phase 5: collect feedback — thank the user and ask for a satisfaction rating
     val collectFeedback by subgraphWithTask<String, String>(
-        tools = askUserTool.asTools()
+        tools = communicationTools.asTools()
     ) { previousResult ->
         HomeServicesPrompts.collectFeedbackInstructions(previousResult)
     }

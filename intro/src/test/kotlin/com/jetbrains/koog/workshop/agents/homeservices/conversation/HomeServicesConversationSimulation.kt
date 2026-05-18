@@ -25,7 +25,7 @@ import com.jetbrains.koog.workshop.agents.homeservices.basic.CONVERSATION_END_MA
 import com.jetbrains.koog.workshop.agents.homeservices.basic.homeServicesBasicSystemPrompt
 import com.jetbrains.koog.workshop.agents.homeservices.graph.HomeServicesPrompts
 import com.jetbrains.koog.workshop.agents.homeservices.graph.homeServicesStrategy
-import com.jetbrains.koog.workshop.agents.util.AskUserTool
+import com.jetbrains.koog.workshop.agents.util.CommunicationTools
 import com.jetbrains.koog.workshop.settings.ApiKeyService
 import dev.dokimos.core.JudgeLM
 import dev.dokimos.core.conversation.ConversationTrajectory
@@ -589,7 +589,7 @@ class HomeServicesGraphConversationSimulation : HomeServicesConversationSimulati
     ) {
         val findTools = HomeServicesFindSlotTools(schedule)
         val bookTools = HomeServicesBookTools(schedule)
-        val askUserTool = AskUserTool { question ->
+        val communicationTools = CommunicationTools { question ->
             addMessage("Assistant", question)
             val userResponse = simulateUserResponse()
             addMessage("User", userResponse)
@@ -604,9 +604,9 @@ class HomeServicesGraphConversationSimulation : HomeServicesConversationSimulati
                 model = model,
                 maxAgentIterations = 200
             ),
-            strategy = homeServicesStrategy(askUserTool, findTools, bookTools),
+            strategy = homeServicesStrategy(communicationTools, findTools, bookTools),
             toolRegistry = ToolRegistry {
-                tools(askUserTool)
+                tools(communicationTools)
                 tools(findTools)
                 tools(bookTools)
             }

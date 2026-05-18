@@ -54,7 +54,7 @@ fun orderCustomerSupportStrategy(tools: CustomerSupportTools) = strategy<String,
 //        moderatingModel = OpenAIModels.Moderation.Omni
 //    )
 
-    val summarize by subgraphWithTask<String, OrderDetails>(tools = tools.askQuestionTool + tools.readOrderTools) { input ->
+    val summarize by subgraphWithTask<String, OrderDetails>(tools = tools.communicationTools + tools.readOrderTools) { input ->
         """
             $input
         """.trimIndent()
@@ -67,7 +67,7 @@ fun orderCustomerSupportStrategy(tools: CustomerSupportTools) = strategy<String,
         """.trimIndent()
     }
 
-    val verify by subgraphWithVerification<IssueSolution>(tools = tools.readOrderTools + tools.askQuestionTool) { solution ->
+    val verify by subgraphWithVerification<IssueSolution>(tools = tools.readOrderTools + tools.communicationTools) { solution ->
         "Verify if $solution fixed the problem. Also verify its actually fixed by checking the system state if necessary."
     }
 

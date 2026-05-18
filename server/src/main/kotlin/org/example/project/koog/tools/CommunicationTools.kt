@@ -11,9 +11,7 @@ import org.example.project.koog.tracking.sendChatMessage
 import org.example.project.shared.ChatMessage
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 
-// FIXME similar to "intro", the class name is confusing since it doesn't define a tool, but a set of tools.
-//  Rename to smth like "CommunicationTools" or convert to a class-based tool.
-class AskQuestionTool(
+class CommunicationTools(
     private val characterId: CharacterId,
     private val sessionId: String,
     private val repository: AskQuestionRepository,

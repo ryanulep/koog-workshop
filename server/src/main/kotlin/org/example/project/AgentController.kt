@@ -13,7 +13,7 @@ import org.example.project.domain.chat.ChatUpdate
 import org.example.project.domain.shared.CharacterId
 import org.example.project.koog.ChatAgentProvider
 import org.example.project.koog.sse
-import org.example.project.koog.tools.AskQuestionTool
+import org.example.project.koog.tools.CommunicationTools
 import org.example.project.koog.tracking.SseEmitterEventHandler
 import org.example.project.koog.tracking.sendChatMessage
 import org.example.project.shared.AgentState
@@ -51,7 +51,7 @@ class AgentController(
         val agent = provider.provideAgent(
             characterId = charId,
             sseEventHandler = SseEmitterEventHandler(emitter),
-            askQuestionTool = AskQuestionTool(charId, sessionId, askQuestionRepository, emitter),
+            communicationTools = CommunicationTools(charId, sessionId, askQuestionRepository, emitter),
         )
 
         try {
