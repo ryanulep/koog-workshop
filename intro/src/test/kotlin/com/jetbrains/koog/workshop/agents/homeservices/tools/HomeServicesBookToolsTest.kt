@@ -29,7 +29,7 @@ class HomeServicesBookToolsTest {
 
         val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
-            serviceType = ServiceType.PLUMBING,
+            serviceType = ServiceType.plumbing,
             slotId = slotId,
             address = "123 Main St",
             issueDescription = "Broken pipe",
@@ -49,7 +49,7 @@ class HomeServicesBookToolsTest {
 
         bookTools.bookAppointment(
             customerName = "Jane Doe",
-            serviceType = ServiceType.PLUMBING,
+            serviceType = ServiceType.plumbing,
             slotId = slotId,
             address = "123 Main St",
             issueDescription = "Broken pipe",
@@ -66,7 +66,7 @@ class HomeServicesBookToolsTest {
         val (_, _, bookTools) = freshScheduleAndTools()
         val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
-            serviceType = ServiceType.PLUMBING,
+            serviceType = ServiceType.plumbing,
             slotId = "svc_fake_9999_1",
             address = "123 Main St",
             issueDescription = "Broken pipe",
@@ -82,7 +82,7 @@ class HomeServicesBookToolsTest {
 
         val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
-            serviceType = ServiceType.PLUMBING,
+            serviceType = ServiceType.plumbing,
             slotId = bookedSlotId,
             address = "123 Main St",
             issueDescription = "Broken pipe",
@@ -99,7 +99,7 @@ class HomeServicesBookToolsTest {
 
         val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
-            serviceType = ServiceType.ELECTRICAL,
+            serviceType = ServiceType.electrical,
             slotId = shkSlotId,
             address = "123 Main St",
             issueDescription = "Electrical wiring broke",
@@ -115,7 +115,7 @@ class HomeServicesBookToolsTest {
 
         val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
-            serviceType = ServiceType.HVAC,
+            serviceType = ServiceType.hvac,
             slotId = slotId,
             address = "456 Oak Ave",
             issueDescription = "Air conditioner malfunction",
@@ -131,7 +131,7 @@ class HomeServicesBookToolsTest {
 
         val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
-            serviceType = ServiceType.ELECTRICAL,
+            serviceType = ServiceType.electrical,
             slotId = slotId,
             address = "789 Elm St",
             notes = "Gate code: 1234",
@@ -149,7 +149,7 @@ class HomeServicesBookToolsTest {
 
         bookTools.bookAppointment(
             customerName = "Jane Doe",
-            serviceType = ServiceType.ELECTRICAL,
+            serviceType = ServiceType.electrical,
             slotId = slotId,
             address = "789 Elm St",
             notes = "  ",
@@ -166,7 +166,7 @@ class HomeServicesBookToolsTest {
 
         bookTools.bookAppointment(
             customerName = "Jane Doe",
-            serviceType = ServiceType.ELECTRICAL,
+            serviceType = ServiceType.electrical,
             slotId = slotId,
             address = "789 Elm St",
             issueDescription = "Electrical wiring broke",
@@ -182,7 +182,7 @@ class HomeServicesBookToolsTest {
 
         bookTools.bookAppointment(
             customerName = "First",
-            serviceType = ServiceType.HANDYMAN,
+            serviceType = ServiceType.handyman,
             slotId = slotId,
             address = "111 Pine St",
             issueDescription = "Broken table",
@@ -190,7 +190,7 @@ class HomeServicesBookToolsTest {
 
         val result = bookTools.bookAppointment(
             customerName = "Second",
-            serviceType = ServiceType.HANDYMAN,
+            serviceType = ServiceType.handyman,
             slotId = slotId,
             address = "222 Birch St",
             issueDescription = "Broken chair",
@@ -206,7 +206,7 @@ class HomeServicesBookToolsTest {
 
         val result = bookTools.bookAppointment(
             customerName = "Jane Doe",
-            serviceType = ServiceType.PLUMBING,
+            serviceType = ServiceType.plumbing,
             slotId = slotId,
             address = "123 Main St",
             issueDescription = "Broken pipe",
@@ -226,13 +226,13 @@ class HomeServicesBookToolsTest {
 
         bookTools.bookAppointment(
             customerName = "Jane Doe",
-            serviceType = ServiceType.PLUMBING,
+            serviceType = ServiceType.plumbing,
             slotId = slotId,
             address = "123 Main St",
             issueDescription = "Broken pipe",
         )
 
-        val result = findTools.getAvailableSlots(ServiceType.PLUMBING, limit = 100)
+        val result = findTools.getAvailableSlots(ServiceType.plumbing, limit = 100)
         val slotLines = result.lines().filter { it.contains(slotId) }
         assertTrue(slotLines.isEmpty(), "Booked slot $slotId should not appear in available slots")
     }

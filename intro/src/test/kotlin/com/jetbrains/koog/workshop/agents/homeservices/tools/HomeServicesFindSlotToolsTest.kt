@@ -22,7 +22,7 @@ class HomeServicesFindSlotToolsTest {
 
     @Test
     fun `returns only slots matching the requested service type`() {
-        val result = findTools.getAvailableSlots(ServiceType.PLUMBING, limit = 50)
+        val result = findTools.getAvailableSlots(ServiceType.plumbing, limit = 50)
         // PLUMBING is handled by SHK only
         assertFalse(result.contains("electrician"), "Plumbing results should not contain electrician slots")
         assertFalse(result.contains("handyman"), "Plumbing results should not contain handyman slots")
@@ -30,34 +30,34 @@ class HomeServicesFindSlotToolsTest {
 
     @Test
     fun `HANDYMAN returns slots from both handyman specialists`() {
-        val result = findTools.getAvailableSlots(ServiceType.HANDYMAN, limit = 50)
+        val result = findTools.getAvailableSlots(ServiceType.handyman, limit = 50)
         assertContains(result, "handyman_1")
         assertContains(result, "handyman_2")
     }
 
     @Test
     fun `HVAC returns SHK specialist slots`() {
-        val result = findTools.getAvailableSlots(ServiceType.HVAC, limit = 50)
+        val result = findTools.getAvailableSlots(ServiceType.hvac, limit = 50)
         assertContains(result, "shk")
     }
 
     @Test
     fun `respects limit parameter`() {
-        val result = findTools.getAvailableSlots(ServiceType.PLUMBING, limit = 2)
+        val result = findTools.getAvailableSlots(ServiceType.plumbing, limit = 2)
         val slotLines = result.lines().filter { it.trimStart().startsWith("- svc_") }
         assertTrue(slotLines.size <= 2, "Expected at most 2 slot lines but got ${slotLines.size}")
     }
 
     @Test
     fun `default limit is 5`() {
-        val result = findTools.getAvailableSlots(ServiceType.HANDYMAN)
+        val result = findTools.getAvailableSlots(ServiceType.handyman)
         val slotLines = result.lines().filter { it.trimStart().startsWith("- svc_") }
         assertTrue(slotLines.size <= 5, "Default limit should cap at 5, got ${slotLines.size}")
     }
 
     @Test
     fun `shows overflow message when more slots exist beyond limit`() {
-        val result = findTools.getAvailableSlots(ServiceType.HANDYMAN, limit = 1)
+        val result = findTools.getAvailableSlots(ServiceType.handyman, limit = 1)
         if (result.contains("Available slots")) {
             assertContains(result, "more slots available")
         }
@@ -67,7 +67,7 @@ class HomeServicesFindSlotToolsTest {
     fun `respects startDate parameter`() {
         val laterDate = futureDates.last()
         val result = findTools.getAvailableSlots(
-            ServiceType.HANDYMAN,
+            ServiceType.handyman,
             limit = 50,
             startDate = laterDate.toString(),
         )
@@ -81,7 +81,7 @@ class HomeServicesFindSlotToolsTest {
 
     @Test
     fun `returns error for invalid startDate format`() {
-        val result = findTools.getAvailableSlots(ServiceType.PLUMBING, startDate = "April 28")
+        val result = findTools.getAvailableSlots(ServiceType.plumbing, startDate = "April 28")
         assertContains(result, "Error")
         assertContains(result, "yyyy-MM-dd")
     }
@@ -97,13 +97,13 @@ class HomeServicesFindSlotToolsTest {
             }
         }
         val findTools = HomeServicesFindSlotTools(schedule)
-        val result = findTools.getAvailableSlots(ServiceType.HVAC)
+        val result = findTools.getAvailableSlots(ServiceType.hvac)
         assertContains(result, "No available slots found for HVAC")
     }
 
     @Test
     fun `output does not contain specialist type names`() {
-        val result = findTools.getAvailableSlots(ServiceType.PLUMBING, limit = 50)
+        val result = findTools.getAvailableSlots(ServiceType.plumbing, limit = 50)
         if (result.contains("Available slots")) {
             val slotLines = result.lines().filter { it.trimStart().startsWith("- svc_") }
             for (line in slotLines) {
@@ -118,7 +118,7 @@ class HomeServicesFindSlotToolsTest {
 
     @Test
     fun `each returned slot line contains date and time window`() {
-        val result = findTools.getAvailableSlots(ServiceType.ELECTRICAL, limit = 3)
+        val result = findTools.getAvailableSlots(ServiceType.electrical, limit = 3)
         if (result.contains("Available slots")) {
             val slotLines = result.lines().filter { it.trimStart().startsWith("- svc_") }
             for (line in slotLines) {

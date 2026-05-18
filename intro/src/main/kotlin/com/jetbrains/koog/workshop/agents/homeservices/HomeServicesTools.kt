@@ -1,3 +1,5 @@
+@file:Suppress("EnumEntryName")
+
 package com.jetbrains.koog.workshop.agents.homeservices
 
 import ai.koog.agents.core.tools.annotations.LLMDescription
@@ -11,33 +13,33 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 enum class Workday(val dayOfWeek: DayOfWeek) {
-    MONDAY(DayOfWeek.MONDAY),
-    TUESDAY(DayOfWeek.TUESDAY),
-    WEDNESDAY(DayOfWeek.WEDNESDAY),
-    THURSDAY(DayOfWeek.THURSDAY),
-    FRIDAY(DayOfWeek.FRIDAY),
+    monday(DayOfWeek.MONDAY),
+    tuesday(DayOfWeek.TUESDAY),
+    wednesday(DayOfWeek.WEDNESDAY),
+    thursday(DayOfWeek.THURSDAY),
+    friday(DayOfWeek.FRIDAY),
 }
 
 enum class ServiceType {
-    PLUMBING, ELECTRICAL, HVAC, HANDYMAN
+    plumbing, electrical, hvac, handyman
 }
 
 enum class UrgencyLevel {
-    URGENT,
-    STANDARD,
+    urgent,
+    standard,
 }
 
 enum class SpecialistType(val idPart: String, val supportedServices: Set<ServiceType>) {
-    SHK("shk", setOf(ServiceType.PLUMBING, ServiceType.HVAC)),
-    ELECTRICIAN("electrician", setOf(ServiceType.ELECTRICAL)),
-    HANDYMAN_1("handyman_1", setOf(ServiceType.HANDYMAN)),
-    HANDYMAN_2("handyman_2", setOf(ServiceType.HANDYMAN)),
+    SHK("shk", setOf(ServiceType.plumbing, ServiceType.hvac)),
+    ELECTRICIAN("electrician", setOf(ServiceType.electrical)),
+    HANDYMAN_1("handyman_1", setOf(ServiceType.handyman)),
+    HANDYMAN_2("handyman_2", setOf(ServiceType.handyman)),
 }
 
 enum class TimeWindow(val label: String, val hours: String, val startHour: Int) {
-    MORNING("Morning", "9:00-12:00", 9),
-    EARLY_AFTERNOON("Early afternoon", "12:00-15:00", 12),
-    LATE_AFTERNOON("Late afternoon", "15:00-18:00", 15),
+    morning("Morning", "9:00-12:00", 9),
+    early_afternoon("Early afternoon", "12:00-15:00", 12),
+    later_afternoon("Late afternoon", "15:00-18:00", 15),
 }
 
 private val DISPLAY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -129,72 +131,72 @@ class HomeServicesSchedule {
 
     private fun bookedWindowsBySpecialist(): Map<SpecialistType, List<List<TimeWindow>>> = mapOf(
         SpecialistType.SHK to listOf(
-            listOf(TimeWindow.MORNING, TimeWindow.MORNING, TimeWindow.EARLY_AFTERNOON, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.MORNING, TimeWindow.EARLY_AFTERNOON, TimeWindow.LATE_AFTERNOON, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.MORNING, TimeWindow.MORNING, TimeWindow.EARLY_AFTERNOON),
-            listOf(TimeWindow.MORNING, TimeWindow.EARLY_AFTERNOON, TimeWindow.EARLY_AFTERNOON),
-            listOf(TimeWindow.MORNING, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.EARLY_AFTERNOON, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.MORNING, TimeWindow.EARLY_AFTERNOON),
+            listOf(TimeWindow.morning, TimeWindow.morning, TimeWindow.early_afternoon, TimeWindow.later_afternoon),
+            listOf(TimeWindow.morning, TimeWindow.early_afternoon, TimeWindow.later_afternoon, TimeWindow.later_afternoon),
+            listOf(TimeWindow.morning, TimeWindow.morning, TimeWindow.early_afternoon),
+            listOf(TimeWindow.morning, TimeWindow.early_afternoon, TimeWindow.early_afternoon),
+            listOf(TimeWindow.morning, TimeWindow.later_afternoon),
+            listOf(TimeWindow.early_afternoon, TimeWindow.later_afternoon),
+            listOf(TimeWindow.morning, TimeWindow.early_afternoon),
             emptyList(),
             emptyList(),
             emptyList(),
         ),
         SpecialistType.ELECTRICIAN to listOf(
             listOf(
-                TimeWindow.MORNING,
-                TimeWindow.MORNING,
-                TimeWindow.EARLY_AFTERNOON,
-                TimeWindow.EARLY_AFTERNOON,
-                TimeWindow.LATE_AFTERNOON
+                TimeWindow.morning,
+                TimeWindow.morning,
+                TimeWindow.early_afternoon,
+                TimeWindow.early_afternoon,
+                TimeWindow.later_afternoon
             ),
-            listOf(TimeWindow.MORNING, TimeWindow.MORNING, TimeWindow.EARLY_AFTERNOON, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.MORNING, TimeWindow.EARLY_AFTERNOON, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.MORNING, TimeWindow.EARLY_AFTERNOON, TimeWindow.EARLY_AFTERNOON),
-            listOf(TimeWindow.MORNING, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.EARLY_AFTERNOON, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.LATE_AFTERNOON),
+            listOf(TimeWindow.morning, TimeWindow.morning, TimeWindow.early_afternoon, TimeWindow.later_afternoon),
+            listOf(TimeWindow.morning, TimeWindow.early_afternoon, TimeWindow.later_afternoon),
+            listOf(TimeWindow.morning, TimeWindow.early_afternoon, TimeWindow.early_afternoon),
+            listOf(TimeWindow.morning, TimeWindow.later_afternoon),
+            listOf(TimeWindow.early_afternoon, TimeWindow.later_afternoon),
+            listOf(TimeWindow.later_afternoon),
             emptyList(),
             emptyList(),
             emptyList(),
         ),
         SpecialistType.HANDYMAN_1 to listOf(
             listOf(
-                TimeWindow.MORNING,
-                TimeWindow.MORNING,
-                TimeWindow.EARLY_AFTERNOON,
-                TimeWindow.EARLY_AFTERNOON,
-                TimeWindow.LATE_AFTERNOON
+                TimeWindow.morning,
+                TimeWindow.morning,
+                TimeWindow.early_afternoon,
+                TimeWindow.early_afternoon,
+                TimeWindow.later_afternoon
             ),
             listOf(
-                TimeWindow.MORNING,
-                TimeWindow.EARLY_AFTERNOON,
-                TimeWindow.EARLY_AFTERNOON,
-                TimeWindow.LATE_AFTERNOON
+                TimeWindow.morning,
+                TimeWindow.early_afternoon,
+                TimeWindow.early_afternoon,
+                TimeWindow.later_afternoon
             ),
-            listOf(TimeWindow.MORNING, TimeWindow.MORNING, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.MORNING, TimeWindow.EARLY_AFTERNOON, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.EARLY_AFTERNOON, TimeWindow.EARLY_AFTERNOON),
-            listOf(TimeWindow.MORNING, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.LATE_AFTERNOON),
+            listOf(TimeWindow.morning, TimeWindow.morning, TimeWindow.later_afternoon),
+            listOf(TimeWindow.morning, TimeWindow.early_afternoon, TimeWindow.later_afternoon),
+            listOf(TimeWindow.early_afternoon, TimeWindow.early_afternoon),
+            listOf(TimeWindow.morning, TimeWindow.later_afternoon),
+            listOf(TimeWindow.later_afternoon),
             emptyList(),
             emptyList(),
             emptyList(),
         ),
         SpecialistType.HANDYMAN_2 to listOf(
             listOf(
-                TimeWindow.MORNING,
-                TimeWindow.EARLY_AFTERNOON,
-                TimeWindow.EARLY_AFTERNOON,
-                TimeWindow.LATE_AFTERNOON,
-                TimeWindow.LATE_AFTERNOON
+                TimeWindow.morning,
+                TimeWindow.early_afternoon,
+                TimeWindow.early_afternoon,
+                TimeWindow.later_afternoon,
+                TimeWindow.later_afternoon
             ),
-            listOf(TimeWindow.MORNING, TimeWindow.MORNING, TimeWindow.EARLY_AFTERNOON, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.MORNING, TimeWindow.EARLY_AFTERNOON, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.MORNING, TimeWindow.MORNING, TimeWindow.EARLY_AFTERNOON),
-            listOf(TimeWindow.EARLY_AFTERNOON, TimeWindow.LATE_AFTERNOON),
-            listOf(TimeWindow.MORNING, TimeWindow.EARLY_AFTERNOON),
-            listOf(TimeWindow.MORNING),
+            listOf(TimeWindow.morning, TimeWindow.morning, TimeWindow.early_afternoon, TimeWindow.later_afternoon),
+            listOf(TimeWindow.morning, TimeWindow.early_afternoon, TimeWindow.later_afternoon),
+            listOf(TimeWindow.morning, TimeWindow.morning, TimeWindow.early_afternoon),
+            listOf(TimeWindow.early_afternoon, TimeWindow.later_afternoon),
+            listOf(TimeWindow.morning, TimeWindow.early_afternoon),
+            listOf(TimeWindow.morning),
             emptyList(),
             emptyList(),
             emptyList(),
@@ -214,9 +216,9 @@ class HomeServicesSchedule {
     }
 
     private fun slotTimeWindow(slotIndex: Int): TimeWindow = when (slotIndex) {
-        1, 2 -> TimeWindow.MORNING
-        3, 4 -> TimeWindow.EARLY_AFTERNOON
-        5, 6 -> TimeWindow.LATE_AFTERNOON
+        1, 2 -> TimeWindow.morning
+        3, 4 -> TimeWindow.early_afternoon
+        5, 6 -> TimeWindow.later_afternoon
         else -> error("Unsupported slot index: $slotIndex")
     }
 
@@ -249,7 +251,7 @@ class HomeServicesFindSlotTools(private val schedule: HomeServicesSchedule) : To
         @LLMDescription("Service type: PLUMBING, ELECTRICAL, HVAC, or HANDYMAN")
         serviceType: ServiceType,
         @LLMDescription("Urgency level: URGENT (slots from today) or STANDARD (slots from today + 2 business days)")
-        urgencyLevel: UrgencyLevel = UrgencyLevel.STANDARD,
+        urgencyLevel: UrgencyLevel = UrgencyLevel.standard,
         @LLMDescription("Maximum number of slots to return (default 5)")
         limit: Int = 5,
         @LLMDescription("Earliest date to consider in yyyy-MM-dd format (overrides urgency-based default when provided)")
@@ -271,7 +273,7 @@ class HomeServicesFindSlotTools(private val schedule: HomeServicesSchedule) : To
                 return "Error: Invalid startDate '$startDate'. Use yyyy-MM-dd format, e.g. 2026-05-01."
             }
         } else {
-            if (urgencyLevel == UrgencyLevel.STANDARD) addBusinessDays(schedule.today, 2) else schedule.today
+            if (urgencyLevel == UrgencyLevel.standard) addBusinessDays(schedule.today, 2) else schedule.today
         }
 
         val allFree = schedule.slots.filter { slot ->

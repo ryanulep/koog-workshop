@@ -1,3 +1,5 @@
+@file:Suppress("EnumEntryName")
+
 package com.jetbrains.koog.workshop.agents.weather
 
 import ai.koog.agents.core.tools.annotations.LLMDescription
@@ -20,8 +22,8 @@ import kotlin.time.ExperimentalTime
  */
 @Serializable
 enum class Granularity {
-    DAILY,
-    HOURLY
+    daily,
+    hourly
 }
 
 /**
@@ -120,7 +122,7 @@ class WeatherTools(
         @LLMDescription("The number of days to forecast (1-7)")
         days: Int = 1,
         @LLMDescription("The granularity of the forecast: 'daily' for day-by-day forecast or 'hourly' for hour-by-hour forecast. Default is 'daily'.")
-        granularity: Granularity = Granularity.DAILY
+        granularity: Granularity = Granularity.daily
     ): String {
         val locations = openMeteoClient.searchLocation(location)
         if (locations.isEmpty()) {
@@ -137,13 +139,13 @@ class WeatherTools(
         )
 
         val formattedForecast = when (granularity) {
-            Granularity.HOURLY -> formatHourlyForecast(forecast, date)
-            Granularity.DAILY -> formatDailyForecast(forecast, date)
+            Granularity.hourly -> formatHourlyForecast(forecast, date)
+            Granularity.daily -> formatDailyForecast(forecast, date)
         }
 
         val granularityText = when (granularity) {
-            Granularity.DAILY -> "daily"
-            Granularity.HOURLY -> "hourly"
+            Granularity.daily -> "daily"
+            Granularity.hourly -> "hourly"
         }
         val dateInfo = if (date.isBlank()) "starting from today" else "for $date"
         val formattedLocation = if (loc.country.isNullOrBlank()) loc.name else "${loc.name}, ${loc.country}"

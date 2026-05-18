@@ -1,3 +1,5 @@
+@file:Suppress("EnumEntryName")
+
 package com.jetbrains.koog.workshop.agents.homeservices.graph
 
 import ai.koog.agents.core.agent.context.agentInput
@@ -27,11 +29,11 @@ data class TriageResult(
 @Serializable
 enum class TriageOutcome {
     @LLMDescription("Emergency detected; justification must be provided")
-    EMERGENCY_DETECTED,
+    emergency_detected,
     @LLMDescription("No emergency detected; proceed with regular appointment scheduling")
-    PROCEED_WITH_SCHEDULING,
+    proceed_with_scheduling,
     @LLMDescription("User cancelled the scheduling process")
-    CANCELLED,
+    cancelled,
 }
 
 @LLMDescription("Collected details required to schedule a home service visit")
@@ -90,11 +92,11 @@ data class SelectedSlot(
 @Serializable
 enum class ConfirmationOutcome {
     @LLMDescription("Customer confirmed the slot and wants to proceed with booking")
-    CONFIRMED,
+    confirmed,
     @LLMDescription("Customer wants to pick a different slot")
-    CHANGE_REQUESTED,
+    change_requested,
     @LLMDescription("Customer cancelled the scheduling process")
-    CANCELLED,
+    cancelled,
 }
 
 fun homeServicesStrategy(
@@ -186,9 +188,9 @@ fun homeServicesStrategy(
     }
 
     nodeStart then triageEmergency
-    edge(triageEmergency forwardTo collectIssueDetails onCondition { it.status == TriageOutcome.PROCEED_WITH_SCHEDULING })
-    edge(triageEmergency forwardTo handleCancellation onCondition { it.status == TriageOutcome.CANCELLED } transformed { "Cancelled" })
-    edge(triageEmergency forwardTo handleEmergency onCondition { it.status == TriageOutcome.EMERGENCY_DETECTED } transformed { it.justification ?: "Emergency situation detected" })
+    edge(triageEmergency forwardTo collectIssueDetails onCondition { it.status == TriageOutcome.proceed_with_scheduling })
+    edge(triageEmergency forwardTo handleCancellation onCondition { it.status == TriageOutcome.cancelled } transformed { "Cancelled" })
+    edge(triageEmergency forwardTo handleEmergency onCondition { it.status == TriageOutcome.emergency_detected } transformed { it.justification ?: "Emergency situation detected" })
 
     edge(collectIssueDetails forwardTo storeIssueDetails onCondition { it.success() } transformed { it.collected!! })
     edge(collectIssueDetails forwardTo handleCancellation onCondition { !it.success() } transformed { "Cancelled" })
@@ -201,9 +203,9 @@ fun homeServicesStrategy(
 
     storeSelectedSlot then confirmAppointment
 
-    edge(confirmAppointment forwardTo selectSlot onCondition { it == ConfirmationOutcome.CHANGE_REQUESTED } transformed { "Slot was selected, but the change was requested." })
-    edge(confirmAppointment forwardTo handleCancellation onCondition { it == ConfirmationOutcome.CANCELLED } transformed { "Cancelled" })
-    edge(confirmAppointment forwardTo bookAppointment onCondition { it == ConfirmationOutcome.CONFIRMED } transformed { "Slot confirmed, proceeding to booking." })
+    edge(confirmAppointment forwardTo selectSlot onCondition { it == ConfirmationOutcome.change_requested } transformed { "Slot was selected, but the change was requested." })
+    edge(confirmAppointment forwardTo handleCancellation onCondition { it == ConfirmationOutcome.cancelled } transformed { "Cancelled" })
+    edge(confirmAppointment forwardTo bookAppointment onCondition { it == ConfirmationOutcome.confirmed } transformed { "Slot confirmed, proceeding to booking." })
 
     bookAppointment then collectFeedback then nodeFinish
     handleCancellation then nodeFinish

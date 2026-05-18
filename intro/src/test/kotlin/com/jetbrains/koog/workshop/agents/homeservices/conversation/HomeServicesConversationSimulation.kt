@@ -343,7 +343,7 @@ abstract class HomeServicesConversationSimulationBase {
         evaluations = listOf(appointmentScheduled),
         setupSchedule = { schedule ->
             schedule.slots
-                .filter { ServiceType.ELECTRICAL in it.specialistType.supportedServices }
+                .filter { ServiceType.electrical in it.specialistType.supportedServices }
                 .take(8)
                 .forEach { slot ->
                     schedule.bookAnAppointment(slot.id, Booking("Pre-booked", "Pre-booked address"))
