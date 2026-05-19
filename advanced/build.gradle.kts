@@ -48,3 +48,4 @@ fun registerRunTask(
 
 registerRunTask("runAgentContextExample", "org.example.advanced.AgentContextExampleKt")
 registerRunTask("runStructuredOutputExample", "org.example.advanced.StructuredOutputExampleKt")
+registerRunTask("runStreamingExample", "org.example.advanced.StreamingExampleKt")
