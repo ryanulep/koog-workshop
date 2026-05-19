@@ -8,7 +8,6 @@ import ai.koog.agents.core.dsl.builder.strategy
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.ext.agent.subgraphWithTask
 import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesBookingProvider
-import com.jetbrains.koog.workshop.agents.util.textContent
 
 fun homeServicesStrategy(
     communicationTools: List<Tool<*, *>>,
