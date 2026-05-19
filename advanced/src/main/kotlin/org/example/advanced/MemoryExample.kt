@@ -104,9 +104,6 @@ private suspend fun runSimpleAgent(
             model = OpenAIModels.Chat.GPT5_4,
             maxAgentIterations = 50,
         ),
-        toolRegistry = ToolRegistry {
-            tool(::askUser)
-        }
     ) {
         install(LongTermMemory) {
             retrievalSettings = RetrievalSettings(
