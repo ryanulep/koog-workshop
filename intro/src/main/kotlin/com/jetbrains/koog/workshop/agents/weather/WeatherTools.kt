@@ -36,6 +36,47 @@ class WeatherTools(
     private val clock: Clock = Clock.System,
 ) : ToolSet {
 
+    @Tool("weather_forecast")
+    @LLMDescription("Get a weather forecast for a location with specified granularity (daily or hourly)")
+    suspend fun weatherForecast(
+        @LLMDescription("The location to get the weather forecast for (e.g., 'New York', 'London', 'Paris')")
+        location: String,
+        @LLMDescription("The date to get the weather forecast for in ISO format (e.g., '2023-05-20'). If empty, the forecast starts from today.")
+        date: String = "",
+        @LLMDescription("The number of days to forecast (1-7)")
+        days: Int = 1,
+        @LLMDescription("The granularity of the forecast: 'daily' for day-by-day forecast or 'hourly' for hour-by-hour forecast. Default is 'daily'.")
+        granularity: Granularity = Granularity.daily
+    ): String {
+        val locations = openMeteoClient.searchLocation(location)
+        if (locations.isEmpty()) {
+            return "Location not found"
+        }
+
+        val loc = locations.first()
+        val forecastDays = days.coerceIn(1, 7)
+
+        val forecast = openMeteoClient.getWeatherForecast(
+            latitude = loc.latitude,
+            longitude = loc.longitude,
+            forecastDays = forecastDays
+        )
+
+        val formattedForecast = when (granularity) {
+            Granularity.hourly -> formatHourlyForecast(forecast, date)
+            Granularity.daily -> formatDailyForecast(forecast, date)
+        }
+
+        val granularityText = when (granularity) {
+            Granularity.daily -> "daily"
+            Granularity.hourly -> "hourly"
+        }
+        val dateInfo = if (date.isBlank()) "starting from today" else "for $date"
+        val formattedLocation = if (loc.country.isNullOrBlank()) loc.name else "${loc.name}, ${loc.country}"
+
+        return "Weather forecast for $formattedLocation ($granularityText, $dateInfo):\n$formattedForecast"
+    }
+
     @Tool("current_datetime")
     @LLMDescription("Get the current date and time in the specified timezone")
     suspend fun currentDatetime(
@@ -110,47 +151,6 @@ class WeatherTools(
                 }
             }
         }
-    }
-
-    @Tool("weather_forecast")
-    @LLMDescription("Get a weather forecast for a location with specified granularity (daily or hourly)")
-    suspend fun weatherForecast(
-        @LLMDescription("The location to get the weather forecast for (e.g., 'New York', 'London', 'Paris')")
-        location: String,
-        @LLMDescription("The date to get the weather forecast for in ISO format (e.g., '2023-05-20'). If empty, the forecast starts from today.")
-        date: String = "",
-        @LLMDescription("The number of days to forecast (1-7)")
-        days: Int = 1,
-        @LLMDescription("The granularity of the forecast: 'daily' for day-by-day forecast or 'hourly' for hour-by-hour forecast. Default is 'daily'.")
-        granularity: Granularity = Granularity.daily
-    ): String {
-        val locations = openMeteoClient.searchLocation(location)
-        if (locations.isEmpty()) {
-            return "Location not found"
-        }
-
-        val loc = locations.first()
-        val forecastDays = days.coerceIn(1, 7)
-
-        val forecast = openMeteoClient.getWeatherForecast(
-            latitude = loc.latitude,
-            longitude = loc.longitude,
-            forecastDays = forecastDays
-        )
-
-        val formattedForecast = when (granularity) {
-            Granularity.hourly -> formatHourlyForecast(forecast, date)
-            Granularity.daily -> formatDailyForecast(forecast, date)
-        }
-
-        val granularityText = when (granularity) {
-            Granularity.daily -> "daily"
-            Granularity.hourly -> "hourly"
-        }
-        val dateInfo = if (date.isBlank()) "starting from today" else "for $date"
-        val formattedLocation = if (loc.country.isNullOrBlank()) loc.name else "${loc.name}, ${loc.country}"
-
-        return "Weather forecast for $formattedLocation ($granularityText, $dateInfo):\n$formattedForecast"
     }
 
     private fun formatDailyForecast(forecast: WeatherForecast, date: String): String {
