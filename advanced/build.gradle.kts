@@ -1,3 +1,5 @@
+import java.util.*
+
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.kotlinSerialization)
@@ -14,3 +16,34 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.kotlinx.serialization.json)
 }
+
+fun registerRunTask(
+    name: String,
+    mainClassName: String,
+) {
+    tasks.register<JavaExec>(name) {
+        group = "application"
+        description = "Runs a main class after loading env.properties"
+
+        val mainClassName = mainClassName
+
+        doFirst {
+            val envFile = project.file("env.properties")
+            if (envFile.exists()) {
+                val props = Properties().apply {
+                    envFile.inputStream().use(::load)
+                }
+
+                props.forEach { (key, value) ->
+                    environment(key.toString(), value.toString())
+                }
+            }
+
+            mainClass.set(mainClassName)
+        }
+
+        classpath = sourceSets["main"].runtimeClasspath
+    }
+}
+
+registerRunTask("runAgentContextExample", "org.example.advanced.AgentContextExampleKt")
