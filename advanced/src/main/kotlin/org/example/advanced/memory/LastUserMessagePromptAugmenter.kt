@@ -7,7 +7,10 @@ import ai.koog.prompt.message.MessagePart
 import ai.koog.rag.base.TextDocument
 import ai.koog.rag.base.storage.search.SearchResult
 
-public class UserPromptAugmenterFixed(
+/**
+ * Augments the last user message in the prompt with additional text part with relevant context, if found.
+ */
+class LastUserMessagePromptAugmenter(
     private val template: String = DEFAULT_USER_PROMPT_TEMPLATE,
     private val contextPrefix: String = PromptAugmenter.DEFAULT_CONTEXT_PREFIX
 ) : PromptAugmenter {
@@ -15,12 +18,12 @@ public class UserPromptAugmenterFixed(
     /**
      * Companion object with default templates.
      */
-    public companion object {
+    companion object {
         /**
          * Default template for user context insertion.
          * Use [PromptAugmenter.RELEVANT_CONTEXT_PLACEHOLDER] placeholder.
          */
-        public val DEFAULT_USER_PROMPT_TEMPLATE: String =
+        val DEFAULT_USER_PROMPT_TEMPLATE: String =
             """
             |Here is some relevant context:
             |

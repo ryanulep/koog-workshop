@@ -3,6 +3,9 @@ package org.example.advanced
 import ai.koog.agents.core.agent.AIAgent
 import ai.koog.agents.core.agent.config.AIAgentConfig
 import ai.koog.agents.core.tools.ToolRegistry
+import ai.koog.agents.core.tools.annotations.LLMDescription
+import ai.koog.agents.core.tools.annotations.Tool
+import ai.koog.agents.core.tools.reflect.asTool
 import ai.koog.agents.features.eventHandler.feature.EventHandler
 import ai.koog.agents.longtermmemory.feature.LongTermMemory
 import ai.koog.agents.longtermmemory.ingestion.IngestionSettings
@@ -17,7 +20,9 @@ import ai.koog.prompt.llm.LLMProvider
 import ai.koog.rag.vector.storage.JVMFileEmbeddingStorage
 import ai.koog.spring.ai.vectorstore.SpringAiKoogVectorStore
 import kotlinx.coroutines.Dispatchers
-import org.example.advanced.memory.UserPromptAugmenterFixed
+import org.example.advanced.memory.LLMSummaryDocumentExtractor
+import org.example.advanced.memory.LastUserMessagePromptAugmenter
+import org.example.advanced.memory.LastUserResponseQueryProvider
 import org.springframework.ai.document.MetadataMode
 import org.springframework.ai.openai.OpenAiEmbeddingModel
 import org.springframework.ai.openai.OpenAiEmbeddingOptions
@@ -49,6 +54,7 @@ private fun provideSpringPgVectorStore(
         password = "postgres"
     }
 
+    // max 2000 for pgvector vector type, otherwise you need to use a different vector type
     val embeddingDimensions = 1536
 
     val embeddingModel = OpenAiEmbeddingModel(
@@ -91,7 +97,8 @@ private suspend fun runSimpleAgent(
     openaiApiKey: String,
 ) {
     val vectorStore = provideSpringPgVectorStore(openaiApiKey)
-    //val vectorStore = provideFileVectorStorage(openaiApiKey)
+
+    val askTool = ::askUser.asTool()
 
     val agent = AIAgent(
         promptExecutor = promptExecutor,
@@ -99,16 +106,26 @@ private suspend fun runSimpleAgent(
             prompt = prompt("example") {
                 system {
                     +"You're a helpful assistant."
+                    +"Use askTool to chat with the user, DO NOT send regular messages to chat."
+                    +"Only send the normal message to end the conversation when the user is done."
+                    +"Do not terminate the conversation early yourself, prefer to use askTool to show the message instead."
                 }
             },
             model = OpenAIModels.Chat.GPT5_4,
-            maxAgentIterations = 50,
+            maxAgentIterations = 100,
         ),
+        toolRegistry = ToolRegistry {
+            tool(askTool)
+        }
     ) {
         install(LongTermMemory) {
             retrievalSettings = RetrievalSettings(
                 storage = vectorStore,
-                promptAugmenter = UserPromptAugmenterFixed(),
+                // How the prompt is going to be modified?
+                promptAugmenter = LastUserMessagePromptAugmenter(),
+                // How to construct a search query from the prompt?
+                searchQueryProvider = LastUserResponseQueryProvider(askTool),
+                // Search parameters
                 searchStrategy = SimilaritySearchStrategy(
                     similarityThreshold = 0.2,
                 )
@@ -116,6 +133,10 @@ private suspend fun runSimpleAgent(
 
             ingestionSettings = IngestionSettings(
                 storage = vectorStore,
+                // custom document extractor based on LLM summarization
+                documentExtractor = LLMSummaryDocumentExtractor(
+                    promptExecutor = promptExecutor,
+                )
             )
         }
 
@@ -130,16 +151,15 @@ private suspend fun runSimpleAgent(
         }
     }
 
-    var userMessage = askUser("Hi, how can I help you?")
-
-    while (userMessage != "/q") {
-        val agentResponse = agent.run(userMessage)
-        userMessage = askUser(agentResponse)
-    }
+    val initialMessage = askUser("Hi, how can I help you?")
+    val result = agent.run(initialMessage)
+    println("Agent: $result")
 }
 
-private fun askUser(question: String): String {
-    println("Agent: $question")
+@Tool
+@LLMDescription("Shows a message to the user and returns the response.")
+fun askUser(message: String): String {
+    println("Agent: $message")
     print("User: ")
     return readln()
 }
