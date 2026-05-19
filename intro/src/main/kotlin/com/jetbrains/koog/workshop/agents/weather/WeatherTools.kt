@@ -56,10 +56,22 @@ class WeatherTools(
         val loc = locations.first()
         val forecastDays = days.coerceIn(1, 7)
 
+        val startDate = if (date.isNotBlank()) {
+            try {
+                LocalDate.parse(date)
+            } catch (_: Exception) {
+                null
+            }
+        } else null
+
+        val endDate = startDate?.plus(forecastDays - 1, kotlinx.datetime.DateTimeUnit.DAY)
+
         val forecast = openMeteoClient.getWeatherForecast(
             latitude = loc.latitude,
             longitude = loc.longitude,
-            forecastDays = forecastDays
+            forecastDays = forecastDays,
+            startDate = startDate?.toString(),
+            endDate = endDate?.toString()
         )
 
         val formattedForecast = when (granularity) {

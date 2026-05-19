@@ -58,12 +58,19 @@ class OpenMeteoClient {
         forecastDays: Int = 7,
         hourly: List<String> = listOf("temperature_2m", "precipitation_probability", "weather_code"),
         daily: List<String> = listOf("weather_code", "temperature_2m_max", "temperature_2m_min", "precipitation_sum"),
-        timezone: String = "auto"
+        timezone: String = "auto",
+        startDate: String? = null,
+        endDate: String? = null
     ): WeatherForecast {
         return client.get("https://api.open-meteo.com/v1/forecast") {
             parameter("latitude", latitude)
             parameter("longitude", longitude)
-            parameter("forecast_days", forecastDays)
+            if (startDate != null && endDate != null) {
+                parameter("start_date", startDate)
+                parameter("end_date", endDate)
+            } else {
+                parameter("forecast_days", forecastDays)
+            }
             parameter("hourly", hourly.joinToString(","))
             parameter("daily", daily.joinToString(","))
             parameter("timezone", timezone)
