@@ -2,7 +2,7 @@ package com.jetbrains.koog.workshop.agents.util
 
 import ai.koog.agents.core.agent.GraphAIAgent
 import ai.koog.agents.core.tools.ToolDescriptor
-import ai.koog.agents.features.eventHandler.feature.handleEvents
+import ai.koog.agents.features.eventHandler.feature.EventHandler
 import ai.koog.prompt.message.Message
 
 fun GraphAIAgent.FeatureContext.trackEvents(
@@ -11,7 +11,7 @@ fun GraphAIAgent.FeatureContext.trackEvents(
     onLLMCallEvent: suspend (List<Message>, List<ToolDescriptor>) -> Unit,
     onExecutionTraceEvent: suspend (AgentExecutionTraceEvent) -> Unit,
 ) {
-    handleEvents {
+    install(EventHandler) {
         onNodeExecutionStarting { ctx ->
             onExecutionTraceEvent(AgentExecutionTraceEvent.Node(ctx.node.name))
         }
