@@ -36,16 +36,11 @@ class WeatherTools(
     private val clock: Clock = Clock.System,
 ) : ToolSet {
 
-    @Tool("weather_forecast")
-    @LLMDescription("Get a weather forecast for a location with specified granularity (daily or hourly)")
     suspend fun weatherForecast(
-        @LLMDescription("The location to get the weather forecast for (e.g., 'New York', 'London', 'Paris')")
         location: String,
-        @LLMDescription("The date to get the weather forecast for in ISO format (e.g., '2023-05-20'). If empty, the forecast starts from today.")
+        // The date to get the weather forecast for in ISO format (e.g., '2023-05-20'). If empty, the forecast starts from today.
         date: String = "",
-        @LLMDescription("The number of days to forecast (1-7)")
         days: Int = 1,
-        @LLMDescription("The granularity of the forecast: 'daily' for day-by-day forecast or 'hourly' for hour-by-hour forecast. Default is 'daily'.")
         granularity: Granularity = Granularity.daily
     ): String {
         val locations = openMeteoClient.searchLocation(location)

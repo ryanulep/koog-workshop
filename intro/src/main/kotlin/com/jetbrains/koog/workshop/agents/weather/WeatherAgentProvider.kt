@@ -42,10 +42,6 @@ internal class WeatherAgentProvider(
         val (llmClient, model) = provideLLMClient.invoke()
         val executor = MultiLLMPromptExecutor(llmClient)
 
-        val toolRegistry = ToolRegistry {
-            tools(WeatherTools())
-        }
-
         val agentConfig = AIAgentConfig(
             prompt = prompt("test") {
                 system(systemPrompt)
@@ -57,15 +53,10 @@ internal class WeatherAgentProvider(
         return AIAgent(
             promptExecutor = executor,
             agentConfig = agentConfig,
-//            strategy = basicSingleRunStrategyByHand(),
-            toolRegistry = toolRegistry,
+            // TODO: Add weather tools
         ) {
             install(EventHandler) {
                 trackEvents(onToolCallEvent, onErrorEvent, onLLMCallEvent, onExecutionTraceEvent)
-            }
-            install(ChatMemory) {
-                chatHistoryProvider = historyProvider
-                windowSize(50)
             }
         }
     }

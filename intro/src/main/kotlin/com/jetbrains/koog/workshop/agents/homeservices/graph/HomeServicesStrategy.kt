@@ -33,20 +33,18 @@ fun homeServicesStrategy(
     }
 
     // Phase 2: select a slot — find availability and let the user pick
-    val selectSlot by subgraphWithTask<String, SlotSelectionOutcome>(
-        tools = communicationTools + findAvailableSlotTools
-    ) { state ->
-        val issueDetails = storage.getValue(issueDetailsKey)
-        HomeServicesPrompts.selectSlotInstructions(issueDetails, state)
+    val selectSlot by node<String, SlotSelectionOutcome> {
+        // TODO Implement selectSlot task
+        throw NotImplementedError("Use subgraphWithTask with communicationTools and findAvailableSlotTools, " +
+                "use HomeServicesPrompts.selectSlotInstructions prompt")
     }
 
     // Phase 3: confirm appointment — review details with the customer before booking
-    val confirmAppointment by subgraphWithTask<String, ConfirmationOutcome>(
-        tools = communicationTools
-    ) { state ->
-        val issueDetails = storage.getValue(issueDetailsKey)
-        val slot = storage.getValue(selectedSlotKey)
-        HomeServicesPrompts.confirmAppointmentInstructions(issueDetails, slot, state)
+    val confirmAppointment by node<String, ConfirmationOutcome> { state ->
+        // TODO Implement confirmAppointment task
+        throw NotImplementedError("Use subgraphWithTask with communicationTools, " +
+                "use HomeServicesPrompts.confirmAppointmentInstructions prompt with the state: $state"
+        )
     }
 
     // Phase 4: book appointment — all data is already collected, no LLM needed
@@ -91,23 +89,14 @@ fun homeServicesStrategy(
     edge(triageEmergency forwardTo handleCancellation onCondition { it.status == TriageOutcome.cancelled } transformed { "Cancelled" })
     edge(triageEmergency forwardTo handleEmergency onCondition { it.status == TriageOutcome.emergency_detected } transformed { it.justification ?: "Emergency situation detected" })
 
-    edge(collectIssueDetails forwardTo selectSlot onCondition { it.success() } transformed { outcome ->
-        val details = outcome.collected!!
-        storage.set(issueDetailsKey, details)
-        "Issue details collected"
-    })
+    edge(collectIssueDetails forwardTo selectSlot onCondition { it.success() } transformed { "Issue details collected" })
     edge(collectIssueDetails forwardTo handleCancellation onCondition { !it.success() } transformed { "Cancelled" })
 
-    edge(selectSlot forwardTo confirmAppointment onCondition { it.success() }  transformed { outcome ->
-        val slot = outcome.selected!!
-        storage.set(selectedSlotKey, slot)
-        "Slot selected"
-    })
+    edge(selectSlot forwardTo confirmAppointment onCondition { it.success() }  transformed { "Slot selected" })
     edge(selectSlot forwardTo handleCancellation onCondition { !it.success() } transformed { "Cancelled" })
 
-    edge(confirmAppointment forwardTo selectSlot onCondition { it == ConfirmationOutcome.change_requested } transformed { "Slot was selected, but the change was requested." })
-    edge(confirmAppointment forwardTo handleCancellation onCondition { it == ConfirmationOutcome.cancelled } transformed { "Cancelled" })
-    edge(confirmAppointment forwardTo bookAppointment onCondition { it == ConfirmationOutcome.confirmed } transformed { "Slot confirmed, proceeding to booking." })
+//    TODO: Add edges from "confirmAppointment" to "selectSlot", "handleCancellation" and "bookAppointment" with relevant conditions (and transformations to String)
+    edge(confirmAppointment forwardTo handleCancellation transformed { "Cancelled" })
 
     bookAppointment then collectFeedback then nodeFinish
     handleCancellation then nodeFinish
