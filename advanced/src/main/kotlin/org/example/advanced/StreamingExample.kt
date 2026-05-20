@@ -2,8 +2,12 @@ package org.example.advanced
 
 import ai.koog.agents.core.agent.AIAgent
 import ai.koog.agents.core.agent.config.AIAgentConfig
+import ai.koog.agents.core.annotation.InternalAgentsApi
 import ai.koog.agents.core.dsl.builder.node
 import ai.koog.agents.core.dsl.builder.strategy
+import ai.koog.agents.core.dsl.extension.asUserMessage
+import ai.koog.agents.core.dsl.extension.nodeLLMSendMessageStreaming
+import ai.koog.agents.core.dsl.extension.onIsInstance
 import ai.koog.agents.core.environment.ReceivedToolResult
 import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.agents.core.tools.annotations.LLMDescription
@@ -14,9 +18,13 @@ import ai.koog.prompt.executor.clients.openai.OpenAILLMClient
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
 import ai.koog.prompt.llm.LLMProvider
+import ai.koog.prompt.message.Message
 import ai.koog.prompt.message.MessagePart
+import ai.koog.prompt.message.RequestMetaInfo
 import ai.koog.prompt.streaming.StreamFrame
 import ai.koog.prompt.streaming.toMessageResponse
+import ai.koog.utils.time.KoogClock
+import kotlinx.coroutines.flow.Flow
 
 class InfoTools : ToolSet {
     private val capitals = mapOf(
@@ -79,69 +87,69 @@ suspend fun main() {
  * Note: environment (AIAgentEnvironment) is captured from the node context BEFORE
  * entering writeSession, because writeSession scope does not expose it directly.
  */
+@OptIn(InternalAgentsApi::class)
 private suspend fun runStreamingExample(promptExecutor: MultiLLMPromptExecutor) {
     val toolRegistry = ToolRegistry { tools(InfoTools()) }
 
     val strategy = strategy<String, String>("streaming") {
-        val nodeStream by node<String, String> { query ->
-            // Capture environment here — it is not accessible inside writeSession
-            val env = environment
-            var finalText = ""
+        val nodeStream by nodeLLMSendMessageStreaming()
 
+        val nodeProcessStream by node<Flow<StreamFrame>, Message>() { stream ->
             llm.writeSession {
-                appendPrompt { user(query) }
+                val frames = mutableListOf<StreamFrame>()
+                val toolResults = mutableListOf<ReceivedToolResult>()
 
-                while (true) {
-                    val frames = mutableListOf<StreamFrame>()
-                    val toolResults = mutableListOf<ReceivedToolResult>()
-                    var hasText = false
+                stream.collect { frame ->
+                    frames.add(frame)
 
-                    requestLLMStreaming().collect { frame ->
-                        frames.add(frame)
-                        when (frame) {
-                            is StreamFrame.TextDelta -> {
-                                // Print each token as it arrives — the response appears gradually
-                                print(frame.text)
-                                hasText = true
-                            }
-
-                            is StreamFrame.ToolCallComplete -> {
-                                // Execute the tool immediately when its complete frame arrives,
-                                // without waiting for the stream to finish
-                                val call = MessagePart.Tool.Call(frame.id, frame.name, frame.content)
-                                println("\n  [tool call] ${frame.name}(${frame.content})")
-                                val result = env.executeTool(call)
-                                println("  [tool result] ${result.output}")
-                                toolResults.add(result)
-                            }
-
-                            is StreamFrame.End -> if (hasText) println()
-
-                            else -> {}
+                    when (frame) {
+                        is StreamFrame.TextDelta -> {
+                            // Print each token as it arrives — the response appears gradually
+                            print(frame.text)
                         }
-                    }
 
-                    // Commit the full assistant message (text + tool calls) to the prompt
-                    appendPrompt { message(frames.toMessageResponse()) }
+                        is StreamFrame.ToolCallComplete -> {
+                            // Execute the tool immediately when its complete frame arrives,
+                            // without waiting for the stream to finish
+                            val call = MessagePart.Tool.Call(frame.id, frame.name, frame.content)
+                            println("\n  [tool call] ${frame.name}(${frame.content})")
+                            val result = environment.executeTool(call)
+                            println("  [tool result] ${result.output}")
+                            toolResults.add(result)
+                        }
 
-                    if (toolResults.isEmpty()) {
-                        // No tool calls this turn — the streamed text is the final answer
-                        finalText = frames.filterIsInstance<StreamFrame.TextComplete>()
-                            .joinToString("") { it.text }
-                        break
-                    }
-
-                    // Send tool results back so the LLM can use them in the next turn
-                    appendPrompt {
-                        toolResults.forEach { result -> toolResult(result.toMessagePart()) }
+                        else -> {}
                     }
                 }
-            }
 
-            finalText
+                // Add the full assistant message (text + tool calls) to the prompt
+                val assistantMessage = frames.toMessageResponse()
+                appendPrompt { message(assistantMessage) }
+
+                if (toolResults.isNotEmpty()) {
+                    // If there are tools results, return a user message with tool result parts
+                    val userResultsMessage = Message.User(
+                        parts = toolResults.map { it.toMessagePart() },
+                        metaInfo = RequestMetaInfo.create(KoogClock.System)
+                    )
+
+                    userResultsMessage
+                } else {
+                    // Otherwise, if there were no tool calls, return an assistant message with all
+                    assistantMessage
+                }
+            }
         }
 
-        nodeStart then nodeStream then nodeFinish
+        edge(nodeStart forwardTo nodeStream asUserMessage { it })
+
+        edge(nodeStream forwardTo nodeProcessStream)
+
+        edge(nodeProcessStream forwardTo nodeStream onIsInstance(Message.User::class))
+        edge(
+            nodeProcessStream forwardTo nodeFinish onIsInstance(Message.Assistant::class)
+                transformed { it.textContent() }
+        )
     }
 
     val agent = AIAgent(
