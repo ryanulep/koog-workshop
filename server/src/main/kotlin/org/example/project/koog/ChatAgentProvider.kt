@@ -41,11 +41,9 @@ class ChatAgentProvider(
     ): AIAgent<String, String> {
         val readOrderTools = ReadOrderTools(characterId, orderService)
         val updateOrderTools = UpdateOrderTools(characterId, orderService)
-        val tools = CustomerSupportTools(communicationTools, readOrderTools, updateOrderTools)
 
         return AIAgent(
             promptExecutor = executor,
-            strategy = orderCustomerSupportStrategy(tools),
             systemPrompt = """
                 | You are a helpful Fantasy Store assistant. Help customers with products, orders, and general inquiries.
                 | Use the askQuestion in case you're unsure or there is any missing data for solve the issue.
