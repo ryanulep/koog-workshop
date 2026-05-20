@@ -28,6 +28,9 @@ fun registerRunTask(
         val mainClassName = mainClassName
 
         doFirst {
+            standardInput = System.`in`
+            standardOutput = System.out
+
             val envFile = project.file("env.properties")
             if (envFile.exists()) {
                 val props = Properties().apply {

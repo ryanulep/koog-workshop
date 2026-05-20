@@ -98,7 +98,7 @@ private suspend fun runSimpleAgent(
 ) {
     val vectorStore = provideSpringPgVectorStore(openaiApiKey)
 
-    val askTool = ::askUser.asTool()
+    val sendMessageTool = ::sendMessage.asTool()
 
     val agent = AIAgent(
         promptExecutor = promptExecutor,
@@ -110,11 +110,11 @@ private suspend fun runSimpleAgent(
                     +"Only send the normal message to end the conversation when the user is done."
                 }
             },
-            model = OpenAIModels.Chat.GPT5_4,
+            model = OpenAIModels.Chat.GPT5_5,
             maxAgentIterations = 100,
         ),
         toolRegistry = ToolRegistry {
-            tool(askTool)
+            tool(sendMessageTool)
         }
     ) {
         install(LongTermMemory) {
@@ -123,7 +123,7 @@ private suspend fun runSimpleAgent(
                 // How the prompt is going to be modified?
                 promptAugmenter = LastUserMessagePromptAugmenter(),
                 // How to construct a search query from the prompt?
-                searchQueryProvider = LastUserResponseQueryProvider(askTool),
+                searchQueryProvider = LastUserResponseQueryProvider(sendMessageTool),
                 // Search parameters
                 searchStrategy = SimilaritySearchStrategy(
                     similarityThreshold = 0.2,
@@ -150,14 +150,14 @@ private suspend fun runSimpleAgent(
         }
     }
 
-    val initialMessage = askUser("Hi, how can I help you?")
+    val initialMessage = sendMessage("Hi, how can I help you?")
     val result = agent.run(initialMessage)
     println("Agent: $result")
 }
 
 @Tool
-@LLMDescription("Shows a message to the user and returns the response.")
-fun askUser(message: String): String {
+@LLMDescription("Shows a message to the user and returns the user response. Call this tool to chat with the user.")
+fun sendMessage(message: String): String {
     println("Agent: $message")
     print("User: ")
     return readln()

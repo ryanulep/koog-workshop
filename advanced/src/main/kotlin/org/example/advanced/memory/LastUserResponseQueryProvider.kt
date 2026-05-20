@@ -7,11 +7,11 @@ import ai.koog.prompt.message.Message
 import ai.koog.prompt.message.MessagePart
 
 /**
- * Returns the last user message or/and response from the [askTool] as a query, because [askTool] should also be treated
+ * Returns the last user message or/and response from the [sendMessageTool] as a query, because [sendMessageTool] should also be treated
  * as "user messages"
  */
 class LastUserResponseQueryProvider(
-    private val askTool: Tool<*, *>,
+    private val sendMessageTool: Tool<*, *>,
 ) : SearchQueryProvider {
     override fun provide(prompt: Prompt): String? {
         return prompt.messages
@@ -25,7 +25,7 @@ class LastUserResponseQueryProvider(
 
                 val askToolOutput = message.parts
                     .filterIsInstance<MessagePart.Tool.Result>()
-                    .filter { it.tool == askTool.name }
+                    .filter { it.tool == sendMessageTool.name }
                     .joinToString("\n") { it.output }
                     .takeIf { it.isNotBlank() }
 

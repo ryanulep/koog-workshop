@@ -28,8 +28,6 @@ class LastUserMessagePromptAugmenter(
             |Here is some relevant context:
             |
             |${PromptAugmenter.RELEVANT_CONTEXT_PLACEHOLDER}
-            |
-            |Based on the above context, please answer the following question:
             """.trimMargin().trim()
     }
 
