@@ -108,7 +108,6 @@ private suspend fun runSimpleAgent(
                     +"You're a helpful assistant."
                     +"Use askTool to chat with the user, DO NOT send regular messages to chat."
                     +"Only send the normal message to end the conversation when the user is done."
-                    +"Do not terminate the conversation early yourself, prefer to use askTool to show the message instead."
                 }
             },
             model = OpenAIModels.Chat.GPT5_4,
