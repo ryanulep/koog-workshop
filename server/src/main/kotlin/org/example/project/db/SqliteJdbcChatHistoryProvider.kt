@@ -34,12 +34,34 @@ public class SqliteJdbcChatHistorySchemaMigrator @JvmOverloads constructor(
                     CREATE TABLE IF NOT EXISTS $tableName (
                         conversation_id VARCHAR(255) NOT NULL,
                         messages_json TEXT NOT NULL,
-                        updated_at BIGINT NOT NULL,
+                        updated_at BIGINT NOT NULL DEFAULT 0,
                         ttl_timestamp BIGINT NULL,
                         PRIMARY KEY (conversation_id)
                     )
                     """.trimIndent()
                 )
+
+                val columns = mutableListOf<String>()
+                connection.prepareStatement("PRAGMA table_info($tableName)").executeQuery().use { rs ->
+                    while (rs.next()) {
+                        columns.add(rs.getString("name"))
+                    }
+                }
+
+                if (!columns.contains("updated_at")) {
+                    stmt.execute("ALTER TABLE $tableName ADD COLUMN updated_at BIGINT NOT NULL DEFAULT 0")
+                }
+                if (!columns.contains("ttl_timestamp")) {
+                    stmt.execute("ALTER TABLE $tableName ADD COLUMN ttl_timestamp BIGINT NULL")
+                }
+                if (columns.contains("id") && !columns.contains("conversation_id")) {
+                    // Simple migration for the case found in the DB
+                    stmt.execute("ALTER TABLE $tableName RENAME COLUMN id TO conversation_id")
+                }
+                if (columns.contains("messages") && !columns.contains("messages_json")) {
+                    stmt.execute("ALTER TABLE $tableName RENAME COLUMN messages TO messages_json")
+                }
+
                 stmt.execute("CREATE INDEX IF NOT EXISTS idx_${tableName}_updated_at ON $tableName (updated_at)")
                 stmt.execute("CREATE INDEX IF NOT EXISTS idx_${tableName}_ttl_timestamp ON $tableName (ttl_timestamp)")
             }

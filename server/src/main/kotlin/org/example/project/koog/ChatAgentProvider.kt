@@ -9,6 +9,7 @@ import ai.koog.agents.features.persistence.jdbc.JdbcPersistenceStorageProvider
 import ai.koog.agents.features.tracing.feature.Tracing
 import ai.koog.agents.features.tracing.writer.TraceFeatureMessageLogWriter
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
+import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
 import ai.koog.prompt.executor.model.PromptExecutor
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.example.project.domain.order.OrderService
@@ -18,12 +19,14 @@ import org.example.project.koog.tools.CustomerSupportTools
 import org.example.project.koog.tools.ReadOrderTools
 import org.example.project.koog.tools.UpdateOrderTools
 import org.example.project.koog.tracking.SseEmitterEventHandler
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
 class ChatAgentProvider(
-    private val executor: PromptExecutor,
+    @Qualifier("multiLLMPromptExecutor")
+    private val executor: MultiLLMPromptExecutor,
     private val orderService: OrderService,
     private val historyProvider: ChatHistoryProvider,
     private val persistence: JdbcPersistenceStorageProvider,
@@ -38,11 +41,11 @@ class ChatAgentProvider(
     ): AIAgent<String, String> {
         val readOrderTools = ReadOrderTools(characterId, orderService)
         val updateOrderTools = UpdateOrderTools(characterId, orderService)
-//        val tools = CustomerSupportTools(communicationTools, readOrderTools, updateOrderTools)
+        val tools = CustomerSupportTools(communicationTools, readOrderTools, updateOrderTools)
 
         return AIAgent(
             promptExecutor = executor,
-//            strategy = orderCustomerSupportStrategy(tools),
+            strategy = orderCustomerSupportStrategy(tools),
             systemPrompt = """
                 | You are a helpful Fantasy Store assistant. Help customers with products, orders, and general inquiries.
                 | Use the askQuestion in case you're unsure or there is any missing data for solve the issue.

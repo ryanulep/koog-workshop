@@ -1,6 +1,7 @@
 package org.example.project
 
 import ai.koog.agents.chatMemory.feature.ChatHistoryProvider
+import ai.koog.agents.features.chatmemory.sql.migrateBlocking
 import ai.koog.agents.features.persistence.jdbc.JdbcPersistenceStorageProvider
 import org.example.project.db.SqliteJdbcChatHistoryProvider
 import org.example.project.db.SqliteJdbcPersistenceStorageProvider
@@ -33,9 +34,9 @@ class WebConfig : WebMvcConfigurer {
 
     @Bean
     fun chatHistory(dataSource: DataSource): ChatHistoryProvider =
-        SqliteJdbcChatHistoryProvider(dataSource)
+        SqliteJdbcChatHistoryProvider(dataSource).also { it.migrateBlocking() }
 
     @Bean
     fun persistence(dataSource: DataSource): JdbcPersistenceStorageProvider =
-        SqliteJdbcPersistenceStorageProvider(dataSource)
+        SqliteJdbcPersistenceStorageProvider(dataSource).also { it.migrateBlocking() }
 }
