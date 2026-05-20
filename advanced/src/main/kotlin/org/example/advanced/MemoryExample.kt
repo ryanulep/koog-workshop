@@ -106,7 +106,7 @@ private suspend fun runSimpleAgent(
             prompt = prompt("example") {
                 system {
                     +"You're a helpful assistant."
-                    +"Use askTool to chat with the user, DO NOT send regular messages to chat."
+                    +"Use sendMessage tool to chat with the user, DO NOT send regular messages to chat."
                     +"Only send the normal message to end the conversation when the user is done."
                 }
             },
