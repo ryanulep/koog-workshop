@@ -5,17 +5,17 @@ import ai.koog.agents.chatMemory.feature.ChatMemory
 import ai.koog.agents.core.agent.AIAgent
 import ai.koog.agents.core.tools.ToolRegistry
 import ai.koog.agents.features.eventHandler.feature.EventHandler
+import ai.koog.agents.features.opentelemetry.feature.OpenTelemetry
 import ai.koog.agents.features.persistence.jdbc.JdbcPersistenceStorageProvider
 import ai.koog.agents.features.tracing.feature.Tracing
 import ai.koog.agents.features.tracing.writer.TraceFeatureMessageLogWriter
+import ai.koog.agents.snapshot.feature.Persistence
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.executor.llms.MultiLLMPromptExecutor
-import ai.koog.prompt.executor.model.PromptExecutor
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.example.project.domain.order.OrderService
 import org.example.project.domain.shared.CharacterId
 import org.example.project.koog.tools.CommunicationTools
-import org.example.project.koog.tools.CustomerSupportTools
 import org.example.project.koog.tools.ReadOrderTools
 import org.example.project.koog.tools.UpdateOrderTools
 import org.example.project.koog.tracking.SseEmitterEventHandler
@@ -59,9 +59,19 @@ class ChatAgentProvider(
                 chatHistoryProvider = historyProvider
                 windowSize(50)
             }
-            // TODO:
-            //   Install Persistence plugin
-            //   Test in app that you can close a chat, and resume the agent from its last checkpoint
+            install(OpenTelemetry) {
+                addLangfuseExporter(
+                    langfuseSecretKey = langfuseSecretKey,
+                    langfusePublicKey = langfusePublicKey,
+                    langfuseUrl = langfuseUrl,
+                )
+
+                // See messages and node inputs and outputs
+                setVerbose(true)
+            }
+            install(Persistence) {
+                storage = persistence
+            }
             install(Tracing) {
                 addMessageProcessor(TraceFeatureMessageLogWriter(KotlinLogging.logger {}))
             }
