@@ -1,102 +1,96 @@
-# Agent Fantasy Store
+# Koog Workshop
 
-Agent Fantasy Store is a single-module Kotlin/JVM desktop application built with Compose Multiplatform. It combines a customer-support chat experience, an admin workspace, and a local SQLite database seeded with demo fantasy-store data.
+A hands-on introduction to the [Koog](https://github.com/JetBrains/koog) agent framework for Kotlin. The workspace contains five Gradle modules, each targeting a different level of complexity.
 
-## What is in the app
+## Modules
 
-- **Customer support chat** powered by Koog and an OpenAI executor.
-- **Character-aware order support** after selecting a character in the UI.
-- **Admin workspace** for product operations, merchant operations, shipping assignments, and order management.
-- **Local persistence** with SQLite and Exposed v1.
-- **Seeded demo data** for characters, merchants, shipping methods, products, orders, and transaction history.
+| Module      | What it is                                                           |
+|-------------|----------------------------------------------------------------------|
+| `:intro`    | Compose Desktop app with guided agent demos (weather, home services) |
+| `:advanced` | Four standalone CLI examples covering some more advanced Koog APIs   |
+| `:app`      | Compose Desktop fantasy-store client (connects to `:server`)         |
+| `:server`   | Spring Boot backend with Koog agent, SSE streaming, and REST API     |
+| `:shared`   | Serializable models shared between `:app` and `:server`              |
 
-## Tech stack
-
-- Kotlin/JVM
-- Compose Multiplatform Desktop + Material 3
-- AndroidX Lifecycle ViewModel
-- Koog agents + persisted chat history
-- SQLite + Exposed v1
-- Coroutines + `kotlin.test`/JUnit-based test suites
+Start with `:intro` or `:advanced` if you are new to Koog. `:app` + `:server` together form a complete client-server application.
 
 ## Requirements
 
-- A working JDK supported by Gradle and Compose Desktop
-- `OPENAI_API_KEY` set in the environment before launching the app
+- JDK compatible with Gradle and Compose Desktop
+- `OPENAI_API_KEY` environment variable (or an `env.properties` file for `:advanced`)
 
-The app fails fast on startup if `OPENAI_API_KEY` is missing.
+## :intro — introductory demos
 
-## Run the app
+An interactive Compose Desktop app (1200×800) with two built-in agent demos selectable from the start screen:
 
-Always use Gradle from the wrapper:
+- **Weather agent** — tool-based API integration
+- **Home Services agent** — multi-step booking workflow using a graph-based strategy
+
+```sh
+export OPENAI_API_KEY=your_key_here
+./gradlew :intro:run
+```
+
+A Settings screen in the app lets you enter the API key through the UI instead.
+
+## :advanced — standalone examples
+
+Four CLI programs that each focus on one Koog concept. Create an `advanced/env.properties` file with `OPENAI_API_KEY=your_key_here` before running.
+
+| Task                                            | File                         | What it shows                                                                                                                          |
+|-------------------------------------------------|------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `./gradlew advanced:runStreamingExample`        | `StreamingExample.kt`        | Real-time token streaming; processing `StreamFrame` events and executing tools as they arrive                                          |
+| `./gradlew advanced:runStructuredOutputExample` | `StructuredOutputExample.kt` | Extracting structured data three ways: automatic schema, native OpenAI `response_format`, and manual schema with error-correction loop |
+| `./gradlew advanced:runAgentContextExample`     | `AgentContextExample.kt`     | Agent context APIs: `agentInput`, `storage`, `llm.writeSession`, `llm.readSession`, and detached `promptExecutor` calls                |
+| `./gradlew advanced:runMemoryExample`           | `MemoryExample.kt`           | Long-term memory with vector embeddings via pgvector; requires `docker-compose up`                                                     |
+
+The memory example uses the PostgreSQL + pgvector service defined in `advanced/docker-compose.yml`. Langfuse observability services are defined there as well.
+
+## :app + :server — fantasy store
+
+A complete client-server demo. The `:server` must be running before you start `:app`.
+
+### Server
+
+Spring Boot REST API with SQLite persistence and Koog agent integration. On first start it creates `.agent-fantasy-store/agent-fantasy-store.db` and seeds demo data.
+
+```sh
+export OPENAI_API_KEY=your_key_here
+./gradlew :server:bootRun
+```
+
+Starts on `http://localhost:8080`. Key endpoints:
+
+- `POST /chat` — streams agent responses as SSE
+- `POST /chat/answer` — sends a reply when the agent asks a follow-up question
+- `GET /chat/state` — returns the current agent state for a session
+- Admin CRUD under `/admin/**`
+
+### Desktop client
+
+Compose Desktop app with a customer-support chat window and an admin workspace.
 
 ```sh
 export OPENAI_API_KEY=your_key_here
 ./gradlew :app:run
 ```
 
-On first run the app:
+- Main window: customer chat. Select a character from the top bar to enable order-specific tools.
+- Admin window: product, merchant, and order management. Open from the top bar.
 
-- creates a local SQLite database at `.agent-fantasy-store/agent-fantasy-store.db`
-- creates the schema automatically
-- seeds demo data if the main store tables are empty
-
-## Run tests
+### Tests
 
 ```sh
 ./gradlew :app:test
 ```
 
-## How the UI works
+## Project layout
 
-- The main window is the customer-support chat.
-- The top bar lets you open the admin workspace.
-- The top bar also lets you select a character.
-- Without a selected character, the assistant handles general store questions.
-- With a selected character, the assistant can use order-specific tools to inspect and update that character's orders.
-
-## Project structure
-
-```text
-app/src/main/kotlin/org/example/project/
-├── main.kt                 # Desktop entry point, launches chat and admin windows
-├── dependencies.kt         # Manual dependency wiring
-├── chat/                   # Chat UI, state, and Koog-backed agent
-├── admin/                  # Admin screens, view models, repositories, services
-├── domain/                 # Store domain models, repositories, and services
-├── db/                     # SQLite setup, schema creation, and demo data seeding
-└── koog/                   # Agent tools, strategies, and chat history integration
 ```
-
-Main domain areas currently implemented:
-
-- catalog
-- orders
-- characters
-- cart
-- currency
-- reviews
-- shipping
-- wishlist
-
-## Architecture notes
-
-- The project contains a single Gradle module: `:app`.
-- Persistence uses Exposed v1 and wraps database work in suspend transactions.
-- Chat history is stored in SQLite through `JdbcChatHistoryProvider`.
-- The desktop packaging configuration targets DMG, MSI, and DEB distributions.
-
-## Tests
-
-The test suite covers more than just the UI shell. Existing tests include:
-
-- database schema and repository integration
-- domain service behavior
-- admin view models
-- compose integration helpers for the desktop app
-
-Tests live under `app/src/test/kotlin/org/example/project/`.
-
-## Status
-
-This repository is not the default Compose template anymore. The previous README described a non-existent `composeApp` module; the real application lives in `:app` and is focused on the fantasy store desktop experience described above.
+intro/          Introductory Compose Desktop app
+advanced/       Standalone CLI examples
+app/            Fantasy-store Compose Desktop client
+server/         Spring Boot backend
+shared/         Serializable models (used by app + server)
+docker-compose.yml  PostgreSQL/pgvector + Langfuse observability stack
+```
