@@ -10,10 +10,10 @@ exposed = "1.2.0"
 sqlite = "3.45.1.0"
 junit = "4.13.2"
 koin-bom = "4.2.1"
-koog = "1.0.0-preview2"
+koog = "1.0.0"
 koog-beta = "1.0.0-beta-preview2"
 kotlin = "2.3.20"
-kotlinx-coroutines = "1.10.2"
+kotlinx-coroutines = "1.11.0"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-collections-immutable = "0.4.0"
 kotlinx-serialization = "1.11.0"
@@ -41,7 +41,7 @@ compose-material-icons-extended = { module = "org.jetbrains.compose.material:mat
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMultiplatform" }
 compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
-compose-uiTest = { module="org.jetbrains.compose.ui:ui-test-junit4", version.ref = "composeMultiplatform" }
+compose-uiTest = { module = "org.jetbrains.compose.ui:ui-test-junit4", version.ref = "composeMultiplatform" }
 compose-uiUtil = { module = "org.jetbrains.compose.ui:ui-util", version.ref = "composeMultiplatform" }
 dokimos-core = { module = "dev.dokimos:dokimos-core", version.ref = "dokimos" }
 dokimos-kotlin = { module = "dev.dokimos:dokimos-kotlin", version.ref = "dokimos" }
