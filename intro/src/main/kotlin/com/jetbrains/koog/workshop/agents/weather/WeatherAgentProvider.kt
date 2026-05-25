@@ -52,6 +52,7 @@ internal class WeatherAgentProvider(
       promptExecutor = executor,
       agentConfig = agentConfig,
       toolRegistry = ToolRegistry { tools(WeatherTools()) },
+      strategy = basicSingleRunStrategyByHand(),
     ) {
       install(EventHandler) {
         trackEvents(onToolCallEvent, onErrorEvent, onLLMCallEvent, onExecutionTraceEvent)
