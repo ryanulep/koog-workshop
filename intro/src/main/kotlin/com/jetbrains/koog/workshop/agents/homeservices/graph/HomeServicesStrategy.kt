@@ -6,6 +6,10 @@ import ai.koog.agents.core.agent.context.agentInput
 import ai.koog.agents.core.agent.entity.createStorageKey
 import ai.koog.agents.core.dsl.builder.node
 import ai.koog.agents.core.dsl.builder.strategy
+import ai.koog.agents.core.dsl.extension.Concept
+import ai.koog.agents.core.dsl.extension.FactType
+import ai.koog.agents.core.dsl.extension.HistoryCompressionStrategy
+import ai.koog.agents.core.dsl.extension.nodeLLMCompressHistory
 import ai.koog.agents.core.tools.Tool
 import ai.koog.agents.ext.agent.subgraphWithTask
 import com.jetbrains.koog.workshop.agents.homeservices.HomeServicesBookingProvider
@@ -30,6 +34,19 @@ fun homeServicesStrategy(
       subgraphWithTask<TriageResult, IssueDetailsOutcome>(tools = communicationTools) { _ ->
         HomeServicesPrompts.collectIssueDetailsInstructions(agentInput<String>())
       }
+
+    // Phase 1a: compress the history so as not to take up so much of the context window
+    val compressHistory by
+    nodeLLMCompressHistory<IssueDetailsOutcome>(
+      strategy =
+        HistoryCompressionStrategy.FactRetrieval(
+          Concept(
+            keyword = "important-details",
+            description = "What are the critically important details of the issue",
+            factType = FactType.MULTIPLE,
+          )
+        )
+    )
 
     // Phase 2: select a slot — find availability and let the user pick
     val selectSlot by
@@ -116,8 +133,10 @@ fun homeServicesStrategy(
         }
     )
 
+    edge(collectIssueDetails forwardTo compressHistory)
+
     edge(
-      collectIssueDetails forwardTo
+      compressHistory forwardTo
         selectSlot onCondition
         {
           it.success()
@@ -128,7 +147,7 @@ fun homeServicesStrategy(
         }
     )
     edge(
-      collectIssueDetails forwardTo
+      compressHistory forwardTo
         handleCancellation onCondition
         {
           !it.success()
